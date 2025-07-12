@@ -20,7 +20,7 @@ export function useMagneticEffect<T extends HTMLElement = HTMLButtonElement>({
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || typeof window === 'undefined') return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = element.getBoundingClientRect();

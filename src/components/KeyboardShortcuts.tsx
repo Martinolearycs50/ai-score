@@ -13,6 +13,8 @@ export default function KeyboardShortcuts({ onAnalyze, onHome }: KeyboardShortcu
   const [ctrlPressed, setCtrlPressed] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       // Track Ctrl/Cmd key state
       if (e.ctrlKey || e.metaKey) {

@@ -21,7 +21,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>({
 
   useEffect(() => {
     const element = ref.current;
-    if (!element || (triggerOnce && hasTriggered)) return;
+    if (!element || (triggerOnce && hasTriggered) || typeof window === 'undefined') return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {

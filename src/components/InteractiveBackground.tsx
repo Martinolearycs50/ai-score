@@ -26,8 +26,10 @@ export default function InteractiveBackground({
   const mouseRef = useRef({ x: 0, y: 0 });
   const particlesRef = useRef<Particle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const updateDimensions = () => {
       setDimensions({
         width: window.innerWidth,
@@ -42,7 +44,7 @@ export default function InteractiveBackground({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !dimensions.width || !dimensions.height) return;
+    if (!canvas || !dimensions.width || !dimensions.height || !isClient) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -143,7 +145,11 @@ export default function InteractiveBackground({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [dimensions, particleCount, mouseRadius]);
+  }, [dimensions, particleCount, mouseRadius, isClient]);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <canvas

@@ -19,7 +19,7 @@ export function useParallaxScroll<T extends HTMLElement = HTMLDivElement>({
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || typeof window === 'undefined') return;
 
     const handleScroll = () => {
       const rect = element.getBoundingClientRect();

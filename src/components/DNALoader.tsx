@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface DNALoaderProps {
   size?: number;
@@ -15,10 +15,15 @@ export default function DNALoader({
 }: DNALoaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !isClient) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -109,7 +114,17 @@ export default function DNALoader({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [size, color1, color2]);
+  }, [size, color1, color2, isClient]);
+
+  if (!isClient) {
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
