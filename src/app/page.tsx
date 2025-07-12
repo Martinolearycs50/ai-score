@@ -5,7 +5,6 @@ import UrlForm from '@/components/UrlForm';
 import LoadingState from '@/components/LoadingState';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import RecommendationsList from '@/components/RecommendationsList';
-import { Search, BarChart3, Zap } from 'lucide-react';
 import type { AnalysisState } from '@/lib/types';
 
 export default function Home() {
@@ -76,24 +75,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border-light bg-surface-elevated">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+      <header className="border-b border-border">
+        <div className="container py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-accent-primary rounded-lg flex items-center justify-center">
-                <Search className="w-4 h-4 text-white" />
-              </div>
-              <h1 className="text-lg font-semibold text-foreground">
-                AI Search Analyzer
-              </h1>
+            <div className="flex items-center gap-2">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="8" fill="var(--accent)"/>
+                <path d="M16 8L8 20H24L16 8Z" fill="white" opacity="0.9"/>
+                <circle cx="16" cy="16" r="3" fill="white"/>
+              </svg>
+              <span className="font-semibold text-lg">AI Search Analyzer</span>
             </div>
             
             {analysisState.status !== 'idle' && (
               <button
                 onClick={handleReset}
-                className="btn btn-secondary text-sm"
+                className="btn btn-secondary"
               >
-                ← New Analysis
+                New Analysis
               </button>
             )}
           </div>
@@ -103,154 +102,132 @@ export default function Home() {
       {/* Main Content */}
       <main>
         {analysisState.status === 'idle' && (
-          <div className="py-16 px-6">
-            <div className="max-w-4xl mx-auto text-center">
-              {/* Hero Section */}
-              <div className="mb-12">
-                <h2 className="text-large text-heading mb-6">
-                  Optimize your website for AI search platforms
-                </h2>
-                
-                <p className="text-lg text-foreground-secondary max-w-2xl mx-auto mb-12 leading-relaxed">
-                  Get comprehensive analysis and actionable recommendations to improve your 
-                  visibility across ChatGPT, Claude, Perplexity, and Gemini.
+          <section className="section">
+            <div className="container">
+              {/* Hero */}
+              <div className="text-center mb-12">
+                <h1 className="mb-4">
+                  Is your website ready for AI search?
+                </h1>
+                <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
+                  Analyze how ChatGPT, Claude, Perplexity, and Gemini see your website. 
+                  Get actionable insights to improve your AI search visibility.
                 </p>
+              </div>
 
-                {/* URL Form */}
-                <div className="max-w-xl mx-auto mb-12">
-                  <UrlForm 
-                    onSubmit={handleAnalyze} 
-                    isLoading={false}
-                  />
+              {/* URL Form */}
+              <div className="max-w-2xl mx-auto mb-16">
+                <UrlForm 
+                  onSubmit={handleAnalyze} 
+                  isLoading={false}
+                />
+              </div>
+
+              {/* Features Grid */}
+              <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent-light rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold mb-2">Crawler Analysis</h3>
+                  <p className="text-foreground-muted text-small">
+                    Check AI bot access and permissions for your content
+                  </p>
                 </div>
-
-                {/* Feature Cards */}
-                <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
-                  <div className="card p-6 transition-smooth">
-                    <div className="w-12 h-12 bg-accent-primary rounded-lg flex items-center justify-center mb-4 mx-auto">
-                      <Search className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      Crawler Analysis
-                    </h3>
-                    <p className="text-foreground-secondary text-sm">
-                      Check how AI platforms can access and crawl your content.
-                    </p>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent-light rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                      <path d="M3 3v18h18"/>
+                      <path d="m7 16 5-5 5 5"/>
+                    </svg>
                   </div>
-                  
-                  <div className="card p-6 transition-smooth">
-                    <div className="w-12 h-12 bg-accent-secondary rounded-lg flex items-center justify-center mb-4 mx-auto">
-                      <BarChart3 className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      Content Scoring
-                    </h3>
-                    <p className="text-foreground-secondary text-sm">
-                      Analyze structure, readability, and AI-optimization factors.
-                    </p>
-                  </div>
-                  
-                  <div className="card p-6 transition-smooth">
-                    <div className="w-12 h-12 bg-accent-success rounded-lg flex items-center justify-center mb-4 mx-auto">
-                      <Zap className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      Recommendations
-                    </h3>
-                    <p className="text-foreground-secondary text-sm">
-                      Get specific actions to improve your AI search visibility.
-                    </p>
-                  </div>
+                  <h3 className="font-semibold mb-2">Content Scoring</h3>
+                  <p className="text-foreground-muted text-small">
+                    Measure structure, readability, and optimization
+                  </p>
                 </div>
-
-                {/* AI Platform Indicators */}
-                <div className="flex justify-center items-center gap-6 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-foreground-secondary">ChatGPT</span>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-accent-light rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                      <path d="m6 9 6 6 6-6"/>
+                    </svg>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="text-sm text-foreground-secondary">Claude</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-foreground-secondary">Perplexity</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-sm text-foreground-secondary">Gemini</span>
-                  </div>
+                  <h3 className="font-semibold mb-2">Recommendations</h3>
+                  <p className="text-foreground-muted text-small">
+                    Get specific actions to improve AI visibility
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {analysisState.status === 'loading' && (
-          <div className="py-16 px-6">
-            <div className="max-w-2xl mx-auto">
-              <LoadingState url={analysisState.result?.url} />
+          <section className="section">
+            <div className="container">
+              <div className="max-w-2xl mx-auto">
+                <LoadingState url={analysisState.result?.url} />
+              </div>
             </div>
-          </div>
+          </section>
         )}
 
         {analysisState.status === 'error' && (
-          <div className="py-16 px-6">
-            <div className="max-w-2xl mx-auto">
-              <div className="card p-8 text-center border-red-200">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                  <span className="text-red-600 text-xl">⚠️</span>
+          <section className="section">
+            <div className="container">
+              <div className="max-w-md mx-auto text-center">
+                <div className="card">
+                  <div className="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--error)" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold mb-2">Analysis Failed</h2>
+                  <p className="text-foreground-secondary mb-6">
+                    {analysisState.error}
+                  </p>
+                  <button
+                    onClick={handleReset}
+                    className="btn btn-primary"
+                  >
+                    Try Again
+                  </button>
                 </div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">
-                  Analysis Failed
-                </h2>
-                <p className="text-foreground-secondary mb-6">
-                  {analysisState.error}
-                </p>
-                <button
-                  onClick={handleReset}
-                  className="btn btn-primary"
-                >
-                  Try Again
-                </button>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {analysisState.status === 'success' && analysisState.result && (
-          <div id="results" className="py-8 px-6">
-            <div className="max-w-4xl mx-auto space-y-8">
-              {/* Score Display */}
-              <div className="card p-6">
+          <section id="results" className="section">
+            <div className="container">
+              <div className="max-w-4xl mx-auto space-y-8">
+                {/* Score Display */}
                 <ScoreDisplay result={analysisState.result} />
-              </div>
-              
-              {/* Recommendations */}
-              <div className="card p-6">
-                <RecommendationsList recommendations={analysisState.result.recommendations} />
+                
+                {/* Recommendations */}
+                <div className="card">
+                  <h2 className="text-xl font-semibold mb-6">Recommendations</h2>
+                  <RecommendationsList recommendations={analysisState.result.recommendations} />
+                </div>
               </div>
             </div>
-          </div>
+          </section>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border-light mt-16 bg-surface">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="text-center">
-            <div className="flex justify-center items-center gap-3 mb-4">
-              <div className="w-6 h-6 bg-accent-primary rounded flex items-center justify-center">
-                <Search className="w-3 h-3 text-white" />
-              </div>
-              <span className="text-foreground-secondary font-medium">
-                AI Search Analyzer
-              </span>
-            </div>
-            <p className="text-sm text-foreground-muted">
-              Optimize your website for AI search platforms
-            </p>
+      <footer className="border-t border-border mt-auto">
+        <div className="container py-8">
+          <div className="text-center text-foreground-muted text-small">
+            <p>AI Search Analyzer • Optimize for AI search platforms</p>
           </div>
         </div>
       </footer>
