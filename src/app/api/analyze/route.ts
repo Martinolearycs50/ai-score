@@ -1,0 +1,172 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { WebsiteAnalyzer } from '@/lib/analyzer';
+import type { AnalysisApiResponse } from '@/lib/types';
+import { validateAndNormalizeUrl } from '@/utils/validators';
+
+// Request validation schema
+const analyzeRequestSchema = z.object({
+  url: z.string().min(1, 'URL is required')
+});
+
+// Rate limiting (simple in-memory store for MVP)
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10; // requests per hour
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+function checkRateLimit(clientId: string): boolean {
+  const now = Date.now();
+  const clientData = requestCounts.get(clientId);
+
+  if (!clientData || now > clientData.resetTime) {
+    // Reset or initialize
+    requestCounts.set(clientId, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW
+    });
+    return true;
+  }
+
+  if (clientData.count >= RATE_LIMIT) {
+    return false;
+  }
+
+  clientData.count++;
+  requestCounts.set(clientId, clientData);
+  return true;
+}
+
+function getClientId(request: NextRequest): string {
+  // Use IP address as client identifier (in production, consider more sophisticated methods)
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+  return ip;
+}
+
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
+  try {
+    // Check rate limiting
+    const clientId = getClientId(request);
+    if (!checkRateLimit(clientId)) {
+      return NextResponse.json<AnalysisApiResponse>(
+        {
+          success: false,
+          error: 'Rate limit exceeded. Please try again later.'
+        },
+        { status: 429 }
+      );
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validationResult = analyzeRequestSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json<AnalysisApiResponse>(
+        {
+          success: false,
+          error: 'Invalid request: ' + validationResult.error.issues[0].message
+        },
+        { status: 400 }
+      );
+    }
+
+    const { url } = validationResult.data;
+
+    // Additional URL validation
+    console.log('Received URL for validation:', url);
+    
+    // Temporarily bypass additional validation for debugging
+    const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+    console.log('Using normalized URL:', normalizedUrl);
+
+    // Perform analysis
+    console.log(`Starting analysis for URL: ${normalizedUrl}`);
+    const analyzer = new WebsiteAnalyzer();
+    const result = await analyzer.analyzeUrl(normalizedUrl);
+
+    const analysisTime = Date.now() - startTime;
+    console.log(`Analysis completed in ${analysisTime}ms for: ${normalizedUrl}`);
+
+    // Return successful response
+    return NextResponse.json<AnalysisApiResponse>(
+      {
+        success: true,
+        data: result,
+        message: `Analysis completed in ${(analysisTime / 1000).toFixed(1)}s`
+      },
+      { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+        }
+      }
+    );
+
+  } catch (error) {
+    const analysisTime = Date.now() - startTime;
+    console.error('Analysis failed:', error);
+
+    // Determine error type and appropriate response
+    let errorMessage = 'Analysis failed. Please try again.';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      
+      if (message.includes('timeout') || message.includes('took too long')) {
+        errorMessage = 'Analysis timed out. The website may be slow to respond.';
+        statusCode = 408;
+      } else if (message.includes('not found') || message.includes('404')) {
+        errorMessage = 'Page not found. Please check the URL and try again.';
+        statusCode = 404;
+      } else if (message.includes('forbidden') || message.includes('403')) {
+        errorMessage = 'Access to this page is forbidden.';
+        statusCode = 403;
+      } else if (message.includes('network') || message.includes('connect')) {
+        errorMessage = 'Unable to connect to the website. Please check the URL.';
+        statusCode = 502;
+      } else if (message.includes('invalid url')) {
+        errorMessage = error.message;
+        statusCode = 400;
+      } else {
+        errorMessage = error.message;
+      }
+    }
+
+    return NextResponse.json<AnalysisApiResponse>(
+      {
+        success: false,
+        error: errorMessage
+      },
+      { status: statusCode }
+    );
+  }
+}
+
+// Handle OPTIONS requests for CORS
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
+
+// Health check endpoint
+export async function GET() {
+  return NextResponse.json(
+    {
+      success: true,
+      message: 'AI Search Readiness Analyzer API is running',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    },
+    { status: 200 }
+  );
+}
