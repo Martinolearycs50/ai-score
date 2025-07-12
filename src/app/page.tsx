@@ -5,13 +5,7 @@ import UrlForm from '@/components/UrlForm';
 import LoadingState from '@/components/LoadingState';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import RecommendationsList from '@/components/RecommendationsList';
-import Icon3D from '@/components/Icon3D';
-import FloatingNav from '@/components/FloatingNav';
-import KeyboardShortcuts from '@/components/KeyboardShortcuts';
-import InteractiveBackground from '@/components/InteractiveBackground';
-import { Bot, Zap, Target } from 'lucide-react';
-import { useParallaxScroll } from '@/hooks/useParallaxScroll';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { Search, BarChart3, Zap } from 'lucide-react';
 import type { AnalysisState } from '@/lib/types';
 
 export default function Home() {
@@ -20,14 +14,6 @@ export default function Home() {
     result: null,
     error: null
   });
-
-  // Parallax effects
-  const { ref: dotGridRef, transform: dotGridTransform } = useParallaxScroll({ speed: 0.3 });
-  const { ref: particlesRef, transform: particlesTransform } = useParallaxScroll({ speed: 0.5 });
-  
-  // Scroll animations
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 });
-  const { ref: featuresRef, isVisible: featuresVisible } = useScrollAnimation({ threshold: 0.1, delay: 200 });
 
   const handleAnalyze = async (url: string) => {
     setAnalysisState({
@@ -88,59 +74,24 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen animated-gradient relative overflow-hidden">
-      <InteractiveBackground />
-      <FloatingNav />
-      <KeyboardShortcuts 
-        onAnalyze={() => (document.querySelector('input[type="text"]') as HTMLInputElement)?.focus()}
-        onHome={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      />
-      {/* Ambient Background Elements */}
-      <div 
-        ref={dotGridRef}
-        className="fixed inset-0 dot-grid opacity-30"
-        style={{ transform: `translateY(${dotGridTransform}px)` }}
-      ></div>
-      
-      {/* Floating Particles */}
-      <div 
-        ref={particlesRef}
-        className="fixed inset-0 pointer-events-none"
-        style={{ transform: `translateY(${particlesTransform}px)` }}
-      >
-        <div className="particle" style={{ top: '20%', left: '10%' }}></div>
-        <div className="particle" style={{ top: '60%', left: '80%' }}></div>
-        <div className="particle" style={{ top: '40%', left: '60%' }}></div>
-        <div className="particle" style={{ top: '80%', left: '20%' }}></div>
-      </div>
-
-      {/* Constellation Lines */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="constellation-line" style={{ top: '25%', left: '15%', width: '200px', transform: 'rotate(45deg)' }}></div>
-        <div className="constellation-line" style={{ top: '65%', left: '70%', width: '150px', transform: 'rotate(-30deg)' }}></div>
-        <div className="constellation-line" style={{ top: '45%', left: '40%', width: '180px', transform: 'rotate(15deg)' }}></div>
-      </div>
-
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="glass-intense sticky top-0 z-50 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
+      <header className="border-b border-border-light bg-surface-elevated">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 magnetic">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-accent-cyan to-accent-purple rounded-xl flex items-center justify-center glow-cyan">
-                  <span className="text-white font-bold text-lg">AI</span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent-cyan rounded-full animate-pulse"></div>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-accent-primary rounded-lg flex items-center justify-center">
+                <Search className="w-4 h-4 text-white" />
               </div>
-              <h1 className="text-xl font-display font-bold text-foreground">
-                AI Search Observatory
+              <h1 className="text-lg font-semibold text-foreground">
+                AI Search Analyzer
               </h1>
             </div>
             
             {analysisState.status !== 'idle' && (
               <button
                 onClick={handleReset}
-                className="magnetic px-6 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground smooth-transition glass rounded-lg"
+                className="btn btn-secondary text-sm"
               >
                 ← New Analysis
               </button>
@@ -150,148 +101,134 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10">
+      <main>
         {analysisState.status === 'idle' && (
-          <div id="home" className="min-h-screen flex items-center justify-center px-6">
-            <div className="max-w-6xl mx-auto text-center">
+          <div className="py-16 px-6">
+            <div className="max-w-4xl mx-auto text-center">
               {/* Hero Section */}
-              <div ref={heroRef} className={`mb-16 smooth-transition ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                <div className="mb-8">
-                  <h2 className="text-massive text-display mb-6">
-                    Unlock Your Website&apos;s{' '}
-                    <span className="block text-accent-cyan">
-                      AI Search Potential
-                    </span>
-                  </h2>
-                  
-                  <p className="text-xl text-foreground-secondary max-w-3xl mx-auto mb-8 leading-relaxed">
-                    Enter the future of search optimization. Our advanced observatory analyzes 
-                    your website across all major AI platforms with scientific precision.
-                  </p>
+              <div className="mb-12">
+                <h2 className="text-large text-heading mb-6">
+                  Optimize your website for AI search platforms
+                </h2>
+                
+                <p className="text-lg text-foreground-secondary max-w-2xl mx-auto mb-12 leading-relaxed">
+                  Get comprehensive analysis and actionable recommendations to improve your 
+                  visibility across ChatGPT, Claude, Perplexity, and Gemini.
+                </p>
+
+                {/* URL Form */}
+                <div className="max-w-xl mx-auto mb-12">
+                  <UrlForm 
+                    onSubmit={handleAnalyze} 
+                    isLoading={false}
+                  />
                 </div>
 
-                {/* Premium Feature Cards */}
-                <div id="features" ref={featuresRef} className={`grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16 smooth-transition ${featuresVisible ? 'opacity-100' : 'opacity-0'}`}>
-                  <div className={`glass magnetic rounded-2xl p-8 group hover:glow-cyan smooth-transition ${featuresVisible ? 'animate-fade-in-up' : ''}`} style={{ animationDelay: '100ms' }}>
-                    <div className="mb-6 flex justify-center">
-                      <Icon3D 
-                        icon={Bot} 
-                        size={48} 
-                        glowColor="var(--accent-cyan)"
-                      />
+                {/* Feature Cards */}
+                <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
+                  <div className="card p-6 transition-smooth">
+                    <div className="w-12 h-12 bg-accent-primary rounded-lg flex items-center justify-center mb-4 mx-auto">
+                      <Search className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-display font-semibold text-foreground mb-4">
-                      AI Crawler Intelligence
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Crawler Analysis
                     </h3>
-                    <p className="text-foreground-secondary leading-relaxed">
-                      Deep analysis of how ChatGPT, Claude, Perplexity, and Gemini 
-                      discover and index your content.
+                    <p className="text-foreground-secondary text-sm">
+                      Check how AI platforms can access and crawl your content.
                     </p>
                   </div>
                   
-                  <div className={`glass magnetic rounded-2xl p-8 group hover:glow-purple smooth-transition ${featuresVisible ? 'animate-fade-in-up' : ''}`} style={{ animationDelay: '200ms' }}>
-                    <div className="mb-6 flex justify-center">
-                      <Icon3D 
-                        icon={Zap} 
-                        size={48} 
-                        glowColor="var(--accent-purple)"
-                      />
+                  <div className="card p-6 transition-smooth">
+                    <div className="w-12 h-12 bg-accent-secondary rounded-lg flex items-center justify-center mb-4 mx-auto">
+                      <BarChart3 className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-display font-semibold text-foreground mb-4">
-                      Neural Content Analysis
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Content Scoring
                     </h3>
-                    <p className="text-foreground-secondary leading-relaxed">
-                      Advanced algorithms evaluate structure, readability, and 
-                      AI-optimized formatting patterns.
+                    <p className="text-foreground-secondary text-sm">
+                      Analyze structure, readability, and AI-optimization factors.
                     </p>
                   </div>
                   
-                  <div className={`glass magnetic rounded-2xl p-8 group hover:glow-cyan smooth-transition ${featuresVisible ? 'animate-fade-in-up' : ''}`} style={{ animationDelay: '300ms' }}>
-                    <div className="mb-6 flex justify-center">
-                      <Icon3D 
-                        icon={Target} 
-                        size={48} 
-                        glowColor="var(--accent-cyan)"
-                      />
+                  <div className="card p-6 transition-smooth">
+                    <div className="w-12 h-12 bg-accent-success rounded-lg flex items-center justify-center mb-4 mx-auto">
+                      <Zap className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-display font-semibold text-foreground mb-4">
-                      Precision Recommendations
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Recommendations
                     </h3>
-                    <p className="text-foreground-secondary leading-relaxed">
-                      Actionable insights with code examples and implementation 
-                      strategies for maximum AI visibility.
+                    <p className="text-foreground-secondary text-sm">
+                      Get specific actions to improve your AI search visibility.
                     </p>
                   </div>
                 </div>
 
                 {/* AI Platform Indicators */}
-                <div className="flex justify-center items-center space-x-8 mb-16">
-                  <div className="flex items-center space-x-2 glass rounded-full px-6 py-3">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-foreground-secondary">ChatGPT</span>
+                <div className="flex justify-center items-center gap-6 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-foreground-secondary">ChatGPT</span>
                   </div>
-                  <div className="flex items-center space-x-2 glass rounded-full px-6 py-3">
-                    <div className="w-3 h-3 bg-orange-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                    <span className="text-sm font-medium text-foreground-secondary">Claude</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-foreground-secondary">Claude</span>
                   </div>
-                  <div className="flex items-center space-x-2 glass rounded-full px-6 py-3">
-                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    <span className="text-sm font-medium text-foreground-secondary">Perplexity</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-foreground-secondary">Perplexity</span>
                   </div>
-                  <div className="flex items-center space-x-2 glass rounded-full px-6 py-3">
-                    <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-                    <span className="text-sm font-medium text-foreground-secondary">Gemini</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-sm text-foreground-secondary">Gemini</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Premium URL Form */}
-              <div className="max-w-2xl mx-auto">
-                <UrlForm 
-                  onSubmit={handleAnalyze} 
-                  isLoading={false}
-                />
               </div>
             </div>
           </div>
         )}
 
         {analysisState.status === 'loading' && (
-          <div className="min-h-screen flex items-center justify-center">
-            <LoadingState url={analysisState.result?.url} />
+          <div className="py-16 px-6">
+            <div className="max-w-2xl mx-auto">
+              <LoadingState url={analysisState.result?.url} />
+            </div>
           </div>
         )}
 
         {analysisState.status === 'error' && (
-          <div className="min-h-screen flex items-center justify-center px-6">
-            <div className="glass-intense rounded-2xl p-12 max-w-2xl mx-auto text-center border border-red-500/20">
-              <div className="text-red-400 text-5xl mb-6">⚠️</div>
-              <h2 className="text-3xl font-display font-bold text-foreground mb-6">
-                Analysis Failed
-              </h2>
-              <p className="text-foreground-secondary mb-8 text-lg leading-relaxed">
-                {analysisState.error}
-              </p>
-              <button
-                onClick={handleReset}
-                className="liquid-button magnetic px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:shadow-lg smooth-transition"
-              >
-                Try Again
-              </button>
+          <div className="py-16 px-6">
+            <div className="max-w-2xl mx-auto">
+              <div className="card p-8 text-center border-red-200">
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-red-600 text-xl">⚠️</span>
+                </div>
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  Analysis Failed
+                </h2>
+                <p className="text-foreground-secondary mb-6">
+                  {analysisState.error}
+                </p>
+                <button
+                  onClick={handleReset}
+                  className="btn btn-primary"
+                >
+                  Try Again
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {analysisState.status === 'success' && analysisState.result && (
-          <div id="results" className="py-16 px-6">
-            <div className="max-w-7xl mx-auto space-y-16">
+          <div id="results" className="py-8 px-6">
+            <div className="max-w-4xl mx-auto space-y-8">
               {/* Score Display */}
-              <div className="glass rounded-3xl p-8">
+              <div className="card p-6">
                 <ScoreDisplay result={analysisState.result} />
               </div>
               
               {/* Recommendations */}
-              <div className="glass rounded-3xl p-8">
+              <div className="card p-6">
                 <RecommendationsList recommendations={analysisState.result.recommendations} />
               </div>
             </div>
@@ -300,22 +237,19 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="glass-intense border-t border-white/10 mt-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <footer className="border-t border-border-light mt-16 bg-surface">
+        <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center">
-            <div className="flex justify-center items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-accent-cyan to-accent-purple rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AI</span>
+            <div className="flex justify-center items-center gap-3 mb-4">
+              <div className="w-6 h-6 bg-accent-primary rounded flex items-center justify-center">
+                <Search className="w-3 h-3 text-white" />
               </div>
-              <span className="text-foreground-secondary font-display font-semibold">
-                AI Search Observatory
+              <span className="text-foreground-secondary font-medium">
+                AI Search Analyzer
               </span>
             </div>
-            <p className="text-foreground-secondary mb-2">
-              Advanced AI search optimization for the future of discovery
-            </p>
             <p className="text-sm text-foreground-muted">
-              Built with cutting-edge technology for next-generation search
+              Optimize your website for AI search platforms
             </p>
           </div>
         </div>
