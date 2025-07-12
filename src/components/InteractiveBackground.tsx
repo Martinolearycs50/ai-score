@@ -22,7 +22,7 @@ export default function InteractiveBackground({
   mouseRadius = 150 
 }: InteractiveBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const mouseRef = useRef({ x: 0, y: 0 });
   const particlesRef = useRef<Particle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });

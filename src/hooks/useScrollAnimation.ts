@@ -9,7 +9,7 @@ interface ScrollAnimationOptions {
   delay?: number;
 }
 
-export function useScrollAnimation<T extends HTMLElement>({
+export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>({
   threshold = 0.1,
   rootMargin = '0px',
   triggerOnce = true,

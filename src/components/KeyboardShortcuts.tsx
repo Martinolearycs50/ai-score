@@ -25,7 +25,7 @@ export default function KeyboardShortcuts({ onAnalyze, onHome }: KeyboardShortcu
           case 'k':
             e.preventDefault();
             if (onAnalyze) onAnalyze();
-            document.querySelector('input[type="text"]')?.focus();
+            (document.querySelector('input[type="text"]') as HTMLInputElement)?.focus();
             break;
           case 'h':
             e.preventDefault();

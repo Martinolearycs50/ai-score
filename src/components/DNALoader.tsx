@@ -14,7 +14,7 @@ export default function DNALoader({
   color2 = 'var(--accent-purple)' 
 }: DNALoaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;

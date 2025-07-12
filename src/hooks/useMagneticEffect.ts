@@ -8,13 +8,13 @@ interface MagneticOptions {
   damping?: number;
 }
 
-export function useMagneticEffect<T extends HTMLElement>({
+export function useMagneticEffect<T extends HTMLElement = HTMLButtonElement>({
   strength = 0.3,
   radius = 100,
   damping = 0.8
 }: MagneticOptions = {}) {
   const ref = useRef<T>(null);
-  const animationFrame = useRef<number>();
+  const animationFrame = useRef<number | undefined>(undefined);
   const position = useRef({ x: 0, y: 0 });
   const target = useRef({ x: 0, y: 0 });
 

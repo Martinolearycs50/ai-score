@@ -8,7 +8,7 @@ interface ParallaxOptions {
   startInView?: boolean;
 }
 
-export function useParallaxScroll<T extends HTMLDivElement>({
+export function useParallaxScroll<T extends HTMLElement = HTMLDivElement>({
   speed = 0.5,
   offset = 0,
   startInView = true
