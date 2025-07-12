@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Search Readiness Analyzer
 
-## Getting Started
+A premium Next.js application that analyzes websites for optimization across major AI search platforms (ChatGPT, Claude, Perplexity, Gemini).
 
-First, run the development server:
+## ✨ Features
+
+- **🤖 AI Platform Analysis**: Comprehensive scoring across 4 categories (25 points each)
+- **🎨 Premium Dark Theme**: Glassmorphism effects with cyber-punk aesthetics
+- **⚡ Advanced Animations**: 3D icons, DNA helix loading, particle backgrounds
+- **🔥 Interactive UI**: Magnetic cursor effects, parallax scrolling, keyboard shortcuts
+- **📊 Detailed Scoring**: Category breakdowns with actionable recommendations
+
+## 🚀 Getting Started
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 15** with App Router and Turbopack
+- **TypeScript** with comprehensive type definitions
+- **Premium Design System** with custom animations
+- **WebsiteAnalyzer Engine** for AI search optimization analysis
+- **Rate-Limited API** with comprehensive error handling
 
-## Learn More
+## 📚 Documentation
 
-To learn more about Next.js, take a look at the following resources:
+See [CLAUDE.md](./CLAUDE.md) for detailed development guidance and architecture overview.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎯 Analysis Categories
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Crawler Accessibility** (25 pts) - HTTPS, robots.txt, AI bot permissions
+2. **Content Structure** (25 pts) - Headings, readability, FAQ detection  
+3. **Technical SEO** (25 pts) - Meta tags, schema markup, performance
+4. **AI Optimization** (25 pts) - Freshness, credibility, content format
