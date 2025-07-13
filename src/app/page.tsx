@@ -59,6 +59,7 @@ export default function Home() {
       try {
         data = await response.json();
         console.log('[HomePage] API Response data:', data);
+        console.log('[HomePage] API Response details:', JSON.stringify(data, null, 2));
       } catch (jsonError) {
         console.error('[HomePage] Failed to parse response JSON:', jsonError);
         throw new Error('Invalid response from server');
