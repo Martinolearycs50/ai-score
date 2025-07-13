@@ -51,10 +51,14 @@ export async function POST(request: NextRequest) {
   
   try {
     // Log request details for debugging
+    console.log('API Route - Request received at:', new Date().toISOString());
+    console.log('API Route - Request method:', request.method);
+    console.log('API Route - Request URL:', request.url);
     console.log('API Route - Request headers:', {
       contentType: request.headers.get('content-type'),
       origin: request.headers.get('origin'),
-      referer: request.headers.get('referer')
+      referer: request.headers.get('referer'),
+      userAgent: request.headers.get('user-agent')
     });
 
     // Check rate limiting

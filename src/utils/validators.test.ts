@@ -87,12 +87,87 @@ describe('URL Validation', () => {
         isValid: false,
         error: 'Local/internal URLs are not allowed'
       });
+      expect(validateAndNormalizeUrl('0.0.0.0')).toEqual({
+        isValid: false,
+        error: 'Local/internal URLs are not allowed'
+      });
+      expect(validateAndNormalizeUrl('[::1]')).toEqual({
+        isValid: false,
+        error: 'Local/internal URLs are not allowed'
+      });
     });
 
     test('should handle malformed URLs', () => {
       expect(validateAndNormalizeUrl('://bad')).toEqual({
         isValid: false,
         error: 'Please enter a valid URL (e.g., example.com or https://example.com)'
+      });
+    });
+
+    test('should validate real-world URLs', () => {
+      const validUrls = [
+        { input: 'www.tap.company', expected: 'https://www.tap.company/' },
+        { input: 'google.com', expected: 'https://google.com/' },
+        { input: 'subdomain.example.com', expected: 'https://subdomain.example.com/' },
+        { input: 'example.co.uk', expected: 'https://example.co.uk/' },
+        { input: 'example.com/', expected: 'https://example.com/' },
+        { input: 'example.com//', expected: 'https://example.com/' },
+        { input: 'EXAMPLE.COM', expected: 'https://example.com/' },
+        { input: 'https://example.com:8080', expected: 'https://example.com:8080/' },
+        { input: 'example.com/path?query=value', expected: 'https://example.com/path?query=value' },
+        { input: 'example.com#anchor', expected: 'https://example.com/#anchor' },
+        { input: 'https://user:pass@example.com', expected: 'https://user:pass@example.com/' },
+      ];
+
+      validUrls.forEach(({ input, expected }) => {
+        const result = validateAndNormalizeUrl(input);
+        expect(result.isValid).toBe(true);
+        expect(result.normalizedUrl).toBe(expected);
+      });
+    });
+
+    test('should reject invalid URL formats', () => {
+      const invalidUrls = [
+        { input: 'example', error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)' },
+        { input: 'example.', error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)' },
+        { input: '.com', error: 'Please enter a valid URL (e.g., example.com or https://example.com)' },
+        { input: 'ftp://example.com', error: 'Only HTTP and HTTPS protocols are supported' },
+        { input: 'file:///path/to/file', error: 'Only HTTP and HTTPS protocols are supported' },
+        { input: 'javascript:alert(1)', error: 'Only HTTP and HTTPS protocols are supported' },
+        { input: 'ex@mple.com', error: 'Domain contains invalid characters' },
+        { input: 'example$.com', error: 'Domain contains invalid characters' },
+        { input: 'example_site.com', error: 'Domain contains invalid characters' },
+      ];
+
+      invalidUrls.forEach(({ input, error }) => {
+        const result = validateAndNormalizeUrl(input);
+        expect(result.isValid).toBe(false);
+        expect(result.error).toBe(error);
+      });
+    });
+
+    test('should handle trailing slashes consistently', () => {
+      const urls = ['example.com', 'example.com/', 'example.com//', 'example.com///'];
+      urls.forEach(url => {
+        const result = validateAndNormalizeUrl(url);
+        expect(result.isValid).toBe(true);
+        expect(result.normalizedUrl).toBe('https://example.com/');
+      });
+    });
+
+    test('should preserve paths and query parameters', () => {
+      const testCases = [
+        { input: 'example.com/path/to/page', expected: 'https://example.com/path/to/page' },
+        { input: 'example.com?q=search', expected: 'https://example.com/?q=search' },
+        { input: 'example.com/path?q=search&filter=1', expected: 'https://example.com/path?q=search&filter=1' },
+        { input: 'example.com#section', expected: 'https://example.com/#section' },
+        { input: 'example.com/path#section', expected: 'https://example.com/path#section' },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const result = validateAndNormalizeUrl(input);
+        expect(result.isValid).toBe(true);
+        expect(result.normalizedUrl).toBe(expected);
       });
     });
   });

@@ -32,44 +32,83 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     };
   }
 
-  // Try to normalize the URL
-  let normalizedUrl: string;
+  // Remove any trailing slashes for consistency
+  let cleanedUrl = trimmed.replace(/\/+$/, '');
   
-  try {
-    // Add protocol if missing
-    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-      normalizedUrl = `https://${trimmed}`;
-    } else {
-      normalizedUrl = trimmed;
-    }
-
-    // Validate with URL constructor
-    const urlObj = new URL(normalizedUrl);
-    
-    // Additional validation checks
-    if (!urlObj.hostname || urlObj.hostname.length < 3) {
+  // Handle common URL patterns
+  if (cleanedUrl.includes('://')) {
+    // URL already has protocol
+    if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
       return {
         isValid: false,
-        error: 'Invalid domain name'
+        error: 'Only HTTP and HTTPS protocols are supported'
       };
     }
+  } else {
+    // No protocol, add https://
+    cleanedUrl = `https://${cleanedUrl}`;
+  }
 
-    // Check for localhost/internal IPs (for security)
+  try {
+    // Validate with URL constructor
+    const urlObj = new URL(cleanedUrl);
+    
+    // Additional validation checks
     const hostname = urlObj.hostname.toLowerCase();
+    
+    // Check for localhost/internal IPs first (for security)
     if (hostname === 'localhost' || 
         hostname.startsWith('127.') || 
         hostname.startsWith('192.168.') ||
         hostname.startsWith('10.') ||
-        hostname.startsWith('172.')) {
+        hostname.startsWith('172.') ||
+        hostname.startsWith('[') || // IPv6 localhost
+        hostname === '0.0.0.0') {
       return {
         isValid: false,
         error: 'Local/internal URLs are not allowed'
       };
     }
+    
+    // Check for valid hostname format
+    if (!hostname || hostname.length < 3) {
+      return {
+        isValid: false,
+        error: 'Invalid domain name'
+      };
+    }
+    
+    // Special case: hostname starting with a dot is invalid
+    if (hostname.startsWith('.')) {
+      return {
+        isValid: false,
+        error: 'Invalid domain name'
+      };
+    }
+    
+    // Validate domain format (must contain at least one dot for TLD)
+    // Exception: localhost was already handled above
+    if (!hostname.includes('.') || hostname.endsWith('.')) {
+      return {
+        isValid: false,
+        error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)'
+      };
+    }
+    
+    // Check for invalid characters in hostname
+    if (!/^[a-z0-9.-]+$/i.test(hostname)) {
+      return {
+        isValid: false,
+        error: 'Domain contains invalid characters'
+      };
+    }
+    
+    // Ensure the URL can be stringified properly
+    const normalizedUrl = urlObj.toString();
 
     return {
       isValid: true,
-      normalizedUrl: urlObj.toString()
+      normalizedUrl: normalizedUrl
     };
   } catch (error) {
     return {

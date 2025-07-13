@@ -15,7 +15,8 @@ export default function Home() {
   });
 
   const handleAnalyze = async (url: string) => {
-    console.log('Starting analysis for URL:', url);
+    console.log('[HomePage] Starting analysis for URL:', url);
+    console.log('[HomePage] Current location:', window.location.href);
     
     setAnalysisState({
       status: 'loading',
@@ -24,25 +25,42 @@ export default function Home() {
     });
 
     try {
+      const requestBody = JSON.stringify({ url });
+      console.log('[HomePage] Request body:', requestBody);
+      
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: requestBody,
+        // Prevent any redirect
+        redirect: 'error'
       });
 
-      const data = await response.json();
-      console.log('API Response:', { status: response.status, data });
+      console.log('[HomePage] Response status:', response.status);
+      console.log('[HomePage] Response headers:', response.headers);
+      
+      let data;
+      try {
+        data = await response.json();
+        console.log('[HomePage] API Response data:', data);
+      } catch (jsonError) {
+        console.error('[HomePage] Failed to parse response JSON:', jsonError);
+        throw new Error('Invalid response from server');
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Analysis failed');
+        console.error('[HomePage] Response not OK:', response.status, data);
+        throw new Error(data.error || `Analysis failed with status ${response.status}`);
       }
 
       if (!data.success) {
+        console.error('[HomePage] Analysis not successful:', data);
         throw new Error(data.error || 'Analysis failed');
       }
 
+      console.log('[HomePage] Analysis successful, setting state');
       setAnalysisState({
         status: 'success',
         result: data.data,
@@ -58,11 +76,18 @@ export default function Home() {
       }, 100);
 
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error('[HomePage] Analysis error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
+      
+      // Check if it's a network error that might indicate navigation
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('[HomePage] Network error - possible navigation detected');
+      }
+      
       setAnalysisState({
         status: 'error',
         result: null,
-        error: error instanceof Error ? error.message : 'Analysis failed'
+        error: errorMessage
       });
     }
   };

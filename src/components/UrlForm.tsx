@@ -15,17 +15,27 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
-    if (isLoading || disabled) return;
+    console.log('[UrlForm] Form submitted with URL:', url);
+    
+    if (isLoading || disabled) {
+      console.log('[UrlForm] Submission blocked - loading or disabled');
+      return;
+    }
 
     setError('');
 
     const validation = validateAndNormalizeUrl(url.trim());
+    console.log('[UrlForm] Validation result:', validation);
+    
     if (!validation.isValid) {
       setError(validation.error || 'Please enter a valid URL');
       return;
     }
 
+    // Clear the URL field to prevent double submission
+    setUrl('');
     onSubmit(validation.normalizedUrl!);
   };
 
@@ -39,7 +49,7 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form onSubmit={handleSubmit} className="w-full" method="post" action="#" noValidate>
       <div className="relative">
         <input
           type="text"
