@@ -90,7 +90,7 @@ export class WebsiteAnalyzer {
         ),
         content_structure: this.analyzeContentStructure($),
         technical_seo: this.analyzeTechnicalSeo($),
-        ai_optimization: this.analyzeAiOptimization($, response),
+        ai_optimization: this.analyzeAiOptimization($, response, normalizedUrl),
         page_metadata: pageMetadata
       };
 
@@ -164,13 +164,26 @@ export class WebsiteAnalyzer {
 
   private async fetchRobotsTxt(url: string): Promise<string> {
     try {
-      const robotsUrl = new URL('/robots.txt', url).toString();
+      console.log(`[Analyzer] Creating robots.txt URL from base: ${url}`);
+      let robotsUrl: string;
+      
+      try {
+        robotsUrl = new URL('/robots.txt', url).toString();
+      } catch (urlError) {
+        console.error('[Analyzer] Failed to create robots.txt URL:', urlError);
+        // Fallback: manually construct the robots.txt URL
+        const baseUrl = url.replace(/\/$/, ''); // Remove trailing slash
+        robotsUrl = `${baseUrl}/robots.txt`;
+      }
+      
+      console.log(`[Analyzer] Fetching robots.txt from: ${robotsUrl}`);
       const response = await this.axiosInstance.get(robotsUrl, {
         timeout: TIMEOUTS.robots_fetch
       });
       
       return response.status === 200 ? response.data : '';
-    } catch {
+    } catch (error) {
+      console.log('[Analyzer] Robots.txt fetch failed (optional):', error instanceof Error ? error.message : 'Unknown error');
       // Robots.txt is optional, so we don't throw on failure
       return '';
     }
@@ -198,7 +211,18 @@ export class WebsiteAnalyzer {
     robotsContent: string, 
     response: any
   ): Promise<CrawlerAccessibilityDetails> {
-    const urlObj = new URL(url);
+    let urlObj;
+    try {
+      urlObj = new URL(url);
+    } catch (urlError) {
+      console.error('[Analyzer] Failed to parse URL in analyzeCrawlerAccessibility:', urlError);
+      // Create a minimal URL object for fallback
+      const match = url.match(/^(https?):\/\/([^\/]+)/);
+      urlObj = {
+        protocol: match ? match[1] + ':' : 'https:',
+        hostname: match ? match[2] : 'unknown'
+      };
+    }
     
     // Parse robots.txt for AI crawler permissions
     const aiCrawlersAllowed = robotsContent 
@@ -345,7 +369,7 @@ export class WebsiteAnalyzer {
     };
   }
 
-  private analyzeAiOptimization($: cheerio.CheerioAPI, response: any): AiOptimizationDetails {
+  private analyzeAiOptimization($: cheerio.CheerioAPI, response: any, url: string): AiOptimizationDetails {
     // Analyze content freshness
     const lastModified = response.headers['last-modified'] || null;
     const bodyText = $('body').text();
@@ -375,8 +399,22 @@ export class WebsiteAnalyzer {
       has_author_info: /author|by\s+\w+/i.test(bodyText) || $('[class*="author"], [id*="author"]').length > 0,
       has_contact_info: /contact|email|phone/i.test(bodyText) || $('a[href^="mailto:"], a[href^="tel:"]').length > 0,
       has_about_page_link: $('a[href*="about"]').length > 0,
-      external_links_count: $('a[href^="http"]:not([href*="' + new URL(response.request?.responseURL || '').hostname + '"])').length,
-      internal_links_count: $('a[href^="/"], a[href*="' + new URL(response.request?.responseURL || '').hostname + '"]').length
+      external_links_count: (() => {
+        try {
+          const hostname = new URL(response.request?.responseURL || url).hostname;
+          return $('a[href^="http"]:not([href*="' + hostname + '"])').length;
+        } catch {
+          return $('a[href^="http"]').length; // Fallback: count all external links
+        }
+      })(),
+      internal_links_count: (() => {
+        try {
+          const hostname = new URL(response.request?.responseURL || url).hostname;
+          return $('a[href^="/"], a[href*="' + hostname + '"]').length;
+        } catch {
+          return $('a[href^="/"]').length; // Fallback: count only relative links
+        }
+      })()
     };
 
     // Analyze content format
