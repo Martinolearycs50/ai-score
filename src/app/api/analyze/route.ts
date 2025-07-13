@@ -78,19 +78,19 @@ export async function POST(request: NextRequest) {
     // Validate and normalize the URL
     console.log('Received URL for validation:', url);
     
-    const validationResult = validateAndNormalizeUrl(url);
+    const urlValidation = validateAndNormalizeUrl(url);
     
-    if (!validationResult.isValid) {
+    if (!urlValidation.isValid) {
       return NextResponse.json<AnalysisApiResponse>(
         {
           success: false,
-          error: validationResult.error || 'Invalid URL'
+          error: urlValidation.error || 'Invalid URL'
         },
         { status: 400 }
       );
     }
     
-    const normalizedUrl = validationResult.normalizedUrl!;
+    const normalizedUrl = urlValidation.normalizedUrl!;
     console.log('Using normalized URL:', normalizedUrl);
 
     // Perform analysis
