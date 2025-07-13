@@ -20,13 +20,18 @@ export async function POST(request: NextRequest) {
     console.log('[Test Fetch] Test URL char codes:', Array.from(testUrl).map(c => c.charCodeAt(0)));
     
     // Try native fetch instead of axios
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     const response = await fetch(testUrl, {
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; AIsearchBot/1.0)'
       },
-      signal: AbortSignal.timeout(10000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     console.log('[Test Fetch] Response status:', response.status);
     
