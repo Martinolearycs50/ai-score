@@ -27,11 +27,18 @@ export async function POST(request: NextRequest) {
     
     // Simple URL normalization
     let normalizedUrl = inputUrl.trim();
+    
+    // Remove any invisible characters
+    normalizedUrl = normalizedUrl.replace(/[\u200B-\u200D\uFEFF]/g, '');
+    
     if (!normalizedUrl.match(/^https?:\/\//)) {
       normalizedUrl = 'https://' + normalizedUrl;
     }
     
+    console.log('[Simple API] Input URL:', inputUrl);
+    console.log('[Simple API] Input URL length:', inputUrl.length);
     console.log('[Simple API] Normalized URL:', normalizedUrl);
+    console.log('[Simple API] Normalized URL length:', normalizedUrl.length);
     
     // Basic domain check
     try {

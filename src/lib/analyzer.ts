@@ -41,15 +41,21 @@ export class WebsiteAnalyzer {
   }
 
   async analyzeUrl(url: string): Promise<AnalysisResult> {
-    console.log(`Starting analysis for: ${url}`);
+    console.log(`[Analyzer] Starting analysis for: ${url}`);
+    console.log(`[Analyzer] URL type: ${typeof url}`);
+    console.log(`[Analyzer] URL length: ${url?.length}`);
     
     // Validate and normalize URL
     const validation = validateAndNormalizeUrl(url);
+    console.log(`[Analyzer] Validation result:`, validation);
+    
     if (!validation.isValid) {
-      throw new Error(validation.error);
+      console.error(`[Analyzer] Validation failed:`, validation.error);
+      throw new Error(`Invalid URL: ${validation.error}`);
     }
 
     const normalizedUrl = validation.normalizedUrl!;
+    console.log(`[Analyzer] Using normalized URL: ${normalizedUrl}`);
     const startTime = Date.now();
 
     try {
@@ -119,8 +125,14 @@ export class WebsiteAnalyzer {
   }
 
   private async fetchPageContent(url: string): Promise<{ data: string; response: any }> {
+    console.log(`[Analyzer] Fetching page content from: ${url}`);
+    console.log(`[Analyzer] URL for axios:`, JSON.stringify(url));
+    
+    // Ensure URL is clean
+    const cleanUrl = String(url).trim();
+    
     try {
-      const response = await this.axiosInstance.get(url);
+      const response = await this.axiosInstance.get(cleanUrl);
       
       if (response.status >= 400) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
