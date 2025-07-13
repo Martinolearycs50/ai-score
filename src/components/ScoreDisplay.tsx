@@ -113,12 +113,12 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
                 platform.ready ? 'bg-green-50' : 'bg-red-50'
               }`}>
                 {platform.ready ? (
-                  <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24">
-                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24">
-                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg className="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6L6 18M6 6L18 18" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 )}
               </div>

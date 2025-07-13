@@ -79,11 +79,12 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="#635BFF"/>
-                <path d="M16 8L8 20H24L16 8Z" fill="white" opacity="0.9"/>
-                <circle cx="16" cy="16" r="3" fill="white"/>
-              </svg>
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 2L3 12h14L10 2z"/>
+                  <circle cx="10" cy="10" r="2"/>
+                </svg>
+              </div>
               <span className="font-semibold text-lg text-gray-900">AI Search Analyzer</span>
             </div>
             
@@ -127,9 +128,9 @@ export default function Home() {
               <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-indigo-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle cx="11" cy="11" r="8" strokeWidth="2"/>
-                      <path d="m21 21-4.35-4.35" strokeWidth="2"/>
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="m21 21-4.35-4.35" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">Crawler Analysis</h3>
@@ -140,9 +141,8 @@ export default function Home() {
                 
                 <div className="text-center">
                   <div className="w-16 h-16 bg-indigo-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path d="M3 3v18h18" strokeWidth="2"/>
-                      <path d="m7 16 5-5 5 5" strokeWidth="2"/>
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">Content Scoring</h3>
@@ -153,8 +153,8 @@ export default function Home() {
                 
                 <div className="text-center">
                   <div className="w-16 h-16 bg-indigo-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path d="m6 9 6 6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">Recommendations</h3>
@@ -183,10 +183,8 @@ export default function Home() {
               <div className="max-w-md mx-auto text-center">
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                   <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                      <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2"/>
+                    <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">Analysis Failed</h2>
