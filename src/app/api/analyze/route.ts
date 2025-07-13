@@ -114,10 +114,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { url } = validationResult.data;
+    const { url: rawUrl } = validationResult.data;
+    
+    // Ensure URL is a string and properly formatted
+    const url = String(rawUrl).trim();
 
     // Validate and normalize the URL
     console.log('API Route - URL from request:', {
+      rawUrl,
       url,
       type: typeof url,
       length: url?.length,
