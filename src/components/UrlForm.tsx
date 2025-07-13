@@ -64,9 +64,11 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
           placeholder={placeholders[placeholderIndex]}
           disabled={isLoading || disabled}
           className={`
-            input w-full h-12 px-4 pr-32 text-base
-            ${error ? 'border-error focus:border-error' : ''}
-            ${isLoading || disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            w-full px-4 py-3 pr-32 text-base border rounded-lg
+            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+            transition-all duration-200
+            ${error ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'}
+            ${isLoading || disabled ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'}
           `}
           autoComplete="url"
           autoFocus
@@ -76,14 +78,18 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
           type="submit"
           disabled={isLoading || disabled || !url.trim()}
           className={`
-            absolute right-2 top-2 bottom-2
-            btn btn-primary h-auto
-            ${!url.trim() || isLoading || disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            absolute right-2 top-1/2 -translate-y-1/2
+            px-6 py-2 text-sm font-medium rounded-md
+            transition-all duration-200
+            ${!url.trim() || isLoading || disabled 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800'
+            }
           `}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
-              <div className="spinner w-4 h-4"></div>
+              <div className="spinner w-4 h-4 border-white"></div>
               <span>Analyzing</span>
             </div>
           ) : (
@@ -93,8 +99,8 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-error text-small">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <div className="flex items-center gap-2 text-red-600 text-sm">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 16 16">
             <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
             <path d="M8 5V8M8 11H8.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
@@ -102,7 +108,7 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
         </div>
       )}
 
-      <p className="text-center text-foreground-muted text-small">
+      <p className="text-center text-gray-500 text-sm">
         Enter any website URL to analyze its AI search readiness
       </p>
     </form>

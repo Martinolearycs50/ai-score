@@ -27,9 +27,9 @@ export default function LoadingState({ url }: LoadingStateProps) {
   return (
     <div className="animate-fadeIn">
       <div className="text-center mb-8">
-        <h2 className="text-xl font-semibold mb-2">Analyzing Website</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Analyzing Website</h2>
         {url && (
-          <p className="text-foreground-muted text-small">
+          <p className="text-gray-500 text-sm">
             {url}
           </p>
         )}
@@ -46,14 +46,14 @@ export default function LoadingState({ url }: LoadingStateProps) {
               className={`
                 flex items-center gap-3 p-3 rounded-lg border
                 transition-all duration-300
-                ${isActive ? 'border-accent bg-accent-light' : 'border-border'}
+                ${isActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-white'}
                 ${isComplete ? 'opacity-60' : ''}
               `}
             >
               <div className="flex-shrink-0">
                 {isComplete ? (
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="10" cy="10" r="9" fill="var(--success)" />
+                  <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="9" fill="currentColor" />
                     <path
                       d="M14 7L8.5 12.5L6 10"
                       stroke="white"
@@ -63,15 +63,15 @@ export default function LoadingState({ url }: LoadingStateProps) {
                     />
                   </svg>
                 ) : isActive ? (
-                  <div className="spinner w-5 h-5"></div>
+                  <div className="spinner w-5 h-5 border-indigo-600"></div>
                 ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-border"></div>
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
                 )}
               </div>
               <span
                 className={`
-                  text-small font-medium
-                  ${isActive ? 'text-accent' : 'text-foreground-secondary'}
+                  text-sm font-medium
+                  ${isActive ? 'text-indigo-700' : 'text-gray-600'}
                 `}
               >
                 {step.label}
@@ -82,7 +82,7 @@ export default function LoadingState({ url }: LoadingStateProps) {
       </div>
 
       <div className="mt-8 text-center">
-        <p className="text-foreground-muted text-small">
+        <p className="text-gray-500 text-sm">
           This typically takes 10-30 seconds
         </p>
       </div>
