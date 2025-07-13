@@ -120,14 +120,17 @@ export async function POST(request: NextRequest) {
     console.log('API Route - URL from request:', {
       url,
       type: typeof url,
-      length: url?.length
+      length: url?.length,
+      rawValue: JSON.stringify(url),
+      charCodes: url ? Array.from(url).map(c => c.charCodeAt(0)) : []
     });
     
     const urlValidation = validateAndNormalizeUrl(url);
     console.log('API Route - URL validation result:', {
       isValid: urlValidation.isValid,
       error: urlValidation.error,
-      normalizedUrl: urlValidation.normalizedUrl
+      normalizedUrl: urlValidation.normalizedUrl,
+      fullResult: urlValidation
     });
     
     if (!urlValidation.isValid) {

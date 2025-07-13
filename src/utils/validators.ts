@@ -15,14 +15,16 @@ export const urlSchema = z.string()
 
 // Enhanced URL validation with normalization
 export function validateAndNormalizeUrl(input: string): UrlValidationResult {
-  // Debug logging
-  if (typeof window !== 'undefined') {
-    console.log('[Validator] Input:', input);
-    console.log('[Validator] Input type:', typeof input);
-    console.log('[Validator] Input length:', input?.length);
-  }
+  // Debug logging for both client and server
+  const isServer = typeof window === 'undefined';
+  const logPrefix = isServer ? '[Server Validator]' : '[Client Validator]';
+  
+  console.log(`${logPrefix} Input:`, input);
+  console.log(`${logPrefix} Input type:`, typeof input);
+  console.log(`${logPrefix} Input length:`, input?.length);
   
   if (!input || input.trim() === '') {
+    console.log(`${logPrefix} Failed: empty input`);
     return {
       isValid: false,
       error: 'URL is required'
@@ -58,10 +60,13 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
 
   try {
     // Validate with URL constructor
+    console.log(`${logPrefix} Attempting to create URL from:`, cleanedUrl);
     const urlObj = new URL(cleanedUrl);
+    console.log(`${logPrefix} URL object created successfully`);
     
     // Additional validation checks
     const hostname = urlObj.hostname.toLowerCase();
+    console.log(`${logPrefix} Hostname:`, hostname);
     
     // Check for localhost/internal IPs first (for security)
     if (hostname === 'localhost' || 
@@ -71,6 +76,7 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
         hostname.startsWith('172.') ||
         hostname.startsWith('[') || // IPv6 localhost
         hostname === '0.0.0.0') {
+      console.log(`${logPrefix} Failed: localhost/internal IP`);
       return {
         isValid: false,
         error: 'Local/internal URLs are not allowed'
@@ -79,6 +85,7 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     
     // Check for valid hostname format
     if (!hostname || hostname.length < 3) {
+      console.log(`${logPrefix} Failed: hostname too short or empty:`, hostname);
       return {
         isValid: false,
         error: 'Invalid domain name'
@@ -87,6 +94,7 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     
     // Special case: hostname starting with a dot is invalid
     if (hostname.startsWith('.')) {
+      console.log(`${logPrefix} Failed: hostname starts with dot:`, hostname);
       return {
         isValid: false,
         error: 'Invalid domain name'
@@ -96,6 +104,7 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     // Validate domain format (must contain at least one dot for TLD)
     // Exception: localhost was already handled above
     if (!hostname.includes('.') || hostname.endsWith('.')) {
+      console.log(`${logPrefix} Failed: invalid domain format (no TLD or ends with dot):`, hostname);
       return {
         isValid: false,
         error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)'
@@ -104,6 +113,7 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     
     // Check for invalid characters in hostname
     if (!/^[a-z0-9.-]+$/i.test(hostname)) {
+      console.log(`${logPrefix} Failed: domain contains invalid characters:`, hostname);
       return {
         isValid: false,
         error: 'Domain contains invalid characters'
@@ -112,12 +122,17 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
     
     // Ensure the URL can be stringified properly
     const normalizedUrl = urlObj.toString();
+    console.log(`${logPrefix} Validation successful, normalized URL:`, normalizedUrl);
 
     return {
       isValid: true,
       normalizedUrl: normalizedUrl
     };
   } catch (error) {
+    console.error(`${logPrefix} URL validation error:`, error);
+    console.error(`${logPrefix} Error message:`, error instanceof Error ? error.message : 'Unknown error');
+    console.error(`${logPrefix} Failed URL was:`, cleanedUrl);
+    
     return {
       isValid: false,
       error: 'Please enter a valid URL (e.g., example.com or https://example.com)'
