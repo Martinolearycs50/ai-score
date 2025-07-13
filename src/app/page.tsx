@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import UrlForm from '@/components/UrlForm';
 import LoadingState from '@/components/LoadingState';
 import ScoreDisplay from '@/components/ScoreDisplay';
@@ -13,6 +13,20 @@ export default function Home() {
     result: null,
     error: null
   });
+
+  // Prevent navigation during loading
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (analysisState.status === 'loading') {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [analysisState.status]);
 
   const handleAnalyze = async (url: string) => {
     console.log('[HomePage] Starting analysis for URL:', url);

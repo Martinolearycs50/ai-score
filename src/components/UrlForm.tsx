@@ -55,13 +55,21 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isLoading && !disabled && url.trim()) {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="w-full" method="post" action="#" noValidate>
+    <div className="w-full">
       <div className="relative">
         <input
           type="text"
           value={url}
           onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
           placeholder="Enter website URL"
           disabled={isLoading || disabled}
           className="search-input pr-32"
@@ -74,7 +82,8 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
         />
         
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={isLoading || disabled || !url.trim()}
           className="btn-primary absolute right-2 top-1/2 -translate-y-1/2"
           style={{
@@ -99,6 +108,6 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
           {error}
         </p>
       )}
-    </form>
+    </div>
   );
 }
