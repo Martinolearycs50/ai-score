@@ -22,6 +22,11 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
   console.log(`${logPrefix} Input:`, input);
   console.log(`${logPrefix} Input type:`, typeof input);
   console.log(`${logPrefix} Input length:`, input?.length);
+  console.log(`${logPrefix} Environment:`, {
+    nodeVersion: typeof process !== 'undefined' ? process.version : 'N/A',
+    isVercel: process.env.VERCEL === '1',
+    runtime: process.env.NEXT_RUNTIME
+  });
   
   if (!input || input.trim() === '') {
     console.log(`${logPrefix} Failed: empty input`);
@@ -61,8 +66,27 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
   try {
     // Validate with URL constructor
     console.log(`${logPrefix} Attempting to create URL from:`, cleanedUrl);
-    const urlObj = new URL(cleanedUrl);
+    
+    let urlObj;
+    try {
+      urlObj = new URL(cleanedUrl);
+    } catch (urlError) {
+      console.error(`${logPrefix} URL constructor error:`, urlError);
+      console.error(`${logPrefix} URL constructor error message:`, urlError instanceof Error ? urlError.message : 'Unknown error');
+      console.error(`${logPrefix} URL that failed:`, cleanedUrl);
+      throw urlError;
+    }
+    
     console.log(`${logPrefix} URL object created successfully`);
+    console.log(`${logPrefix} URL object properties:`, {
+      href: urlObj.href,
+      protocol: urlObj.protocol,
+      hostname: urlObj.hostname,
+      host: urlObj.host,
+      pathname: urlObj.pathname,
+      search: urlObj.search,
+      hash: urlObj.hash
+    });
     
     // Additional validation checks
     const hostname = urlObj.hostname.toLowerCase();
@@ -111,6 +135,12 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
       };
     }
     
+    // Additional check for .company TLD issue
+    const parts = hostname.split('.');
+    const tld = parts[parts.length - 1];
+    console.log(`${logPrefix} TLD detected:`, tld);
+    console.log(`${logPrefix} Domain parts:`, parts);
+    
     // Check for invalid characters in hostname
     if (!/^[a-z0-9.-]+$/i.test(hostname)) {
       console.log(`${logPrefix} Failed: domain contains invalid characters:`, hostname);
@@ -126,16 +156,28 @@ export function validateAndNormalizeUrl(input: string): UrlValidationResult {
 
     return {
       isValid: true,
-      normalizedUrl: normalizedUrl
+      normalizedUrl: normalizedUrl,
+      error: undefined
     };
   } catch (error) {
     console.error(`${logPrefix} URL validation error:`, error);
     console.error(`${logPrefix} Error message:`, error instanceof Error ? error.message : 'Unknown error');
+    console.error(`${logPrefix} Error stack:`, error instanceof Error ? error.stack : 'No stack');
     console.error(`${logPrefix} Failed URL was:`, cleanedUrl);
+    
+    // More specific error messages based on the error
+    let errorMessage = 'Please enter a valid URL (e.g., example.com or https://example.com)';
+    if (error instanceof Error) {
+      if (error.message.includes('Invalid URL')) {
+        errorMessage = 'The URL format is invalid. Please check and try again.';
+      } else if (error.message.includes('ERR_INVALID_URL')) {
+        errorMessage = 'Invalid URL structure detected.';
+      }
+    }
     
     return {
       isValid: false,
-      error: 'Please enter a valid URL (e.g., example.com or https://example.com)'
+      error: errorMessage
     };
   }
 }

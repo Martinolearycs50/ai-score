@@ -134,10 +134,14 @@ export async function POST(request: NextRequest) {
       isValid: urlValidation.isValid,
       error: urlValidation.error,
       normalizedUrl: urlValidation.normalizedUrl,
-      fullResult: urlValidation
+      fullResult: JSON.stringify(urlValidation)
     });
     
     if (!urlValidation.isValid) {
+      console.error('API Route - Validation failed, returning error:', {
+        error: urlValidation.error,
+        defaulting: !urlValidation.error
+      });
       return NextResponse.json<AnalysisApiResponse>(
         {
           success: false,
