@@ -26,7 +26,7 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
       return;
     }
 
-    onSubmit(url.trim());
+    onSubmit(validation.normalizedUrl!);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

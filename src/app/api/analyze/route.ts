@@ -4,6 +4,9 @@ import { WebsiteAnalyzer } from '@/lib/analyzer';
 import type { AnalysisApiResponse } from '@/lib/types';
 import { validateAndNormalizeUrl } from '@/utils/validators';
 
+// Force Node.js runtime for consistent behavior
+export const runtime = 'nodejs';
+
 // Request validation schema
 const analyzeRequestSchema = z.object({
   url: z.string().min(1, 'URL is required')
@@ -47,6 +50,13 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
+    // Log request details for debugging
+    console.log('API Route - Request headers:', {
+      contentType: request.headers.get('content-type'),
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer')
+    });
+
     // Check rate limiting
     const clientId = getClientId(request);
     if (!checkRateLimit(clientId)) {
@@ -59,11 +69,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse and validate request body
-    const body = await request.json();
+    // Parse and validate request body with error handling
+    let body;
+    try {
+      body = await request.json();
+      console.log('API Route - Parsed body:', body);
+    } catch (jsonError) {
+      console.error('API Route - JSON parsing error:', jsonError);
+      return NextResponse.json<AnalysisApiResponse>(
+        {
+          success: false,
+          error: 'Invalid JSON in request body'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate the body is not empty
+    if (!body || typeof body !== 'object') {
+      console.error('API Route - Empty or invalid body:', body);
+      return NextResponse.json<AnalysisApiResponse>(
+        {
+          success: false,
+          error: 'Request body is empty or invalid'
+        },
+        { status: 400 }
+      );
+    }
+
     const validationResult = analyzeRequestSchema.safeParse(body);
 
     if (!validationResult.success) {
+      console.error('API Route - Schema validation failed:', validationResult.error.issues);
       return NextResponse.json<AnalysisApiResponse>(
         {
           success: false,
@@ -76,9 +113,18 @@ export async function POST(request: NextRequest) {
     const { url } = validationResult.data;
 
     // Validate and normalize the URL
-    console.log('Received URL for validation:', url);
+    console.log('API Route - URL from request:', {
+      url,
+      type: typeof url,
+      length: url?.length
+    });
     
     const urlValidation = validateAndNormalizeUrl(url);
+    console.log('API Route - URL validation result:', {
+      isValid: urlValidation.isValid,
+      error: urlValidation.error,
+      normalizedUrl: urlValidation.normalizedUrl
+    });
     
     if (!urlValidation.isValid) {
       return NextResponse.json<AnalysisApiResponse>(
