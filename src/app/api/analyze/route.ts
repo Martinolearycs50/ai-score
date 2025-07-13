@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { WebsiteAnalyzer } from '@/lib/analyzer';
 import type { AnalysisApiResponse } from '@/lib/types';
 import { validateAndNormalizeUrl } from '@/utils/validators';
+import { simpleValidateUrl } from '@/utils/simple-validator';
 
 // Force Node.js runtime for consistent behavior
 export const runtime = 'nodejs';
@@ -129,7 +130,8 @@ export async function POST(request: NextRequest) {
       charCodes: url ? Array.from(url).map(c => c.charCodeAt(0)) : []
     });
     
-    const urlValidation = validateAndNormalizeUrl(url);
+    // Try advanced validation first
+    let urlValidation = validateAndNormalizeUrl(url);
     console.log('API Route - URL validation result:', {
       isValid: urlValidation.isValid,
       error: urlValidation.error,
@@ -137,8 +139,25 @@ export async function POST(request: NextRequest) {
       fullResult: JSON.stringify(urlValidation)
     });
     
+    // If advanced validation fails, try simple validation as fallback
     if (!urlValidation.isValid) {
-      console.error('API Route - Validation failed, returning error:', {
+      console.log('API Route - Advanced validation failed, trying simple validation');
+      const simpleResult = simpleValidateUrl(url);
+      console.log('API Route - Simple validation result:', simpleResult);
+      
+      if (simpleResult.isValid) {
+        // Use simple validation result
+        urlValidation = {
+          isValid: true,
+          normalizedUrl: simpleResult.normalizedUrl,
+          error: undefined
+        };
+        console.log('API Route - Using simple validation result');
+      }
+    }
+    
+    if (!urlValidation.isValid) {
+      console.error('API Route - Both validations failed, returning error:', {
         error: urlValidation.error,
         defaulting: !urlValidation.error
       });
