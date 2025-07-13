@@ -15,6 +15,8 @@ export default function Home() {
   });
 
   const handleAnalyze = async (url: string) => {
+    console.log('Starting analysis for URL:', url);
+    
     setAnalysisState({
       status: 'loading',
       result: null,
@@ -31,6 +33,7 @@ export default function Home() {
       });
 
       const data = await response.json();
+      console.log('API Response:', { status: response.status, data });
 
       if (!response.ok) {
         throw new Error(data.error || 'Analysis failed');
