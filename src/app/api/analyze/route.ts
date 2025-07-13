@@ -75,11 +75,22 @@ export async function POST(request: NextRequest) {
 
     const { url } = validationResult.data;
 
-    // Additional URL validation
+    // Validate and normalize the URL
     console.log('Received URL for validation:', url);
     
-    // Temporarily bypass additional validation for debugging
-    const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+    const validationResult = validateAndNormalizeUrl(url);
+    
+    if (!validationResult.isValid) {
+      return NextResponse.json<AnalysisApiResponse>(
+        {
+          success: false,
+          error: validationResult.error || 'Invalid URL'
+        },
+        { status: 400 }
+      );
+    }
+    
+    const normalizedUrl = validationResult.normalizedUrl!;
     console.log('Using normalized URL:', normalizedUrl);
 
     // Perform analysis
