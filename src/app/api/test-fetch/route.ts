@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     
     console.log('[Test Fetch] Test URL:', testUrl);
     console.log('[Test Fetch] Test URL length:', testUrl.length);
-    console.log('[Test Fetch] Test URL char codes:', Array.from(testUrl).map(c => c.charCodeAt(0)));
+    console.log('[Test Fetch] Test URL char codes:', Array.from(testUrl).map((c: string) => c.charCodeAt(0)));
     
     // Try native fetch instead of axios
     const controller = new AbortController();
