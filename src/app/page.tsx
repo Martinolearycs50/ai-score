@@ -91,12 +91,25 @@ export default function Home() {
 
     } catch (error) {
       console.error('[HomePage] Analysis error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
+      console.error('[HomePage] Error type:', typeof error);
+      console.error('[HomePage] Error constructor:', error?.constructor?.name);
+      
+      let errorMessage = 'Analysis failed';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        console.error('[HomePage] Error message:', error.message);
+        console.error('[HomePage] Error stack:', error.stack);
+      }
       
       // Check if it's a network error that might indicate navigation
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         console.error('[HomePage] Network error - possible navigation detected');
+        errorMessage = 'Network error - please check your connection and try again';
       }
+      
+      // Log the exact error being set
+      console.error('[HomePage] Setting error state with message:', errorMessage);
       
       setAnalysisState({
         status: 'error',
