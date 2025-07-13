@@ -15,6 +15,13 @@ export const urlSchema = z.string()
 
 // Enhanced URL validation with normalization
 export function validateAndNormalizeUrl(input: string): UrlValidationResult {
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('[Validator] Input:', input);
+    console.log('[Validator] Input type:', typeof input);
+    console.log('[Validator] Input length:', input?.length);
+  }
+  
   if (!input || input.trim() === '') {
     return {
       isValid: false,

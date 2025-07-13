@@ -18,6 +18,8 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
     e.stopPropagation();
     
     console.log('[UrlForm] Form submitted with URL:', url);
+    console.log('[UrlForm] URL type:', typeof url);
+    console.log('[UrlForm] URL length:', url.length);
     
     if (isLoading || disabled) {
       console.log('[UrlForm] Submission blocked - loading or disabled');
@@ -26,14 +28,19 @@ export default function UrlForm({ onSubmit, isLoading, disabled = false }: UrlFo
 
     setError('');
 
-    const validation = validateAndNormalizeUrl(url.trim());
+    const trimmedUrl = url.trim();
+    console.log('[UrlForm] Trimmed URL:', trimmedUrl);
+    
+    const validation = validateAndNormalizeUrl(trimmedUrl);
     console.log('[UrlForm] Validation result:', validation);
     
     if (!validation.isValid) {
+      console.error('[UrlForm] Validation failed:', validation.error);
       setError(validation.error || 'Please enter a valid URL');
       return;
     }
 
+    console.log('[UrlForm] Submitting normalized URL:', validation.normalizedUrl);
     // Clear the URL field to prevent double submission
     setUrl('');
     onSubmit(validation.normalizedUrl!);
