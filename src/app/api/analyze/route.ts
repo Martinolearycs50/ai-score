@@ -56,18 +56,21 @@ function getClientId(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  const isDev = process.env.NODE_ENV === 'development';
   
   try {
     // Log request details for debugging
-    console.log('API Route - Request received at:', new Date().toISOString());
-    console.log('API Route - Request method:', request.method);
-    console.log('API Route - Request URL:', request.url);
-    console.log('API Route - Request headers:', {
-      contentType: request.headers.get('content-type'),
-      origin: request.headers.get('origin'),
-      referer: request.headers.get('referer'),
-      userAgent: request.headers.get('user-agent')
-    });
+    if (isDev) {
+      console.log('API Route - Request received at:', new Date().toISOString());
+      console.log('API Route - Request method:', request.method);
+      console.log('API Route - Request URL:', request.url);
+      console.log('API Route - Request headers:', {
+        contentType: request.headers.get('content-type'),
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer'),
+        userAgent: request.headers.get('user-agent')
+      });
+    }
 
     // Check rate limiting
     const clientId = getClientId(request);
@@ -85,9 +88,13 @@ export async function POST(request: NextRequest) {
     let body;
     try {
       body = await request.json();
-      console.log('API Route - Parsed body:', body);
+      if (isDev) {
+        console.log('API Route - Parsed body:', body);
+      }
     } catch (jsonError) {
-      console.error('API Route - JSON parsing error:', jsonError);
+      if (isDev) {
+        console.error('API Route - JSON parsing error:', jsonError);
+      }
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,

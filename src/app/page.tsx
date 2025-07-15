@@ -22,6 +22,11 @@ export default function Home() {
   });
 
   const handleAnalyze = async (url: string) => {
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Debug] handleAnalyze called with URL:', url);
+    }
+
     setAnalysisState({
       status: 'loading',
       result: null,
@@ -29,15 +34,31 @@ export default function Home() {
     });
 
     try {
+      const requestBody = { url };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Debug] Sending request to /api/analyze');
+        console.log('[Debug] Request body:', requestBody);
+      }
+
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(requestBody),
       });
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Debug] Response status:', response.status);
+        console.log('[Debug] Response ok:', response.ok);
+      }
+
       const data = await response.json();
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Debug] Response data:', data);
+      }
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Analysis failed');
@@ -61,6 +82,12 @@ export default function Home() {
       }, 100);
 
     } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Debug] Error in handleAnalyze:', error);
+        console.error('[Debug] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+        console.error('[Debug] Error message:', error instanceof Error ? error.message : String(error));
+      }
+
       setAnalysisState({
         status: 'error',
         result: null,
