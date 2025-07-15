@@ -7,17 +7,17 @@ import type { RecommendationTemplate } from './types';
 export const recTemplates: Record<string, RecommendationTemplate> = {
   // RETRIEVAL pillar recommendations
   ttfb: {
-    why: 'AI engines skip slow pages. Fast pages (under 0.2 seconds) get indexed more frequently.',
-    fix: 'Use a CDN like Cloudflare (free tier available). Add caching headers: Cache-Control: public, max-age=3600. Consider static site generation for content pages.',
+    why: 'AI engines skip slow pages. Fast TTFB (Time To First Byte - server response time) under 200ms gets indexed more frequently.',
+    fix: 'Speed up server response time. Use a CDN (Content Delivery Network) like Cloudflare. Add browser caching. Consider static site generation.',
     gain: 10,
     example: {
       before: 'Server response time: 850ms',
-      after: 'Server response time: 180ms with CDN',
+      after: 'Server response time: 180ms with CDN\nCache-Control: public, max-age=3600',
     },
   },
   paywall: {
     why: 'AI engines can\'t index paywalled content. Your knowledge becomes invisible to AI search.',
-    fix: 'Offer a free preview (first 3 paragraphs) or create a separate summary page. Many sites use metered paywalls (5 free articles/month).',
+    fix: 'Make some content accessible to AI crawlers. Offer free previews of at least 300 words. Create summary pages for premium content. Consider metered access.',
     gain: 5,
     example: {
       before: '<div class="paywall-blocked">Subscribe to read more...</div>',
@@ -26,7 +26,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   mainContent: {
     why: 'AI needs clear content structure. Helps distinguish article from ads/navigation.',
-    fix: 'Wrap your main article in <main> tag. Move sidebars and ads outside. Content should be 70%+ of total text.',
+    fix: 'Structure your page with semantic HTML. Wrap main content in a <main> tag. Move sidebars and ads outside this area. Ensure article text is 70%+ of total page text.',
     gain: 5,
     example: {
       before: '<div class="content">Article here...</div>',
@@ -35,7 +35,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   htmlSize: {
     why: 'Large pages timeout for AI crawlers. They give up after 2MB of HTML.',
-    fix: 'Remove inline styles/scripts. Lazy-load comments. Paginate long articles. Use external CSS/JS files.',
+    fix: 'Shrink your HTML size below 2MB. Remove inline styles and scripts. Use lazy-loading (load content when needed) for comments. Move CSS and JavaScript to external files.',
     gain: 10,
     example: {
       before: 'Page size: 3.5MB (with 500 comments loaded)',
@@ -46,7 +46,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // FACT_DENSITY pillar recommendations
   uniqueStats: {
     why: 'AI values data-rich content. Specific facts make you the primary source.',
-    fix: 'Replace vague claims with specific data. Add percentages, dates, names, and numbers. Cite sources.',
+    fix: 'Pack your content with concrete data. Replace vague claims with specific numbers. Include percentages, dates, and statistics. Always cite your data sources.',
     gain: 10,
     example: {
       before: 'Many users prefer our product',
@@ -55,7 +55,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   dataMarkup: {
     why: 'Tables and lists help AI extract facts. Structured data = better AI comprehension.',
-    fix: 'Convert paragraph comparisons to tables. Use bullet lists for features. Add definition lists for terms.',
+    fix: 'Structure your data for easy scanning. Convert text comparisons into tables. Turn feature lists into bullet points. Use definition lists for glossaries.',
     gain: 5,
     example: {
       before: 'Product A costs $99 and has 5GB storage. Product B costs $199 with 50GB.',
@@ -64,7 +64,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   citations: {
     why: 'AI trusts content with primary sources. Links = credibility signals.',
-    fix: 'Link to research papers, official stats, or expert sources. Use descriptive anchor text, not "click here".',
+    fix: 'Add links to credible sources. Use descriptive anchor text (the clickable words) instead of "click here". Link to research papers, official statistics, or expert sources.',
     gain: 5,
     example: {
       before: 'Studies show this works [click here]',
@@ -73,18 +73,18 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   deduplication: {
     why: 'Repeated content dilutes AI understanding. Say it once, say it well.',
-    fix: 'Remove copy-pasted sections. Consolidate repeated information. Use cross-references instead of duplicating.',
+    fix: 'Eliminate duplicate content from your pages. Consolidate repeated warnings or disclaimers. Use "see above" references instead of copy-pasting. Keep each point unique.',
     gain: 5,
     example: {
-      before: 'Same warning paragraph appears 5 times in article',
-      after: 'Warning appears once prominently, with "See safety note above" references',
+      before: 'Important: Check warranty... [same text repeated 5 times]',
+      after: 'Important: Check warranty... [appears once]\n\nLater: "See warranty information above"',
     },
   },
 
   // STRUCTURE pillar recommendations
   headingFrequency: {
     why: 'AI uses headings to understand topics. Think of them as content GPS.',
-    fix: 'Break up long sections. Add descriptive H2/H3 headings every 2-3 paragraphs. Use question-style headings.',
+    fix: 'Add more headings to break up content. Insert H2 (section headings) every 2-3 paragraphs. Use H3 (subsection headings) for details. Make headings descriptive questions when possible.',
     gain: 5,
     example: {
       before: '<h2>Overview</h2>\n[1000 words of text]',
@@ -93,16 +93,16 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   headingDepth: {
     why: 'Deep nesting confuses AI parsing. Keep it simple and scannable.',
-    fix: 'Use H1 for title, H2 for main sections, H3 for subsections. Avoid H4-H6. Restructure if needed.',
+    fix: 'Flatten your heading structure to 3 levels maximum. Use H1 (main title), H2 (major sections), and H3 (subsections) only. Restructure content that needs deeper levels.',
     gain: 5,
     example: {
       before: 'H1 > H2 > H3 > H4 > H5 > H6 (too deep!)',
-      after: 'H1 (Title) > H2 (Main Topics) > H3 (Subtopics only)',
+      after: 'H1 (Page Title) > H2 (Main Topics) > H3 (Subtopics only)',
     },
   },
   structuredData: {
-    why: 'Schema markup directly feeds AI engines. It\'s like speaking their language.',
-    fix: 'Add FAQ schema for Q&A content. Use HowTo schema for tutorials. Include Article schema for blogs.',
+    why: 'Schema markup (structured data tags) directly feeds AI engines. It\'s like speaking their language.',
+    fix: 'Add structured data to your pages. Use FAQ schema for Q&A sections. Apply HowTo schema for tutorials. Include Article schema for blog posts.',
     gain: 5,
     example: {
       before: '<div class="faq">Q: What is...? A: It is...</div>',
@@ -110,8 +110,8 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
     },
   },
   rssFeed: {
-    why: 'RSS helps AI discover new content. It\'s your content update broadcast.',
-    fix: 'Create RSS feed at /rss.xml. Include full article text, not just summaries. Update within 1 hour of publishing.',
+    why: 'RSS (Really Simple Syndication) helps AI discover new content. It\'s your content update broadcast.',
+    fix: 'Create an RSS feed for your site. Place it at /rss.xml. Include full article text in the feed. Update it within an hour of publishing new content.',
     gain: 5,
     example: {
       before: 'No RSS feed found',
@@ -122,7 +122,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // TRUST pillar recommendations
   authorBio: {
     why: 'AI favors content with clear authorship. Expertise = trustworthiness.',
-    fix: 'Add author name, credentials, and brief bio at article top or bottom. Link to author page or LinkedIn.',
+    fix: 'Show who wrote your content. Add the author\'s name and credentials. Include a brief bio highlighting relevant expertise. Link to their professional profile.',
     gain: 5,
     example: {
       before: 'By Admin',
@@ -131,7 +131,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   napConsistency: {
     why: 'Business info builds AI trust. Consistency across web = legitimacy.',
-    fix: 'Add company name, address, and phone (NAP) to footer. Match exactly with Google Business listing.',
+    fix: 'Display your business name, address, and phone (NAP) consistently. Add this information to your website footer. Match it exactly with your Google Business profile and other listings.',
     gain: 5,
     example: {
       before: 'Contact us: info@company.com',
@@ -140,7 +140,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   license: {
     why: 'AI engines skip pages without clear reuse rights. No license = no citations.',
-    fix: 'Add license meta tag in HTML head. Use Creative Commons for maximum AI visibility. Display license in footer too.',
+    fix: 'Specify content reuse rights clearly. Add a license meta tag (HTML metadata) to your page head. Use Creative Commons licensing. Also display the license in your footer.',
     gain: 5,
     example: {
       before: '© 2024 All rights reserved',
@@ -151,16 +151,16 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // RECENCY pillar recommendations
   lastModified: {
     why: 'AI prioritizes fresh content. Stale = less likely to be cited.',
-    fix: 'Update content every 90 days. Display "Last updated: [date]" prominently. Add Last-Modified HTTP header.',
+    fix: 'Keep content current. Update articles every 90 days. Display "Last updated" date prominently. Add Last-Modified HTTP header (server response information) to your pages.',
     gain: 5,
     example: {
       before: 'Published: January 2022',
-      after: 'Published: January 2022 | Last updated: December 2024',
+      after: 'Published: January 2022 | Last updated: December 2024\nLast-Modified: Wed, 15 Dec 2024 10:00:00 GMT',
     },
   },
   stableCanonical: {
     why: 'URL parameters confuse AI indexing. Clean URLs = better recognition.',
-    fix: 'Set canonical URL without tracking parameters. Use rel="canonical" tag. Keep URLs short and descriptive.',
+    fix: 'Set a canonical (preferred version) URL for each page. Remove tracking parameters like utm_source. Add the canonical tag to your HTML head section.',
     gain: 5,
     example: {
       before: 'example.com/article?id=123&utm_source=social&ref=home',
