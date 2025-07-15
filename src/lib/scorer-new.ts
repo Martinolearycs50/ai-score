@@ -20,12 +20,12 @@ export interface ScoringResult {
  */
 export function score(pillarResults: PillarResults): ScoringResult {
   const breakdown: PillarBreakdown[] = Object.entries(pillarResults).map(([pillar, checks]) => {
-    const earned = Object.values(checks).reduce((a, b) => a + b, 0);
+    const earned = Object.values(checks as Record<string, number>).reduce((a, b) => a + b, 0);
     return {
       pillar: pillar as keyof PillarScores,
       earned,
       max: PILLARS[pillar as keyof typeof PILLARS],
-      checks,
+      checks: checks as any,
     };
   });
 
@@ -46,7 +46,7 @@ export function score(pillarResults: PillarResults): ScoringResult {
   const total = breakdown.reduce((sum, { earned }) => sum + earned, 0);
 
   // Generate recommendations for failed checks
-  const recommendations = generateRecommendations(pillarResults).map(rec => ({
+  const recommendations = generateRecommendations(pillarResults as unknown as Record<string, Record<string, number>>).map(rec => ({
     metric: rec.metric,
     why: rec.template.why,
     fix: rec.template.fix,

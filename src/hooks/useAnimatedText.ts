@@ -23,8 +23,8 @@ export function useAnimatedText(
 
   const [displayText, setDisplayText] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout>();
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const getRandomChar = () => CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
 

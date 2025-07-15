@@ -58,9 +58,9 @@ export function useLoadingProgress(isActive: boolean) {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const animationFrameRef = useRef<number>();
-  const startTimeRef = useRef<number>();
-  const stageStartTimeRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
+  const startTimeRef = useRef<number | undefined>(undefined);
+  const stageStartTimeRef = useRef<number | undefined>(undefined);
 
   const currentStage = LOADING_STAGES[currentStageIndex];
 

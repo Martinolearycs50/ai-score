@@ -46,7 +46,7 @@ export async function run(html: string, headers: Headers): Promise<RecencyScores
       $('meta[name="date"]').attr('content'),
       $('meta[name="DC.date.modified"]').attr('content'),
       $('meta[name="DC.date.created"]').attr('content'),
-    ].filter(Boolean);
+    ].filter((date): date is string => Boolean(date));
 
     // Check structured data for dateModified/datePublished
     const structuredDataDates: string[] = [];
