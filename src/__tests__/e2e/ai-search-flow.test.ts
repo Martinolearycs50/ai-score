@@ -99,7 +99,7 @@ describe('AI Search Analysis E2E Flow', () => {
 
       // Assertions
       expect(result).toBeDefined();
-      expect(result.url).toBe('https://example.com');
+      expect(result.url).toBe('https://example.com/');
       expect(result.aiSearchScore).toBeGreaterThan(80); // Should score high
       expect(result.pageTitle).toBe('AI Search Optimization Guide');
       expect(result.scoringResult.recommendations.length).toBeLessThan(5); // Few recommendations

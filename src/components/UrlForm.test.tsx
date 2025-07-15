@@ -14,7 +14,7 @@ describe('UrlForm Component', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
     expect(screen.getByPlaceholderText(/Enter website URL/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Analyze Website/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Analyze/i })).toBeInTheDocument();
   });
 
   test('should call onSubmit with valid URL', async () => {
@@ -22,13 +22,13 @@ describe('UrlForm Component', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
     const input = screen.getByPlaceholderText(/Enter website URL/i);
-    const button = screen.getByRole('button', { name: /Analyze Website/i });
+    const button = screen.getByRole('button', { name: /Analyze/i });
     
     await user.type(input, 'https://example.com');
     await user.click(button);
     
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com');
+      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com/');
     });
   });
 
@@ -37,13 +37,13 @@ describe('UrlForm Component', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
     const input = screen.getByPlaceholderText(/Enter website URL/i);
-    const button = screen.getByRole('button', { name: /Analyze Website/i });
+    const button = screen.getByRole('button', { name: /Analyze/i });
     
     await user.type(input, 'example.com');
     await user.click(button);
     
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith('example.com');
+      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com/');
     });
   });
 
@@ -52,35 +52,32 @@ describe('UrlForm Component', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
     const input = screen.getByPlaceholderText(/Enter website URL/i);
-    const button = screen.getByRole('button', { name: /Analyze Website/i });
+    const button = screen.getByRole('button', { name: /Analyze/i });
     
     await user.type(input, 'not a url');
     await user.click(button);
     
     await waitFor(() => {
-      expect(screen.getByText(/Please enter a valid URL/i)).toBeInTheDocument();
+      expect(screen.getByText(/URL cannot contain spaces/i)).toBeInTheDocument();
       expect(mockOnSubmit).not.toHaveBeenCalled();
     });
   });
 
-  test('should show error for empty URL', async () => {
-    const user = userEvent.setup();
+  test('should disable button for empty URL', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
-    const button = screen.getByRole('button', { name: /Analyze Website/i });
-    await user.click(button);
+    const button = screen.getByRole('button', { name: /Analyze/i });
     
-    await waitFor(() => {
-      expect(screen.getByText(/URL is required/i)).toBeInTheDocument();
-      expect(mockOnSubmit).not.toHaveBeenCalled();
-    });
+    // Button should be disabled when input is empty
+    expect(button).toBeDisabled();
+    expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
   test('should disable form when loading', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={true} />);
     
     const input = screen.getByPlaceholderText(/Enter website URL/i);
-    const button = screen.getByRole('button', { name: /Analyzing/i });
+    const button = screen.getByRole('button');
     
     expect(input).toBeDisabled();
     expect(button).toBeDisabled();
@@ -91,14 +88,14 @@ describe('UrlForm Component', () => {
     render(<UrlForm onSubmit={mockOnSubmit} isLoading={false} />);
     
     const input = screen.getByPlaceholderText(/Enter website URL/i);
-    const button = screen.getByRole('button', { name: /Analyze Website/i });
+    const button = screen.getByRole('button', { name: /Analyze/i });
     
     // First submit with invalid URL
     await user.type(input, 'invalid');
     await user.click(button);
     
     await waitFor(() => {
-      expect(screen.getByText(/Please enter a valid URL/i)).toBeInTheDocument();
+      expect(screen.getByText(/Invalid domain format|domain extension/i)).toBeInTheDocument();
     });
     
     // Clear and type valid URL
@@ -118,7 +115,7 @@ describe('UrlForm Component', () => {
     await user.type(input, 'https://example.com{enter}');
     
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com');
+      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com/');
     });
   });
 });

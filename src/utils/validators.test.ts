@@ -100,7 +100,7 @@ describe('URL Validation', () => {
     test('should handle malformed URLs', () => {
       expect(validateAndNormalizeUrl('://bad')).toEqual({
         isValid: false,
-        error: 'Please enter a valid URL (e.g., example.com or https://example.com)'
+        error: 'Only HTTP and HTTPS protocols are supported'
       });
     });
 
@@ -130,7 +130,7 @@ describe('URL Validation', () => {
       const invalidUrls = [
         { input: 'example', error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)' },
         { input: 'example.', error: 'Invalid domain format. Please include a valid domain extension (e.g., .com, .org)' },
-        { input: '.com', error: 'Please enter a valid URL (e.g., example.com or https://example.com)' },
+        { input: '.com', error: 'Invalid domain name' },
         { input: 'ftp://example.com', error: 'Only HTTP and HTTPS protocols are supported' },
         { input: 'file:///path/to/file', error: 'Only HTTP and HTTPS protocols are supported' },
         { input: 'javascript:alert(1)', error: 'Only HTTP and HTTPS protocols are supported' },

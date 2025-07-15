@@ -70,7 +70,7 @@ describe('AI Search Analyzer Integration', () => {
     it('should analyze well-optimized website with perfect score', async () => {
       const result = await analyzer.analyzeUrl('https://example.com');
 
-      expect(result.url).toBe('https://example.com');
+      expect(result.url).toBe('https://example.com/');
       expect(result.aiSearchScore).toBe(100);
       expect(result.timestamp).toBeDefined();
       expect(result.pageTitle).toBe('Complete Guide to AI Search Optimization');
@@ -80,7 +80,7 @@ describe('AI Search Analyzer Integration', () => {
     it('should handle URLs that need normalization', async () => {
       const result = await analyzer.analyzeUrl('example.com');
 
-      expect(result.url).toBe('https://example.com');
+      expect(result.url).toBe('https://example.com/');
     });
 
     it('should extract metadata correctly', async () => {

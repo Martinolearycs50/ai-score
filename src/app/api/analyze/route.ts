@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { WebsiteAnalyzer } from '@/lib/analyzer';
-import type { AnalysisApiResponse } from '@/lib/types';
+import { AiSearchAnalyzer, type AnalysisResultNew } from '@/lib/analyzer-new';
 import { validateAndNormalizeUrl } from '@/utils/validators';
 import { simpleValidateUrl } from '@/utils/simple-validator';
 
 // Force Node.js runtime for consistent behavior
 export const runtime = 'nodejs';
+
+// API Response type for new format
+interface ApiResponseNew {
+  success: boolean;
+  data?: AnalysisResultNew;
+  error?: string;
+  message?: string;
+}
 
 // Request validation schema
 const analyzeRequestSchema = z.object({
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
     // Check rate limiting
     const clientId = getClientId(request);
     if (!checkRateLimit(clientId)) {
-      return NextResponse.json<AnalysisApiResponse>(
+      return NextResponse.json<ApiResponseNew>(
         {
           success: false,
           error: 'Rate limit exceeded. Please try again later.'
@@ -81,7 +88,7 @@ export async function POST(request: NextRequest) {
       console.log('API Route - Parsed body:', body);
     } catch (jsonError) {
       console.error('API Route - JSON parsing error:', jsonError);
-      return NextResponse.json<AnalysisApiResponse>(
+      return NextResponse.json<ApiResponseNew>(
         {
           success: false,
           error: 'Invalid JSON in request body'
@@ -93,7 +100,7 @@ export async function POST(request: NextRequest) {
     // Validate the body is not empty
     if (!body || typeof body !== 'object') {
       console.error('API Route - Empty or invalid body:', body);
-      return NextResponse.json<AnalysisApiResponse>(
+      return NextResponse.json<ApiResponseNew>(
         {
           success: false,
           error: 'Request body is empty or invalid'
@@ -106,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       console.error('API Route - Schema validation failed:', validationResult.error.issues);
-      return NextResponse.json<AnalysisApiResponse>(
+      return NextResponse.json<ApiResponseNew>(
         {
           success: false,
           error: 'Invalid request: ' + validationResult.error.issues[0].message
@@ -161,7 +168,7 @@ export async function POST(request: NextRequest) {
         error: urlValidation.error,
         defaulting: !urlValidation.error
       });
-      return NextResponse.json<AnalysisApiResponse>(
+      return NextResponse.json<ApiResponseNew>(
         {
           success: false,
           error: urlValidation.error || 'Invalid URL'
@@ -175,14 +182,14 @@ export async function POST(request: NextRequest) {
 
     // Perform analysis
     console.log(`Starting analysis for URL: ${normalizedUrl}`);
-    const analyzer = new WebsiteAnalyzer();
+    const analyzer = new AiSearchAnalyzer();
     const result = await analyzer.analyzeUrl(normalizedUrl);
 
     const analysisTime = Date.now() - startTime;
     console.log(`Analysis completed in ${analysisTime}ms for: ${normalizedUrl}`);
 
-    // Return successful response
-    return NextResponse.json<AnalysisApiResponse>(
+    // Return successful response with new format
+    return NextResponse.json<ApiResponseNew>(
       {
         success: true,
         data: result,
@@ -227,7 +234,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json<AnalysisApiResponse>(
+    return NextResponse.json<ApiResponseNew>(
       {
         success: false,
         error: errorMessage

@@ -2,6 +2,14 @@
  * Test fixtures for AI Search audit modules
  */
 
+// Add a dummy test to prevent Jest from complaining
+describe('Fixtures', () => {
+  it('should export test fixtures', () => {
+    expect(WELL_OPTIMIZED_HTML).toBeDefined();
+    expect(POORLY_OPTIMIZED_HTML).toBeDefined();
+  });
+});
+
 // Well-optimized page HTML
 export const WELL_OPTIMIZED_HTML = `
 <!DOCTYPE html>

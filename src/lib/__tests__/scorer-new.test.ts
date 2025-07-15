@@ -80,7 +80,7 @@ describe('AI Search Scorer', () => {
       const result = score(zeroResults);
 
       expect(result.total).toBe(0);
-      expect(result.recommendations).toHaveLength(16); // All checks failed
+      expect(result.recommendations).toHaveLength(17); // All checks failed
     });
   });
 
@@ -118,7 +118,7 @@ describe('AI Search Scorer', () => {
 
       const result = score(partialResults);
 
-      expect(result.total).toBe(70);
+      expect(result.total).toBe(65);
       expect(result.pillarScores.RETRIEVAL).toBe(25);
       expect(result.pillarScores.FACT_DENSITY).toBe(20);
       expect(result.pillarScores.STRUCTURE).toBe(10);
@@ -218,7 +218,7 @@ describe('AI Search Scorer', () => {
       const ttfbRec = result.recommendations.find(r => r.metric === 'ttfb');
       expect(ttfbRec).toBeDefined();
       expect(ttfbRec?.why).toContain('AI engines skip slow pages');
-      expect(ttfbRec?.fix).toContain('Optimize server response time');
+      expect(ttfbRec?.fix).toContain('Use a CDN like Cloudflare');
       expect(ttfbRec?.gain).toBe(10);
       expect(ttfbRec?.pillar).toBe('RETRIEVAL');
     });

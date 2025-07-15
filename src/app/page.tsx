@@ -1,37 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
-import ScoreDisplay from '@/components/ScoreDisplay';
-import RecommendationsList from '@/components/RecommendationsList';
-import type { AnalysisState } from '@/lib/types';
+import PillarScoreDisplay from '@/components/PillarScoreDisplay';
+import AIRecommendationCard from '@/components/AIRecommendationCard';
+import type { AnalysisResultNew } from '@/lib/analyzer-new';
+import { recTemplates } from '@/lib/recommendations';
+
+interface AnalysisStateNew {
+  status: 'idle' | 'loading' | 'success' | 'error';
+  result: AnalysisResultNew | null;
+  error: string | null;
+}
 
 export default function Home() {
-  const [analysisState, setAnalysisState] = useState<AnalysisState>({
+  const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
     result: null,
     error: null
   });
 
-  // Prevent navigation during loading
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (analysisState.status === 'loading') {
-        e.preventDefault();
-        e.returnValue = '';
-        return '';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [analysisState.status]);
-
   const handleAnalyze = async (url: string) => {
-    console.log('[HomePage] Starting analysis for URL:', url);
-    console.log('[HomePage] Current location:', window.location.href);
-    
     setAnalysisState({
       status: 'loading',
       result: null,
@@ -39,46 +29,26 @@ export default function Home() {
     });
 
     try {
-      const requestBody = JSON.stringify({ url });
-      console.log('[HomePage] Request body:', requestBody);
-      
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: requestBody,
-        // Prevent any redirect
-        redirect: 'error'
+        body: JSON.stringify({ url }),
       });
 
-      console.log('[HomePage] Response status:', response.status);
-      console.log('[HomePage] Response headers:', response.headers);
-      
-      let data;
-      try {
-        data = await response.json();
-        console.log('[HomePage] API Response data:', data);
-        console.log('[HomePage] API Response details:', JSON.stringify(data, null, 2));
-      } catch (jsonError) {
-        console.error('[HomePage] Failed to parse response JSON:', jsonError);
-        throw new Error('Invalid response from server');
-      }
+      const data = await response.json();
 
-      if (!response.ok) {
-        console.error('[HomePage] Response not OK:', response.status, data);
-        throw new Error(data.error || `Analysis failed with status ${response.status}`);
-      }
-
-      if (!data.success) {
-        console.error('[HomePage] Analysis not successful:', data);
+      if (!response.ok || !data.success) {
         throw new Error(data.error || 'Analysis failed');
       }
 
-      console.log('[HomePage] Analysis successful, setting state');
+      // API now returns the new format directly
+      const result = data.data as AnalysisResultNew;
+
       setAnalysisState({
         status: 'success',
-        result: data.data,
+        result: result,
         error: null
       });
 
@@ -91,31 +61,10 @@ export default function Home() {
       }, 100);
 
     } catch (error) {
-      console.error('[HomePage] Analysis error:', error);
-      console.error('[HomePage] Error type:', typeof error);
-      console.error('[HomePage] Error constructor:', error?.constructor?.name);
-      
-      let errorMessage = 'Analysis failed';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        console.error('[HomePage] Error message:', error.message);
-        console.error('[HomePage] Error stack:', error.stack);
-      }
-      
-      // Check if it's a network error that might indicate navigation
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.error('[HomePage] Network error - possible navigation detected');
-        errorMessage = 'Network error - please check your connection and try again';
-      }
-      
-      // Log the exact error being set
-      console.error('[HomePage] Setting error state with message:', errorMessage);
-      
       setAnalysisState({
         status: 'error',
         result: null,
-        error: errorMessage
+        error: error instanceof Error ? error.message : 'Analysis failed'
       });
     }
   };
@@ -130,10 +79,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      {/* Minimal Header */}
+      {/* Header */}
       <header className="absolute top-0 left-0 p-8">
         <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          AI Search
+          AI Search Optimizer
         </span>
       </header>
 
@@ -143,10 +92,13 @@ export default function Home() {
           <div className="min-h-screen flex flex-col items-center justify-center px-6">
             <div className="w-full max-w-2xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
-                AI Search Analysis
+                AI Search Optimizer
               </h1>
-              <p className="text-xl mb-12 text-muted">
-                See how AI platforms understand your website
+              <p className="text-xl mb-4 text-muted">
+                Optimize your content for ChatGPT, Claude, Perplexity & more
+              </p>
+              <p className="text-sm mb-12 text-muted">
+                See how AI platforms understand and rank your content
               </p>
               
               <UrlForm 
@@ -192,8 +144,44 @@ export default function Home() {
             </div>
 
             <div id="results" className="max-w-4xl mx-auto space-y-8">
-              <ScoreDisplay result={analysisState.result} />
-              <RecommendationsList recommendations={analysisState.result.recommendations} />
+              <PillarScoreDisplay result={analysisState.result} />
+              
+              {/* Enhanced Recommendations Section */}
+              <div className="space-y-4">
+                <h2 className="text-2xl font-medium text-center mb-8" style={{ color: 'var(--foreground)' }}>
+                  Recommendations
+                </h2>
+                
+                {analysisState.result.scoringResult.recommendations.length === 0 ? (
+                  <div className="card p-12 text-center">
+                    <p className="text-lg font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                      Excellent AI Optimization!
+                    </p>
+                    <p className="text-muted">
+                      Your website is well-optimized for AI search platforms.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {analysisState.result.scoringResult.recommendations.map((rec, index) => {
+                      // Get the full template data if available
+                      const template = recTemplates[rec.metric];
+                      
+                      return (
+                        <AIRecommendationCard
+                          key={index}
+                          metric={rec.metric}
+                          why={template?.why || rec.why}
+                          fix={template?.fix || rec.fix}
+                          gain={rec.gain}
+                          pillar={rec.pillar}
+                          example={template?.example}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

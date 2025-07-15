@@ -97,7 +97,7 @@ function extractUniqueStats(text: string): Set<string> {
   numbers.forEach(n => stats.add(n.trim()));
   
   // Extract specific measurements
-  const measurements = text.match(/\d+\s*(mph|km\/h|kg|lbs|meters|feet|miles|kilometers|GB|MB|TB)/g) || [];
+  const measurements = text.match(/\d+\s*(mph|km\/h|kg|lbs|meters|feet|miles|kilometers|GB|MB|TB|ms|seconds?|minutes?|hours?|requests?\s*(?:per|\/)\s*(?:second|minute|hour)|req\/s|rps|qps)/gi) || [];
   measurements.forEach(m => stats.add(m.trim()));
   
   return stats;
