@@ -1,0 +1,72 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linter
+      run: npm run lint
+    
+    - name: Run tests with coverage
+      run: npm test -- --coverage --passWithNoTests
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run E2E tests (if any)
+      run: npm run test:e2e || echo "No E2E tests configured yet"
+
+  ai-search-scoring:
+    runs-on: ubuntu-latest
+    name: AI Search Scoring Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run AI Search scoring tests
+      run: |
+        npm test -- src/lib/__tests__/scorer-new.test.ts
+        npm test -- src/lib/__tests__/analyzer-new.test.ts
+    
+    - name: Validate scoring accuracy
+      run: npx tsx test-ai-search.ts

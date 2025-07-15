@@ -1,5 +1,14 @@
 import type { ScoreWeights } from '@/lib/types';
 
+// New AI Search pillars with max points
+export const PILLARS = {
+  RETRIEVAL: 30,
+  FACT_DENSITY: 25,
+  STRUCTURE: 20,
+  TRUST: 15,
+  RECENCY: 10,
+} as const;
+
 // Scoring weights for each category (total 25 points each)
 export const SCORE_WEIGHTS: ScoreWeights = {
   crawler_accessibility: {

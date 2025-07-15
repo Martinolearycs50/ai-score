@@ -20,6 +20,52 @@ export interface CategoryScores {
   ai_optimization: number;       // 0-25 points
 }
 
+// New pillar-based scoring for AI Search
+export interface PillarScores {
+  RETRIEVAL: number;     // 0-30 points
+  FACT_DENSITY: number;  // 0-25 points
+  STRUCTURE: number;     // 0-20 points
+  TRUST: number;         // 0-15 points
+  RECENCY: number;       // 0-10 points
+}
+
+export interface PillarBreakdown {
+  pillar: keyof PillarScores;
+  earned: number;
+  max: number;
+  checks: Record<string, number>;
+}
+
+export interface PillarResults {
+  RETRIEVAL: {
+    ttfb: number;
+    paywall: number;
+    mainContent: number;
+    htmlSize: number;
+  };
+  FACT_DENSITY: {
+    uniqueStats: number;
+    dataMarkup: number;
+    citations: number;
+    deduplication: number;
+  };
+  STRUCTURE: {
+    headingFrequency: number;
+    headingDepth: number;
+    structuredData: number;
+    rssFeed: number;
+  };
+  TRUST: {
+    authorBio: number;
+    napConsistency: number;
+    license: number;
+  };
+  RECENCY: {
+    lastModified: number;
+    stableCanonical: number;
+  };
+}
+
 export interface Recommendation {
   id: string;
   category: 'crawler_accessibility' | 'content_structure' | 'technical_seo' | 'ai_optimization';
@@ -32,6 +78,13 @@ export interface Recommendation {
   platform_benefits: string[]; // Which AI platforms benefit from this fix
   code_example?: string;
   documentation_link?: string;
+}
+
+// New recommendation template for AI Search
+export interface RecommendationTemplate {
+  why: string;  // Why it matters (≤ 14 words)
+  fix: string;  // How to fix (starts with imperative verb)
+  gain: number; // Points gained if fixed
 }
 
 export interface AnalysisDetails {

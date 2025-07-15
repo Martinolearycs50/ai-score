@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import UrlForm from '@/components/UrlForm';
-import LoadingState from '@/components/LoadingState';
+import AdvancedLoadingState from '@/components/AdvancedLoadingState';
 import ScoreDisplay from '@/components/ScoreDisplay';
 import RecommendationsList from '@/components/RecommendationsList';
 import type { AnalysisState } from '@/lib/types';
@@ -159,7 +159,7 @@ export default function Home() {
 
         {analysisState.status === 'loading' && (
           <div className="min-h-screen flex items-center justify-center px-6">
-            <LoadingState url={analysisState.result?.url} />
+            <AdvancedLoadingState url={analysisState.result?.url} />
           </div>
         )}
 

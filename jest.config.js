@@ -10,6 +10,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^axios$': '<rootDir>/src/__mocks__/axios.ts',
+    '^cheerio$': '<rootDir>/src/__mocks__/cheerio.ts',
   },
   testMatch: [
     '**/__tests__/**/*.(ts|tsx|js)',
@@ -20,11 +22,16 @@ const customJestConfig = {
     '!src/**/*.d.ts',
     '!src/app/layout.tsx',
     '!src/app/page.tsx',
+    '!src/**/__mocks__/**',
+    '!src/**/__tests__/**',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(cheerio|parse5|parse5-htmlparser2-tree-adapter|domhandler|domutils|dom-serializer|entities|htmlparser2)/)'
+    'node_modules/(?!(cheerio|parse5|parse5-htmlparser2-tree-adapter|domhandler|domutils|dom-serializer|entities|htmlparser2|axios)/)'
   ],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
 }
 
 module.exports = createJestConfig(customJestConfig)
