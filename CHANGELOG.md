@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2025-07-16
+
+### Added
+- **EmotionalResultsReveal** component for engaging score presentation
+  - 4-stage animation flow: suspense → reveal → details → complete
+  - Dynamic emotional themes based on score ranges
+  - Particle effects for all scores to celebrate progress
+  - Potential score preview showing improvement possibilities
+  - Encouraging messages for all score levels
+- **FriendlyRecommendationCard** replacing technical recommendation cards
+  - Emoji categories: 🚀 Quick Win (5-10 min), 💎 Big Impact (15-30 min), ⭐ Nice Boost (30-60 min)
+  - Time estimates for each optimization
+  - Interactive hover states with score gain previews
+  - "Mark Complete" buttons for gamified progress tracking
+  - Friendly metaphors for each pillar
+- **EmotionalComparisonReveal** for website comparison battles
+  - Dual score counting animations side-by-side
+  - VS battle theme with competitive messaging
+  - Crown emoji (👑) celebration for winner
+  - Encouraging messages based on score differences
+- Enhanced **ComparisonView** with friendly messaging
+  - "The AI Battle Results ⚔️" theme
+  - "The Battlefield Breakdown 📊" for pillar comparison
+  - Quick Wins section showing top improvements for losing site
+  - Animated elements throughout
+
+### Changed
+- Extended animation timing for better readability
+  - Reveal stage: 4s → 6s (more time to read messages)
+  - Details stage: 3s → 5s (adequate time for encouragement)
+  - Total reveal time: 9s → 13s before showing results
+  - Auto-scroll delay: 10s → 14s to match new timing
+- Transformed all technical language to encouraging, friendly tone
+- Made low scores feel like opportunities rather than failures
+- Added emojis and visual elements throughout for engagement
+
+### Fixed
+- TypeScript build error: missing `index` parameter in ComparisonView map function
+- Vercel deployment now succeeds with all new components
+
 ## [2.2.0] - 2025-07-16
 
 ### Changed
