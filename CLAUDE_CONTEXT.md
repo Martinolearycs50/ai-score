@@ -121,6 +121,14 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-15: Fixed local development server setup
+  - Resolved CSS import issues by switching to Next.js font optimization for Inter font
+  - Added development-only debug logging to frontend and API
+  - Created test tools and documentation for debugging
+  - Fixed Chrome extension interference issues
+- 2025-07-15: Updated scoring system to 5-pillar AI-first approach
+  - New pillars: RETRIEVAL, FACT_DENSITY, STRUCTURE, TRUST, RECENCY
+  - Changed from totalScore to aiSearchScore in API response
 - 2024-01-XX: Initial MVP launched
 - [Claude Code adds entries here when making significant changes]
 
