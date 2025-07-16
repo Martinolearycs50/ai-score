@@ -120,7 +120,7 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
           AI Search Readiness Score
         </h2>
         
-        {/* Main Score Circle */}
+        {/* Main Score Circle with Achievement Badge */}
         <div className="relative inline-flex items-center justify-center">
           <svg className="w-48 h-48 transform -rotate-90">
             <circle
@@ -131,7 +131,7 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
               strokeWidth="8"
               fill="none"
             />
-            <circle
+            <motion.circle
               cx="96"
               cy="96"
               r="88"
@@ -139,36 +139,61 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
               strokeWidth="8"
               fill="none"
               strokeDasharray={`${(result.aiSearchScore / 100) * 553} 553`}
-              className="transition-all duration-1000"
+              initial={{ strokeDashoffset: 553 }}
+              animate={{ strokeDashoffset: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-6xl font-medium" style={{ color: 'var(--accent)' }}>
+            <motion.div 
+              className="text-6xl font-medium" 
+              style={{ color: 'var(--accent)' }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1, type: "spring" }}
+            >
               {result.aiSearchScore}
-            </div>
+            </motion.div>
             <div className="text-sm text-muted">out of 100</div>
           </div>
+          
+          {/* Achievement Badge */}
+          {result.aiSearchScore >= 80 && (
+            <motion.div 
+              className="absolute -top-2 -right-2"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 2, type: "spring" }}
+            >
+              <div className="text-3xl">🏆</div>
+            </motion.div>
+          )}
         </div>
         
-        <p className="text-muted mt-4 max-w-md mx-auto">
+        <motion.p 
+          className="text-muted mt-4 max-w-md mx-auto"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+        >
           {result.aiSearchScore >= 80 
-            ? "Your content is highly optimized for AI search platforms"
+            ? "🌟 Your content is brilliantly optimized for AI search!"
             : result.aiSearchScore >= 60
-            ? "Good foundation with room for improvement"
-            : "Significant optimizations needed for AI visibility"}
-        </p>
+            ? "💪 Strong foundation - let's polish it to perfection!"
+            : "🚀 Exciting journey ahead - huge potential for growth!"}
+        </motion.p>
       </div>
 
       {/* Pillar Breakdown */}
       <div className="space-y-4">
         <motion.h3 
-          className="text-lg font-medium text-center mb-6" 
+          className="text-2xl font-medium text-center mb-6" 
           style={{ color: 'var(--foreground)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          Score Breakdown by Pillar
+          Your Strengths & Opportunities 📊
         </motion.h3>
         
         {scoringResult.breakdown.map((pillar, index) => {

@@ -6,6 +6,7 @@ import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
 import PillarScoreDisplay from '@/components/PillarScoreDisplay';
 import AIRecommendationCard from '@/components/AIRecommendationCard';
+import FriendlyRecommendationCard from '@/components/FriendlyRecommendationCard';
 import ComparisonView from '@/components/ComparisonView';
 import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
@@ -94,7 +95,7 @@ export default function Home() {
           behavior: 'smooth',
           block: 'start'
         });
-      }, 5000); // Wait for emotional reveal to complete
+      }, 10000); // Extended wait for better paced emotional reveal
 
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -261,59 +262,67 @@ export default function Home() {
                   <PillarScoreDisplay result={analysisState.result} />
                   
                   {/* Enhanced Recommendations Section */}
-                  <div className="space-y-4">
-                    <h2 className="text-2xl font-medium text-center mb-8" style={{ color: 'var(--foreground)' }}>
-                      Recommendations
-                    </h2>
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-center mb-8"
+                    >
+                      <h2 className="text-3xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+                        Your AI Optimization Journey 🗺️
+                      </h2>
+                      <p className="text-lg text-muted">
+                        {analysisState.result.scoringResult.recommendations.length === 0
+                          ? "You're already at the summit! 🏔️"
+                          : `${analysisState.result.scoringResult.recommendations.length} opportunities to boost your score`}
+                      </p>
+                    </motion.div>
                     
                     {analysisState.result.scoringResult.recommendations.length === 0 ? (
-                      <div className="card p-12 text-center">
-                        <p className="text-lg font-medium mb-2" style={{ color: 'var(--foreground)' }}>
-                          Excellent AI Optimization!
+                      <motion.div 
+                        className="card p-12 text-center"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring" }}
+                      >
+                        <motion.div
+                          className="text-6xl mb-4"
+                          animate={{ 
+                            rotate: [0, -10, 10, -10, 10, 0],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          🎉
+                        </motion.div>
+                        <p className="text-xl font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                          Perfect Score Territory!
                         </p>
                         <p className="text-muted">
-                          Your website is well-optimized for AI search platforms.
+                          Your website is brilliantly optimized for AI search platforms.
+                          Keep up the amazing work!
                         </p>
-                      </div>
+                      </motion.div>
                     ) : (
-                      <motion.div 
-                        className="space-y-4"
-                        initial="hidden"
-                        animate="show"
-                        variants={{
-                          hidden: { opacity: 0 },
-                          show: {
-                            opacity: 1,
-                            transition: {
-                              staggerChildren: 0.1
-                            }
-                          }
-                        }}
-                      >
+                      <div className="space-y-4">
                         {analysisState.result.scoringResult.recommendations.map((rec, index) => {
                           // Get the full template data if available
                           const template = recTemplates[rec.metric];
                           
                           return (
-                            <motion.div
+                            <FriendlyRecommendationCard
                               key={index}
-                              variants={{
-                                hidden: { opacity: 0, y: 20 },
-                                show: { opacity: 1, y: 0 }
-                              }}
-                            >
-                              <AIRecommendationCard
-                                metric={rec.metric}
-                                why={template?.why || rec.why}
-                                fix={template?.fix || rec.fix}
-                                gain={rec.gain}
-                                pillar={rec.pillar}
-                                example={template?.example}
-                              />
-                            </motion.div>
+                              metric={rec.metric}
+                              why={template?.why || rec.why}
+                              fix={template?.fix || rec.fix}
+                              gain={rec.gain}
+                              pillar={rec.pillar}
+                              example={template?.example}
+                              index={index}
+                            />
                           );
                         })}
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 </div>

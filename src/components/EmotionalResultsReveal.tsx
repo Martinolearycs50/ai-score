@@ -13,39 +13,47 @@ interface EmotionalResultsRevealProps {
 const getEmotionalTheme = (score: number) => {
   if (score >= 80) {
     return {
-      title: "Outstanding AI Optimization!",
+      title: "Outstanding AI Optimization! 🏆",
       subtitle: "Your content is primed for AI search success",
+      encouragement: "You're in the top tier of AI-optimized content!",
       color: '#10B981', // Green
       bgGradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
       emotion: 'celebration',
       particles: true,
+      potentialGain: 20,
     };
   } else if (score >= 60) {
     return {
-      title: "Strong Foundation Detected",
+      title: "Strong Foundation Detected! ✨",
       subtitle: "Your content shows great potential",
+      encouragement: "You're just a few tweaks away from excellence!",
       color: '#3B82F6', // Blue
       bgGradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
       emotion: 'positive',
-      particles: false,
+      particles: true,
+      potentialGain: 30,
     };
   } else if (score >= 40) {
     return {
-      title: "Room for Growth",
-      subtitle: "Let's unlock your content's AI potential",
+      title: "Your AI Journey Starts Here! 🚀",
+      subtitle: "Exciting optimization opportunities await",
+      encouragement: "Sites like yours often see 40-60 point improvements!",
       color: '#F59E0B', // Amber
       bgGradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
       emotion: 'encouraging',
-      particles: false,
+      particles: true,
+      potentialGain: 45,
     };
   } else {
     return {
-      title: "AI Optimization Opportunities",
-      subtitle: "We'll help you improve step by step",
+      title: "Let's Transform Your AI Visibility! 🌟",
+      subtitle: "Every expert started here - your potential is unlimited",
+      encouragement: "We've seen sites go from 20 to 80+ with our recommendations!",
       color: '#8B5CF6', // Purple
       bgGradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
       emotion: 'supportive',
-      particles: false,
+      particles: true,
+      potentialGain: 60,
     };
   }
 };
@@ -113,11 +121,11 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
   const theme = getEmotionalTheme(result.aiSearchScore);
 
   useEffect(() => {
-    // Progression through stages
+    // Progression through stages with better pacing
     const timers = [
-      setTimeout(() => setStage('reveal'), 1000),
-      setTimeout(() => setStage('details'), 3500),
-      setTimeout(() => setStage('complete'), 4500),
+      setTimeout(() => setStage('reveal'), 2000),  // Increased from 1s
+      setTimeout(() => setStage('details'), 6000), // Increased from 3.5s
+      setTimeout(() => setStage('complete'), 9000), // Increased from 4.5s
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -251,7 +259,31 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               <h2 className="text-3xl font-medium mb-2" style={{ color: theme.color }}>
                 {theme.title}
               </h2>
-              <p className="text-lg text-muted">{theme.subtitle}</p>
+              <p className="text-lg text-muted mb-4">{theme.subtitle}</p>
+              
+              {/* Potential Score Preview */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 2.5, type: "spring" }}
+                className="inline-flex items-center gap-3 mt-4 px-6 py-3 rounded-full"
+                style={{ 
+                  background: `${theme.color}20`,
+                  border: `2px solid ${theme.color}40`
+                }}
+              >
+                <span className="text-sm font-medium" style={{ color: theme.color }}>
+                  Potential Score: {result.aiSearchScore + theme.potentialGain}
+                </span>
+                <motion.span
+                  className="text-xs font-bold px-2 py-1 rounded"
+                  style={{ background: theme.color, color: 'white' }}
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  +{theme.potentialGain} points possible!
+                </motion.span>
+              </motion.div>
             </motion.div>
 
             {theme.particles && <ParticleEffect />}
@@ -269,16 +301,17 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           className="min-h-[600px] flex items-center justify-center"
         >
           <motion.div
-            className="text-center"
+            className="text-center max-w-2xl mx-auto px-6"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
           >
             <motion.div
-              className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
+              className="inline-flex items-center justify-center w-32 h-32 rounded-full mb-6"
               style={{ background: theme.bgGradient }}
               animate={{
                 scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0],
               }}
               transition={{
                 duration: 2,
@@ -286,21 +319,56 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                 ease: "easeInOut",
               }}
             >
-              <span className="text-4xl">
+              <span className="text-5xl">
                 {theme.emotion === 'celebration' ? '🎉' :
                  theme.emotion === 'positive' ? '✨' :
                  theme.emotion === 'encouraging' ? '💪' : '🚀'}
               </span>
             </motion.div>
             
-            <motion.p
-              className="text-lg text-muted"
+            <motion.h3
+              className="text-2xl font-medium mb-3"
+              style={{ color: theme.color }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              Preparing your detailed analysis...
+              {theme.encouragement}
+            </motion.h3>
+            
+            <motion.p
+              className="text-lg text-muted mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              Analyzing your optimization opportunities...
             </motion.p>
+            
+            {/* Progress dots */}
+            <motion.div
+              className="flex justify-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: theme.color }}
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                />
+              ))}
+            </motion.div>
           </motion.div>
         </motion.div>
       )}
