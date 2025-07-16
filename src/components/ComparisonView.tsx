@@ -180,7 +180,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         </p>
         
         <div className="space-y-4">
-          {result1.scoringResult.breakdown.map((pillar1) => {
+          {result1.scoringResult.breakdown.map((pillar1, index) => {
             // Find the matching pillar in result2
             const pillar2 = result2.scoringResult.breakdown.find(
               p => p.pillar === pillar1.pillar
