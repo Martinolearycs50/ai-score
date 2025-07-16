@@ -8,6 +8,15 @@ interface ComparisonViewProps {
   results: [AnalysisResultNew, AnalysisResultNew];
 }
 
+// Pillar display names
+const PILLAR_NAMES: Record<string, string> = {
+  RETRIEVAL: 'Retrieval & Access',
+  FACT_DENSITY: 'Fact Density',
+  STRUCTURE: 'Answer Architecture',
+  TRUST: 'Trust & Authority',
+  RECENCY: 'Freshness'
+};
+
 export default function ComparisonView({ results }: ComparisonViewProps) {
   const [result1, result2] = results;
   
@@ -108,16 +117,22 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         </h3>
         
         <div className="space-y-4">
-          {Object.entries(result1.scoringResult.breakdown).map(([pillar, score1]) => {
-            const score2 = result2.scoringResult.breakdown[pillar as keyof typeof result2.scoringResult.breakdown];
-            const diff = score1.score - score2.score;
+          {result1.scoringResult.breakdown.map((pillar1) => {
+            // Find the matching pillar in result2
+            const pillar2 = result2.scoringResult.breakdown.find(
+              p => p.pillar === pillar1.pillar
+            );
+            
+            if (!pillar2) return null;
+            
+            const diff = pillar1.earned - pillar2.earned;
             
             return (
-              <div key={pillar} className="card p-6">
+              <div key={pillar1.pillar} className="card p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
-                      {pillar.replace(/_/g, ' ')}
+                      {PILLAR_NAMES[pillar1.pillar] || pillar1.pillar}
                     </h4>
                   </div>
                   
@@ -128,7 +143,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                       <div className="text-lg font-medium" style={{ 
                         color: diff > 0 ? 'var(--success)' : diff < 0 ? 'var(--error)' : 'var(--foreground)' 
                       }}>
-                        {score1.score}/100
+                        {pillar1.earned}/{pillar1.max}
                       </div>
                     </div>
                     
@@ -143,7 +158,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                       <div className="text-lg font-medium" style={{ 
                         color: diff < 0 ? 'var(--success)' : diff > 0 ? 'var(--error)' : 'var(--foreground)' 
                       }}>
-                        {score2.score}/100
+                        {pillar2.earned}/{pillar2.max}
                       </div>
                     </div>
                   </div>
