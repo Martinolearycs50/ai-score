@@ -128,6 +128,12 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-16: Implemented 2025 AI search optimization enhancements
+  - Updated scoring weights: STRUCTURE now 30pts (most important!)
+  - Added listicleFormat check (listicles get 32.5% of AI citations)
+  - Added directAnswers, llmsTxtFile, semanticUrl checks
+  - Dynamic recommendations with actual page content examples
+  - Version 2.2.0 release
 - 2025-07-16: Added website comparison feature
   - Compare two websites side-by-side with visual indicators
   - New ComparisonView component for detailed comparison display

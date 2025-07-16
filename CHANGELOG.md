@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-07-16
+
+### Changed
+- **MAJOR**: Updated scoring weights for 2025 AI search behavior
+  - STRUCTURE: 20 → 30 points (now most important!)
+  - FACT_DENSITY: 25 → 20 points
+  - RETRIEVAL: 30 → 25 points
+- Individual scoring adjustments:
+  - uniqueStats: 10 → 5 points
+  - ttfb: 10 → 5 points
+  - htmlSize: 10 → 5 points
+
+### Added
+- 2025 AI optimization checks:
+  - `listicleFormat` (10 pts) - Detects numbered titles and list content
+  - `comparisonTables` (5 pts) - Checks for comparison tables
+  - `semanticUrl` (5 pts) - Evaluates URL readability
+  - `directAnswers` (5 pts) - Checks for immediate answers after headings
+  - `llmsTxtFile` (5 pts) - Looks for AI crawler instructions
+- Dynamic recommendations using actual content from analyzed pages
+- Personalized before/after examples in recommendations
+- UI updates highlighting STRUCTURE importance for 2025
+
+### Research-Based
+- Listicles get 32.5% of all AI citations
+- Structured content dominates AI search results
+- Direct answers improve AI comprehension
+
 ## [2.1.0] - 2025-07-16
 
 ### Added
