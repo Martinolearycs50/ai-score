@@ -5,6 +5,7 @@ import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
 import PillarScoreDisplay from '@/components/PillarScoreDisplay';
 import AIRecommendationCard from '@/components/AIRecommendationCard';
+import ComparisonView from '@/components/ComparisonView';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { recTemplates } from '@/lib/recommendations';
 
@@ -14,11 +15,23 @@ interface AnalysisStateNew {
   error: string | null;
 }
 
+interface ComparisonState {
+  status: 'idle' | 'loading' | 'success' | 'error';
+  results: [AnalysisResultNew | null, AnalysisResultNew | null];
+  errors: [string | null, string | null];
+}
+
 export default function Home() {
+  const [comparisonMode, setComparisonMode] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
     result: null,
     error: null
+  });
+  const [comparisonState, setComparisonState] = useState<ComparisonState>({
+    status: 'idle',
+    results: [null, null],
+    errors: [null, null]
   });
 
   const handleAnalyze = async (url: string) => {
@@ -96,11 +109,78 @@ export default function Home() {
     }
   };
 
+  const handleCompare = async (urls: [string, string]) => {
+    setComparisonState({
+      status: 'loading',
+      results: [null, null],
+      errors: [null, null]
+    });
+
+    try {
+      // Analyze both URLs in parallel
+      const promises = urls.map(async (url) => {
+        try {
+          const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Analysis failed');
+          }
+
+          return { success: true, data: data.data as AnalysisResultNew, error: null };
+        } catch (error) {
+          return { 
+            success: false, 
+            data: null, 
+            error: error instanceof Error ? error.message : 'Analysis failed' 
+          };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      
+      setComparisonState({
+        status: results.every(r => r.success) ? 'success' : 
+                results.some(r => r.success) ? 'success' : 'error',
+        results: [results[0].data, results[1].data],
+        errors: [results[0].error, results[1].error]
+      });
+
+      // Smooth scroll to results
+      setTimeout(() => {
+        document.getElementById('results')?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+
+    } catch {
+      setComparisonState({
+        status: 'error',
+        results: [null, null],
+        errors: ['Comparison failed', 'Comparison failed']
+      });
+    }
+  };
+
   const handleReset = () => {
+    setComparisonMode(false);
     setAnalysisState({
       status: 'idle',
       result: null,
       error: null
+    });
+    setComparisonState({
+      status: 'idle',
+      results: [null, null],
+      errors: [null, null]
     });
   };
 
@@ -115,7 +195,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="animate-fade-in">
-        {analysisState.status === 'idle' && (
+        {analysisState.status === 'idle' && comparisonState.status === 'idle' && (
           <div className="min-h-screen flex flex-col items-center justify-center px-6">
             <div className="w-full max-w-2xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
@@ -129,14 +209,17 @@ export default function Home() {
               </p>
               
               <UrlForm 
-                onSubmit={handleAnalyze} 
+                onSubmit={handleAnalyze}
+                onCompare={handleCompare}
                 isLoading={false}
+                comparisonMode={comparisonMode}
+                onComparisonModeChange={setComparisonMode}
               />
             </div>
           </div>
         )}
 
-        {analysisState.status === 'loading' && (
+        {(analysisState.status === 'loading' || comparisonState.status === 'loading') && (
           <div className="min-h-screen flex items-center justify-center px-6">
             <AdvancedLoadingState url={analysisState.result?.url} />
           </div>
@@ -209,6 +292,24 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {comparisonState.status === 'success' && comparisonState.results[0] && comparisonState.results[1] && (
+          <div className="min-h-screen px-6 py-16">
+            {/* Back button */}
+            <div className="max-w-6xl mx-auto mb-12">
+              <button
+                onClick={handleReset}
+                className="text-muted hover:text-foreground transition-colors text-sm"
+              >
+                ← New analysis
+              </button>
+            </div>
+
+            <div id="results" className="max-w-6xl mx-auto">
+              <ComparisonView results={[comparisonState.results[0], comparisonState.results[1]]} />
             </div>
           </div>
         )}

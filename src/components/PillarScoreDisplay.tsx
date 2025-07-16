@@ -5,6 +5,7 @@ import type { AnalysisResultNew } from '@/lib/analyzer-new';
 
 interface PillarScoreDisplayProps {
   result: AnalysisResultNew;
+  compact?: boolean;
 }
 
 // Pillar metadata with plain language explanations
@@ -46,7 +47,7 @@ const PILLAR_INFO = {
   },
 };
 
-export default function PillarScoreDisplay({ result }: PillarScoreDisplayProps) {
+export default function PillarScoreDisplay({ result, compact = false }: PillarScoreDisplayProps) {
   const [hoveredPillar, setHoveredPillar] = useState<string | null>(null);
   const { scoringResult } = result;
 
@@ -64,6 +65,50 @@ export default function PillarScoreDisplay({ result }: PillarScoreDisplayProps) 
     if (percentage >= 40) return 'Needs Work';
     return 'Poor';
   };
+
+  // Compact mode for comparison view
+  if (compact) {
+    return (
+      <div className="space-y-4">
+        {/* Compact Score Display */}
+        <div className="text-center">
+          <div className="text-4xl font-medium mb-2" style={{ color: 'var(--accent)' }}>
+            {result.aiSearchScore}
+          </div>
+          <div className="text-sm text-muted">AI Search Score</div>
+        </div>
+        
+        {/* Compact Pillar Bars */}
+        <div className="space-y-2">
+          {scoringResult.breakdown.map((pillar) => {
+            const info = PILLAR_INFO[pillar.pillar];
+            const percentage = (pillar.earned / pillar.max) * 100;
+            
+            return (
+              <div key={pillar.pillar} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    <span>{info.icon}</span>
+                    <span style={{ color: 'var(--foreground)' }}>{info.name}</span>
+                  </span>
+                  <span className="text-muted">{pillar.earned}/{pillar.max}</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-700"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: getScoreColor(pillar.earned, pillar.max),
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
