@@ -1,22 +1,36 @@
 import * as cheerio from 'cheerio';
 
 interface FactDensityScores {
-  uniqueStats: number;      // ≥ 5 unique stats/dates/names per 500 words (+10)
+  uniqueStats: number;      // ≥ 5 unique stats/dates/names per 500 words (+5) - REDUCED
   dataMarkup: number;       // Table/list markup for data (+5)
   citations: number;        // ≥ 2 outbound citations to primary sources (+5)
   deduplication: number;    // Internal deduplication (< 10% repeated paragraphs) (+5)
+  directAnswers: number;    // Direct answers after headings (+5) - NEW for 2025
 }
 
+// Store captured content for dynamic recommendations
+export interface CapturedHeadings {
+  heading: string;
+  content: string;
+  hasDirectAnswer: boolean;
+}
+
+export let capturedHeadings: CapturedHeadings[] = [];
+
 /**
- * Audit module for the Fact Density pillar (25 points max)
- * Checks: Unique facts, data markup, citations, content deduplication
+ * Audit module for the Fact Density pillar (20 points max) - UPDATED for 2025
+ * Checks: Unique facts, data markup, citations, content deduplication, direct answers
  */
 export async function run(html: string): Promise<FactDensityScores> {
+  // Reset captured content for this analysis
+  capturedHeadings = [];
+  
   const scores: FactDensityScores = {
     uniqueStats: 0,
     dataMarkup: 0,
     citations: 0,
     deduplication: 0,
+    directAnswers: 0,
   };
 
   const $ = cheerio.load(html);
@@ -34,7 +48,7 @@ export async function run(html: string): Promise<FactDensityScores> {
   const totalFacts = stats.size + dates.size + names.size;
   const factsPerWords = (totalFacts / wordCount) * 500;
   
-  scores.uniqueStats = factsPerWords >= 5 ? 10 : Math.floor((factsPerWords / 5) * 10);
+  scores.uniqueStats = factsPerWords >= 5 ? 5 : Math.floor((factsPerWords / 5) * 5); // Reduced from 10 to 5
 
   // Check for table/list markup for data
   const tables = $('table').length;
@@ -82,7 +96,120 @@ export async function run(html: string): Promise<FactDensityScores> {
     scores.deduplication = 5; // No paragraphs means no duplication
   }
 
+  // NEW for 2025: Check for direct answers after headings (5 points)
+  const headings = $('h2, h3');
+  let headingsWithDirectAnswers = 0;
+  let totalHeadingsChecked = 0;
+  
+  headings.each((_, heading) => {
+    const $heading = $(heading);
+    const headingText = $heading.text().trim();
+    
+    // Skip empty headings
+    if (!headingText) return;
+    
+    // Get the next elements after the heading
+    let nextElement = $heading.next();
+    let contentAfterHeading = '';
+    let elementsChecked = 0;
+    
+    // Collect text from next few elements (up to 150 words)
+    while (nextElement.length && elementsChecked < 5) {
+      const tagName = nextElement.prop('tagName')?.toLowerCase();
+      
+      // Stop if we hit another heading
+      if (tagName && ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+        break;
+      }
+      
+      // Collect text from paragraphs, lists, etc.
+      if (tagName && ['p', 'ul', 'ol', 'div'].includes(tagName)) {
+        contentAfterHeading += ' ' + nextElement.text();
+      }
+      
+      nextElement = nextElement.next();
+      elementsChecked++;
+    }
+    
+    // Get first 100 words
+    const words = contentAfterHeading.trim().split(/\s+/).slice(0, 100);
+    const firstHundredWords = words.join(' ');
+    
+    // Check for direct answer patterns
+    const hasDirectAnswer = checkForDirectAnswer(headingText, firstHundredWords);
+    
+    // Capture for recommendations (limit to 5 headings without direct answers)
+    if (!hasDirectAnswer && capturedHeadings.length < 5) {
+      capturedHeadings.push({
+        heading: headingText,
+        content: firstHundredWords,
+        hasDirectAnswer: false
+      });
+    }
+    
+    if (hasDirectAnswer) {
+      headingsWithDirectAnswers++;
+    }
+    totalHeadingsChecked++;
+  });
+  
+  // Calculate score based on percentage of headings with direct answers
+  if (totalHeadingsChecked > 0) {
+    const percentage = (headingsWithDirectAnswers / totalHeadingsChecked) * 100;
+    
+    if (percentage >= 80) {
+      scores.directAnswers = 5;
+    } else if (percentage >= 60) {
+      scores.directAnswers = 4;
+    } else if (percentage >= 40) {
+      scores.directAnswers = 2;
+    } else {
+      scores.directAnswers = 0;
+    }
+  } else {
+    scores.directAnswers = 0;
+  }
+
   return scores;
+}
+
+function checkForDirectAnswer(heading: string, content: string): boolean {
+  const headingLower = heading.toLowerCase();
+  const contentLower = content.toLowerCase();
+  
+  // Check for question patterns and their answers
+  if (headingLower.includes('what is') || headingLower.includes('what are')) {
+    // Look for definition patterns
+    return /\b(is|are|means|refers to|defined as)\b/.test(contentLower.slice(0, 50));
+  }
+  
+  if (headingLower.includes('how to') || headingLower.includes('how do')) {
+    // Look for instructional patterns
+    return /\b(first|start|begin|step|to\s+\w+,|by\s+\w+ing)\b/.test(contentLower.slice(0, 50));
+  }
+  
+  if (headingLower.includes('why')) {
+    // Look for reasoning patterns
+    return /\b(because|due to|since|as a result|this is)\b/.test(contentLower.slice(0, 50));
+  }
+  
+  if (headingLower.includes('when')) {
+    // Look for temporal patterns
+    return /\b(in\s+\d{4}|on\s+\w+|during|after|before|at\s+\d+)\b/.test(contentLower.slice(0, 50));
+  }
+  
+  // Check for general direct statement patterns
+  const firstSentence = content.split(/[.!?]/).find(s => s.trim().length > 10)?.trim() || '';
+  
+  // A good direct answer usually:
+  // 1. Starts with the subject of the heading
+  // 2. Contains a verb within the first few words
+  // 3. Is a complete statement
+  const headingKeywords = headingLower.split(/\s+/).filter(w => w.length > 3);
+  const hasSubjectMatch = headingKeywords.some(kw => firstSentence.toLowerCase().includes(kw));
+  const hasEarlyVerb = /^(\w+\s+){0,3}(is|are|was|were|has|have|can|will|does|provides|offers|includes|helps|makes|allows|enables)\b/i.test(firstSentence);
+  
+  return hasSubjectMatch && hasEarlyVerb;
 }
 
 function extractUniqueStats(text: string): Set<string> {

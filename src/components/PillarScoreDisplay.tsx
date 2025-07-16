@@ -14,22 +14,22 @@ const PILLAR_INFO = {
     name: 'Retrieval & Access',
     icon: '⚡',
     description: 'How fast AI can access your content',
-    tooltip: 'AI systems need quick access to your content. This measures page speed, accessibility, and whether content is behind paywalls.',
-    maxScore: 30,
+    tooltip: 'AI systems need quick access to your content. This measures page speed, accessibility, llms.txt presence, and whether content is behind paywalls.',
+    maxScore: 25, // UPDATED for 2025
   },
   FACT_DENSITY: {
     name: 'Fact Density',
     icon: '📊',
     description: 'How much useful information per section',
-    tooltip: 'AI prioritizes content rich in facts, data, and specific examples. Generic content ranks lower.',
-    maxScore: 25,
+    tooltip: 'AI prioritizes content with facts, data, specific examples, and direct answers after headings. Generic content ranks lower.',
+    maxScore: 20, // UPDATED for 2025
   },
   STRUCTURE: {
     name: 'Answer Architecture',
     icon: '📋',
-    description: 'How well-organized for AI understanding',
-    tooltip: 'Content should be structured like Q&A conversations with clear headings, lists, and logical flow.',
-    maxScore: 20,
+    description: 'Most important for 2025 AI search!',
+    tooltip: '🔥 MOST IMPORTANT: Listicles get 32.5% of AI citations! Use numbered titles, lists, comparison tables, and semantic URLs for maximum AI visibility.',
+    maxScore: 30, // INCREASED for 2025 - Most important!
   },
   TRUST: {
     name: 'Trust & Authority',

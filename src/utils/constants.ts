@@ -1,12 +1,13 @@
 // AI Search Optimizer Constants
 
-// New AI Search pillars with max points
+// New AI Search pillars with max points - Updated for 2025 AI trends
+// Structure is now most important due to listicles getting 32.5% of AI citations
 export const PILLARS = {
-  RETRIEVAL: 30,
-  FACT_DENSITY: 25,
-  STRUCTURE: 20,
-  TRUST: 15,
-  RECENCY: 10,
+  RETRIEVAL: 25,    // Reduced from 30 (-5)
+  FACT_DENSITY: 20, // Reduced from 25 (-5)
+  STRUCTURE: 30,    // Increased from 20 (+10) - Most important for 2025!
+  TRUST: 15,        // Unchanged
+  RECENCY: 10,      // Unchanged
 } as const;
 
 // Minimum thresholds for scoring

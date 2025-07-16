@@ -167,7 +167,161 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
       after: '<link rel="canonical" href="https://example.com/ai-search-guide">',
     },
   },
+
+  // NEW 2025 AI Search recommendations
+  listicleFormat: {
+    why: 'AI search engines heavily favor listicle content - comparative listicles get 32.5% of all AI citations.',
+    fix: 'Restructure your content as a numbered list (e.g., "10 Best...", "7 Ways to..."). Include ordered lists with at least 3-5 items. Consider adding comparison tables for even better results.',
+    gain: 10,
+    example: {
+      before: 'AI Search Optimization Guide',
+      after: '10 Essential AI Search Optimization Strategies for 2025',
+    },
+  },
+  comparisonTables: {
+    why: 'AI engines love structured comparisons. Tables make data extraction easy.',
+    fix: 'Add comparison tables when discussing multiple options or comparing features. Use proper HTML table markup with headers. Include "vs" or "versus" in your headings.',
+    gain: 5,
+    example: {
+      before: '<h2>ChatGPT vs Claude</h2>\n<p>ChatGPT is better at X while Claude excels at Y...</p>',
+      after: '<h2>ChatGPT vs Claude</h2>\n<table>\n  <tr><th>Feature</th><th>ChatGPT</th><th>Claude</th></tr>\n  <tr><td>Context</td><td>8K tokens</td><td>100K tokens</td></tr>\n</table>',
+    },
+  },
+  semanticUrl: {
+    why: 'AI systems use URLs to understand content. Descriptive URLs rank higher.',
+    fix: 'Use descriptive, keyword-rich URLs instead of IDs or parameters. Include the main topic keywords in your URL slug. Keep URLs clean without session IDs or tracking parameters.',
+    gain: 5,
+    example: {
+      before: '/blog/post-123',
+      after: '/blog/ai-search-optimization-guide-2025',
+    },
+  },
+  directAnswers: {
+    why: 'AI systems look for immediate answers after headings to quickly extract information.',
+    fix: 'Add a 1-2 sentence answer immediately after each heading before elaborating. Think "featured snippet" style - answer the question in the first 50 words.',
+    gain: 5,
+    example: {
+      before: '<h2>What is AI Search?</h2>\n<p>Let me tell you a story about how I discovered...</p>',
+      after: '<h2>What is AI Search?</h2>\n<p>AI search uses language models to provide direct answers instead of just links. Unlike traditional search engines that return a list of websites, AI search understands your question and synthesizes information from multiple sources...</p>',
+    },
+  },
+  llmsTxtFile: {
+    why: 'The llms.txt file tells AI crawlers how to interpret your content, similar to robots.txt for search engines.',
+    fix: 'Create an /llms.txt file at your domain root with instructions for AI crawlers. Include content type, update frequency, and site structure information.',
+    gain: 5,
+    example: {
+      before: 'No llms.txt file found',
+      after: '# llms.txt\n# AI Crawler Instructions\n\nSitemap: /sitemap.xml\nContent-Type: article\nUpdate-Frequency: weekly\nPrimary-Language: en\nContent-Focus: AI and machine learning',
+    },
+  },
 };
+
+// Import captured content from audit modules
+import { capturedContent as structureContent } from './audit/structure';
+import { capturedHeadings as densityHeadings } from './audit/factDensity';
+import { capturedDomain as retrievalDomain } from './audit/retrieval';
+
+/**
+ * Get maximum possible score for a metric
+ */
+function getMaxScoreForMetric(metric: string): number {
+  const maxScores: Record<string, number> = {
+    // RETRIEVAL
+    ttfb: 5,
+    paywall: 5,
+    mainContent: 5,
+    htmlSize: 5,
+    llmsTxtFile: 5,
+    // FACT_DENSITY
+    uniqueStats: 5,
+    dataMarkup: 5,
+    citations: 5,
+    deduplication: 5,
+    directAnswers: 5,
+    // STRUCTURE
+    headingFrequency: 5,
+    headingDepth: 5,
+    structuredData: 5,
+    rssFeed: 5,
+    listicleFormat: 10,
+    comparisonTables: 5,
+    semanticUrl: 5,
+    // TRUST
+    authorBio: 5,
+    napConsistency: 5,
+    license: 5,
+    // RECENCY
+    lastModified: 5,
+    stableCanonical: 5,
+  };
+  
+  return maxScores[metric] || 5;
+}
+
+/**
+ * Generate a listicle title from existing title
+ */
+function generateListicleTitle(title: string): string {
+  // Remove existing numbers if any
+  const cleanTitle = title.replace(/^\d+\s+/, '').replace(/[\s-–—]\d+\s+/, ' ');
+  
+  // Common listicle numbers based on content type
+  const numbers = ['10', '7', '5', '15', '12'];
+  const randomNum = numbers[Math.floor(Math.random() * numbers.length)];
+  
+  // Add appropriate prefix based on title content
+  if (cleanTitle.toLowerCase().includes('guide')) {
+    return `${randomNum} Essential ${cleanTitle}`;
+  } else if (cleanTitle.toLowerCase().includes('tips') || cleanTitle.toLowerCase().includes('ways')) {
+    return `${randomNum} ${cleanTitle}`;
+  } else if (cleanTitle.toLowerCase().includes('best')) {
+    return `Top ${randomNum} ${cleanTitle}`;
+  } else {
+    return `${randomNum} Key ${cleanTitle} Strategies`;
+  }
+}
+
+/**
+ * Generate a semantic URL from current URL and title
+ */
+function generateSemanticUrl(currentUrl: string, title: string): string {
+  try {
+    const urlObj = new URL(currentUrl);
+    const titleSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .substring(0, 60);
+    
+    // Keep the base path structure
+    const pathParts = urlObj.pathname.split('/').filter(p => p && !/^\d+$/.test(p) && p.length > 2);
+    const basePath = pathParts.slice(0, -1).join('/');
+    
+    return `${urlObj.origin}/${basePath}/${titleSlug}`.replace(/\/+/g, '/').replace(/\/$/, '');
+  } catch {
+    return '/blog/optimize-for-ai-search-2025';
+  }
+}
+
+/**
+ * Generate direct answer for a heading
+ */
+function generateDirectAnswer(heading: string, content: string): string {
+  const headingLower = heading.toLowerCase();
+  
+  if (headingLower.includes('what is')) {
+    const subject = heading.replace(/what is/i, '').replace(/\?/g, '').trim();
+    return `${subject} is ${content.slice(0, 100)}...`;
+  } else if (headingLower.includes('how to')) {
+    return `To ${heading.replace(/how to/i, '').trim()}, start by ${content.slice(0, 80)}...`;
+  } else if (headingLower.includes('why')) {
+    return `This is important because ${content.slice(0, 100)}...`;
+  } else {
+    // Generic improvement
+    return `${heading.replace(/\?/g, '')} can be understood as ${content.slice(0, 80)}...`;
+  }
+}
 
 /**
  * Generate recommendations based on failed checks
@@ -188,11 +342,60 @@ export function generateRecommendations(
   // Iterate through each pillar's results
   for (const [pillar, checks] of Object.entries(pillarResults)) {
     for (const [metric, score] of Object.entries(checks)) {
-      // If check failed (score is 0), add recommendation
-      if (score === 0 && recTemplates[metric]) {
+      // If check failed or has partial score, add recommendation
+      const maxScore = getMaxScoreForMetric(metric);
+      if (score < maxScore && recTemplates[metric]) {
+        // Create a copy of the template to customize
+        let template = { ...recTemplates[metric] };
+        
+        // Customize recommendations with captured content
+        if (metric === 'listicleFormat' && structureContent.title) {
+          template = {
+            ...template,
+            example: {
+              before: structureContent.title,
+              after: generateListicleTitle(structureContent.title),
+            },
+          };
+        } else if (metric === 'semanticUrl' && structureContent.url && structureContent.title) {
+          template = {
+            ...template,
+            example: {
+              before: structureContent.url,
+              after: generateSemanticUrl(structureContent.url, structureContent.title),
+            },
+          };
+        } else if (metric === 'directAnswers' && densityHeadings.length > 0) {
+          const firstHeading = densityHeadings[0];
+          template = {
+            ...template,
+            example: {
+              before: `<h2>${firstHeading.heading}</h2>\n<p>${firstHeading.content.slice(0, 100)}...</p>`,
+              after: `<h2>${firstHeading.heading}</h2>\n<p>${generateDirectAnswer(firstHeading.heading, firstHeading.content)}</p>`,
+            },
+          };
+        } else if (metric === 'llmsTxtFile' && retrievalDomain.domain) {
+          template = {
+            ...template,
+            example: {
+              before: `No llms.txt file found at ${retrievalDomain.domain}`,
+              after: `# llms.txt for ${retrievalDomain.domain}\n# AI Crawler Instructions\n\nSitemap: /sitemap.xml\nContent-Type: article\nUpdate-Frequency: weekly\nPrimary-Language: en`,
+            },
+          };
+        } else if (metric === 'comparisonTables' && structureContent.headingsForComparison && structureContent.headingsForComparison.length > 0) {
+          const compHeading = structureContent.headingsForComparison[0];
+          template = {
+            ...template,
+            example: {
+              before: `<h2>${compHeading}</h2>\n<p>Detailed comparison text...</p>`,
+              after: `<h2>${compHeading}</h2>\n<table>\n  <tr><th>Feature</th><th>Option A</th><th>Option B</th></tr>\n  <tr><td>Speed</td><td>Fast</td><td>Faster</td></tr>\n</table>`,
+            },
+          };
+        }
+        
         recommendations.push({
           metric,
-          template: recTemplates[metric],
+          template,
           pillar,
         });
       }

@@ -62,7 +62,7 @@ export class AiSearchAnalyzer {
       const pillarResults: PillarResults = {
         RETRIEVAL: await retrieval.run(html, normalizedUrl),
         FACT_DENSITY: await factDensity.run(html),
-        STRUCTURE: await structure.run(html),
+        STRUCTURE: await structure.run(html, normalizedUrl), // Pass URL for semantic URL check
         TRUST: await trust.run(html),
         RECENCY: await recency.run(html, headers),
       };
