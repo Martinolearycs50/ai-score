@@ -1,3 +1,4 @@
+
 # CLAUDE_CONTEXT.md
 
 AI assistant context for AI Search Optimizer. This file contains stable architectural information + current state tracking.
@@ -14,7 +15,7 @@ AI assistant context for AI Search Optimizer. This file contains stable architec
 - Background: White (#FFFFFF)  
 - Primary: Blue (#3B82F6)
 - Text: Dark gray (#111827)
-- NO dark theme, NO glassmorphism (README is outdated)
+
 
 ## 🏗️ Stable Architecture (Rarely Changes)
 
