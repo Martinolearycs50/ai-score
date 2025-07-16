@@ -1,4 +1,5 @@
 import type { PillarResults, PillarBreakdown, PillarScores } from './types';
+import type { ExtractedContent } from './contentExtractor';
 import { PILLARS } from '@/utils/constants';
 import { generateRecommendations } from './recommendations';
 
@@ -12,13 +13,17 @@ export interface ScoringResult {
     fix: string;
     gain: number;
     pillar: string;
+    example?: {
+      before: string;
+      after: string;
+    };
   }>;
 }
 
 /**
  * Score pillar results according to the new AI Search scoring model
  */
-export function score(pillarResults: PillarResults): ScoringResult {
+export function score(pillarResults: PillarResults, extractedContent?: ExtractedContent): ScoringResult {
   const breakdown: PillarBreakdown[] = Object.entries(pillarResults).map(([pillar, checks]) => {
     const earned = Object.values(checks as Record<string, number>).reduce((a, b) => a + b, 0);
     return {
@@ -46,12 +51,16 @@ export function score(pillarResults: PillarResults): ScoringResult {
   const total = breakdown.reduce((sum, { earned }) => sum + earned, 0);
 
   // Generate recommendations for failed checks
-  const recommendations = generateRecommendations(pillarResults as unknown as Record<string, Record<string, number>>).map(rec => ({
+  const recommendations = generateRecommendations(
+    pillarResults as unknown as Record<string, Record<string, number>>,
+    extractedContent
+  ).map(rec => ({
     metric: rec.metric,
     why: rec.template.why,
     fix: rec.template.fix,
     gain: rec.template.gain,
     pillar: rec.pillar,
+    example: rec.template.example,
   }));
 
   return {

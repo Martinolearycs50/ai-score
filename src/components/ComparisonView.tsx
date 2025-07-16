@@ -70,7 +70,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                🏆 {new URL(result1.url).hostname} dominates with +{Math.abs(totalScoreDiff)} points!
+                🏆 {result1.websiteProfile?.title || result1.pageTitle || new URL(result1.url).hostname} dominates with +{Math.abs(totalScoreDiff)} points!
               </motion.span>
             ) : totalScoreDiff < 0 ? (
               <motion.span 
@@ -78,7 +78,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                🏆 {new URL(result2.url).hostname} crushes it with +{Math.abs(totalScoreDiff)} points!
+                🏆 {result2.websiteProfile?.title || result2.pageTitle || new URL(result2.url).hostname} crushes it with +{Math.abs(totalScoreDiff)} points!
               </motion.span>
             ) : (
               <span className="text-muted">
@@ -101,9 +101,12 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         {/* Website 1 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
-              {new URL(result1.url).hostname}
-            </h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                {result1.websiteProfile?.title || result1.pageTitle || new URL(result1.url).hostname}
+              </h3>
+              <p className="text-xs text-muted truncate">{new URL(result1.url).hostname}</p>
+            </div>
             {totalScoreDiff > 0 && (
               <motion.span 
                 className="text-sm px-3 py-1 rounded-full font-medium" 
@@ -134,9 +137,12 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         {/* Website 2 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
-              {new URL(result2.url).hostname}
-            </h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                {result2.websiteProfile?.title || result2.pageTitle || new URL(result2.url).hostname}
+              </h3>
+              <p className="text-xs text-muted truncate">{new URL(result2.url).hostname}</p>
+            </div>
             {totalScoreDiff < 0 && (
               <motion.span 
                 className="text-sm px-3 py-1 rounded-full font-medium" 

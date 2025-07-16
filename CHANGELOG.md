@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2025-07-16
+
+### Added
+- **Content-Aware Recommendation System** - Personalized recommendations based on actual website content
+  - `ContentExtractor` module for comprehensive content analysis
+    - Extracts headings, paragraphs, lists, statistics, and comparisons
+    - Detects business type (payment, ecommerce, blog, documentation, corporate, educational)
+    - Identifies key terms, product names, and technical terminology
+    - Analyzes content structure and patterns
+  - `DynamicRecommendationGenerator` for personalized advice
+    - Generates examples using actual content from analyzed pages
+    - Tailors recommendations to detected business type
+    - Creates specific before/after examples for each website
+    - Personalizes recommendation language based on content
+  - Business type detection for targeted optimization strategies
+  - `extractedContent` field added to API response
+    - Includes business type, primary topic, and content samples
+    - Provides detected features and key terms
+    - Shows word count and language detection
+- Comprehensive error handling for universal URL support
+  - Safe fallbacks for content extraction failures
+  - Content size limits (100KB) to prevent memory issues
+  - Null safety checks throughout the pipeline
+  - Graceful degradation to static recommendations on failure
+
+### Changed
+- Recommendations now use dynamic content-aware examples instead of generic templates
+- API response includes extracted content analysis for transparency
+- Enhanced error messages for better debugging
+
+### Fixed
+- TypeScript compatibility issues with Set operations
+  - Replaced spread operator with `Array.from()` for Set iterations
+  - Fixed import paths for Next.js module resolution
+  - Added default exports for all new modules
+- Server stability with problematic URLs
+  - Added try-catch blocks to all extraction methods
+  - Limited content processing to prevent regex catastrophic backtracking
+  - Added safe defaults for all extracted fields
+
 ## [2.3.0] - 2025-07-16
 
 ### Added
@@ -152,7 +192,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript configuration
 - Tailwind CSS integration
 
-[Unreleased]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Martinolearycs50/a-search-v2/releases/tag/v0.1.0

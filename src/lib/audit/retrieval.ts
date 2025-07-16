@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { DEFAULT_HEADERS } from '@/utils/constants';
+import { DEFAULT_HEADERS } from '../../utils/constants';
 
 interface RetrievalScores {
   ttfb: number;           // Time to first byte < 200ms (+5) - REDUCED
@@ -14,6 +14,12 @@ interface RetrievalScores {
 export interface CapturedDomain {
   domain?: string;
   hasLlmsTxt?: boolean;
+  actualTtfb?: number;
+  htmlSizeMB?: number;
+  htmlSizeKB?: number;
+  mainContentSample?: string;
+  hasPaywall?: boolean;
+  mainContentRatio?: number;
 }
 
 export let capturedDomain: CapturedDomain = {};
@@ -26,6 +32,12 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   // Reset captured content for this analysis
   capturedDomain = {};
   
+  // Capture URL domain for examples
+  try {
+    const urlObj = new URL(url);
+    capturedDomain.domain = urlObj.hostname;
+  } catch {}
+  
   const scores: RetrievalScores = {
     ttfb: 0,
     paywall: 0,
@@ -37,6 +49,10 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   // Check HTML size (≤ 2MB)
   const htmlSizeKB = Buffer.byteLength(html, 'utf8') / 1024;
   scores.htmlSize = htmlSizeKB <= 2048 ? 5 : 0; // Reduced from 10 to 5
+  
+  // Capture actual size for recommendations
+  capturedDomain.htmlSizeKB = Math.round(htmlSizeKB);
+  capturedDomain.htmlSizeMB = Number((htmlSizeKB / 1024).toFixed(2));
 
   // Parse HTML
   const $ = cheerio.load(html);
@@ -63,6 +79,9 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
                       $('meta[property="article:content_tier"]').attr('content') === 'locked';
 
   scores.paywall = (!hasPaywall && !metaPaywall) ? 5 : 0;
+  
+  // Capture paywall status
+  capturedDomain.hasPaywall = hasPaywall || metaPaywall;
 
   // Check <main> content ratio
   const mainContent = $('main').text().trim();
@@ -71,12 +90,16 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   if (mainContent && totalContent) {
     const contentRatio = mainContent.length / totalContent.length;
     scores.mainContent = contentRatio >= 0.7 ? 5 : 0;
+    capturedDomain.mainContentRatio = Math.round(contentRatio * 100);
+    capturedDomain.mainContentSample = mainContent.substring(0, 200) + '...';
   } else if ($('article').length > 0) {
     // Fallback to article tag if no main tag
     const articleContent = $('article').text().trim();
     if (articleContent && totalContent) {
       const contentRatio = articleContent.length / totalContent.length;
       scores.mainContent = contentRatio >= 0.7 ? 5 : 0;
+      capturedDomain.mainContentRatio = Math.round(contentRatio * 100);
+      capturedDomain.mainContentSample = articleContent.substring(0, 200) + '...';
     }
   }
 
@@ -96,6 +119,7 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
       response.data.once('data', () => {
         const ttfb = Date.now() - startTime;
         scores.ttfb = ttfb < 200 ? 5 : 0; // Reduced from 10 to 5
+        capturedDomain.actualTtfb = ttfb; // Capture actual TTFB
         response.data.destroy(); // Clean up stream
         resolve(true);
       });
@@ -108,7 +132,6 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   // NEW for 2025: Check for llms.txt file (5 points)
   try {
     const urlObj = new URL(url);
-    capturedDomain.domain = urlObj.hostname;
     
     // Try to fetch /llms.txt
     const llmsTxtUrl = new URL('/llms.txt', url).toString();

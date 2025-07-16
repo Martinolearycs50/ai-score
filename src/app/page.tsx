@@ -10,6 +10,7 @@ import FriendlyRecommendationCard from '@/components/FriendlyRecommendationCard'
 import ComparisonView from '@/components/ComparisonView';
 import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
 import EmotionalComparisonReveal from '@/components/EmotionalComparisonReveal';
+import WebsiteProfileCard from '@/components/WebsiteProfileCard';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { recTemplates } from '@/lib/recommendations';
 
@@ -260,6 +261,14 @@ export default function Home() {
             <div id="results" className="max-w-4xl mx-auto">
               <EmotionalResultsReveal result={analysisState.result}>
                 <div className="space-y-8">
+                  {/* Website Profile Card */}
+                  {analysisState.result.websiteProfile && (
+                    <WebsiteProfileCard 
+                      profile={analysisState.result.websiteProfile} 
+                      score={analysisState.result.aiSearchScore}
+                    />
+                  )}
+                  
                   <PillarScoreDisplay result={analysisState.result} />
                   
                   {/* Enhanced Recommendations Section */}
@@ -307,19 +316,21 @@ export default function Home() {
                     ) : (
                       <div className="space-y-4">
                         {analysisState.result.scoringResult.recommendations.map((rec, index) => {
-                          // Get the full template data if available
-                          const template = recTemplates[rec.metric];
-                          
                           return (
                             <FriendlyRecommendationCard
                               key={index}
                               metric={rec.metric}
-                              why={template?.why || rec.why}
-                              fix={template?.fix || rec.fix}
+                              why={rec.why}
+                              fix={rec.fix}
                               gain={rec.gain}
                               pillar={rec.pillar}
-                              example={template?.example}
+                              example={rec.example}
                               index={index}
+                              websiteProfile={analysisState.result?.websiteProfile ? {
+                                domain: analysisState.result.websiteProfile.domain,
+                                title: analysisState.result.websiteProfile.title,
+                                contentType: analysisState.result.websiteProfile.contentType,
+                              } : undefined}
                             />
                           );
                         })}

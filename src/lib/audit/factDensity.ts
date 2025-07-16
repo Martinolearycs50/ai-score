@@ -303,7 +303,8 @@ function findDuplicatedContent(paragraphs: string[]): number {
       seen.add(normalized);
       
       // Also check for near-duplicates (80% similarity)
-      for (const existing of seen) {
+      const seenArray = Array.from(seen);
+      for (const existing of seenArray) {
         if (similarity(normalized, existing) > 0.8) {
           duplicates++;
           break;

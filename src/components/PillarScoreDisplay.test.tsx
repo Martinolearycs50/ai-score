@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import PillarScoreDisplay from './PillarScoreDisplay';
-import type { PillarScores } from '@/lib/analyzer-new';
+import type { PillarScores } from '@/lib/types';
 
 describe('PillarScoreDisplay Component', () => {
   const mockPillarScores: PillarScores = {

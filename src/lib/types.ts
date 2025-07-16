@@ -130,3 +130,17 @@ export const SCORE_RANGES: ScoreRange[] = [
     color: "red"
   }
 ];
+
+// Website profile for personalization
+export interface WebsiteProfile {
+  domain: string;
+  title: string;
+  description: string;
+  language?: string;
+  contentType?: 'blog' | 'ecommerce' | 'news' | 'corporate' | 'documentation' | 'other';
+  primaryTopics?: string[];
+  wordCount?: number;
+  hasImages?: boolean;
+  hasFavicon?: boolean;
+  ogImage?: string;
+}

@@ -11,6 +11,8 @@ Instantly analyze any website to see how well it's optimized for AI search engin
 - **🤖 AI Platform Analysis**: Comprehensive scoring for ChatGPT, Claude, Perplexity, and Gemini
 - **📊 5-Pillar AI-First Scoring**: 100-point system optimized for AI retrieval and comprehension
 - **🔍 Website Comparison**: Compare two websites side-by-side to benchmark performance
+- **🎯 Content-Aware Recommendations**: Personalized advice using your actual website content
+- **🏢 Business Type Detection**: Tailored suggestions for payment, ecommerce, blogs, and more
 - **🎮 Gamified Experience**: Engaging animations and encouraging messages make optimization fun
 - **✨ Emotional Results Reveal**: 4-stage animated score presentation that builds anticipation
 - **🎯 Friendly Recommendations**: Interactive cards with time estimates and progress tracking
@@ -236,12 +238,13 @@ Martin O'Leary - [@Martinolearycs50](https://github.com/Martinolearycs50)
 
 ## 📊 Performance
 
-- **Build Status**: ✅ Production Ready (v2.3.0)
+- **Build Status**: ✅ Production Ready (v2.4.0)
 - **Test Coverage**: Comprehensive unit and integration tests
 - **Lighthouse Score**: 95+ Performance
 - **Accessibility**: WCAG 2.1 AA compliant
 - **User Experience**: Engaging animations with optimal timing
 - **TypeScript**: Strict mode with full type safety
+- **Content Analysis**: Intelligent content extraction and business type detection
 
 ---
 

@@ -14,6 +14,11 @@ interface FriendlyRecommendationCardProps {
     after: string;
   };
   index: number;
+  websiteProfile?: {
+    domain: string;
+    title: string;
+    contentType?: string;
+  };
 }
 
 // Friendly category mapping
@@ -75,6 +80,7 @@ export default function FriendlyRecommendationCard({
   pillar,
   example,
   index,
+  websiteProfile,
 }: FriendlyRecommendationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -157,9 +163,9 @@ export default function FriendlyRecommendationCard({
                 {friendlyPillar.metaphor}
               </p>
 
-              {/* Why it matters - made more conversational */}
+              {/* Why it matters - made more conversational and personalized */}
               <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
-                💡 {why}
+                💡 {getPersonalizedWhy(why, metric, websiteProfile)}
               </p>
 
               {/* Encouragement text */}
@@ -266,7 +272,7 @@ export default function FriendlyRecommendationCard({
                   </div>
                 )}
 
-                {/* Motivational completion section */}
+                {/* Motivational call-to-action section */}
                 <motion.div
                   className="mt-6 p-4 rounded-lg"
                   style={{ background: friendlyPillar.color + '10' }}
@@ -274,30 +280,16 @@ export default function FriendlyRecommendationCard({
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🎯</span>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: friendlyPillar.color }}>
-                          Ready to implement?
-                        </p>
-                        <p className="text-xs text-muted">
-                          You\'ll gain {gain} points with this {friendlyCategory.timeEstimate}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🎯</span>
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: friendlyPillar.color }}>
+                        Ready to implement?
+                      </p>
+                      <p className="text-xs text-muted">
+                        You'll gain {gain} points with this {friendlyCategory.timeEstimate} fix
+                      </p>
                     </div>
-                    <motion.button
-                      className="px-4 py-2 rounded-full text-xs font-medium text-white"
-                      style={{ background: friendlyPillar.color }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Future: Mark as completed
-                      }}
-                    >
-                      Mark Complete ✓
-                    </motion.button>
                   </div>
                 </motion.div>
               </div>
@@ -319,4 +311,22 @@ export default function FriendlyRecommendationCard({
       )}
     </motion.div>
   );
+}
+
+function getPersonalizedWhy(defaultWhy: string, metric: string, profile?: { domain: string; title: string; contentType?: string }): string {
+  if (!profile) return defaultWhy;
+  
+  // Add site-specific context to certain recommendations
+  const personalizations: Record<string, (profile: any) => string> = {
+    ttfb: (p) => `We noticed ${p.domain} takes a bit longer to respond. ${defaultWhy}`,
+    paywall: (p) => `Your ${p.contentType === 'news' ? 'news articles' : 'content'} on ${p.domain} may be behind a paywall. ${defaultWhy}`,
+    mainContent: (p) => `${p.title} has great content, but AI needs clearer structure. ${defaultWhy}`,
+    uniqueStats: (p) => `${p.contentType === 'blog' ? 'Your blog posts' : 'Your pages'} could benefit from more specific data. ${defaultWhy}`,
+    authorBio: (p) => `Readers of ${p.title} want to know who's behind the content. ${defaultWhy}`,
+    structuredData: (p) => `Help AI understand ${p.domain}'s content better. ${defaultWhy}`,
+    headingFrequency: (p) => `${p.title}'s content needs more navigational signposts. ${defaultWhy}`,
+  };
+  
+  const personalizer = personalizations[metric];
+  return personalizer ? personalizer(profile) : defaultWhy;
 }

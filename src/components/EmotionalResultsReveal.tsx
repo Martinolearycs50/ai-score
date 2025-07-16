@@ -119,6 +119,7 @@ const ParticleEffect = () => {
 export default function EmotionalResultsReveal({ result, children }: EmotionalResultsRevealProps) {
   const [stage, setStage] = useState<'suspense' | 'reveal' | 'details' | 'complete'>('suspense');
   const theme = getEmotionalTheme(result.aiSearchScore);
+  const websiteName = result.websiteProfile?.title || result.pageTitle || new URL(result.url).hostname;
 
   useEffect(() => {
     // Progression through stages with extended timing for readability
@@ -169,7 +170,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                 >
                   🔍
                 </motion.div>
-                <p className="text-sm text-muted">Analyzing AI readiness...</p>
+                <p className="text-sm text-muted">Analyzing {websiteName}...</p>
               </div>
             </div>
           </motion.div>
@@ -259,7 +260,10 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               <h2 className="text-3xl font-medium mb-2" style={{ color: theme.color }}>
                 {theme.title}
               </h2>
-              <p className="text-lg text-muted mb-4">{theme.subtitle}</p>
+              <p className="text-lg text-muted mb-2">{theme.subtitle}</p>
+              <p className="text-sm text-muted mb-4">
+                {websiteName} • {result.websiteProfile?.domain || new URL(result.url).hostname}
+              </p>
               
               {/* Potential Score Preview */}
               <motion.div

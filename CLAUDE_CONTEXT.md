@@ -42,11 +42,15 @@ src/
 │   ├── EmotionalResultsReveal.tsx # Animated score reveal
 │   ├── EmotionalComparisonReveal.tsx # VS battle animation
 │   ├── FriendlyRecommendationCard.tsx # Gamified recommendations
-│   └── ScorePotentialPreview.tsx # Score improvement preview
+│   ├── ScorePotentialPreview.tsx # Score improvement preview
+│   └── WebsiteProfileCard.tsx   # Displays website metadata
 │
 ├── lib/
 │   ├── analyzer-new.ts      # Core AiSearchAnalyzer class
 │   ├── scorer-new.ts        # 5-pillar scoring logic
+│   ├── contentExtractor.ts  # Extracts and analyzes page content
+│   ├── dynamicRecommendations.ts # Generates content-aware recommendations
+│   ├── recommendations.ts   # Recommendation templates and logic
 │   └── types.ts             # TypeScript definitions
 │
 └── utils/                   # Helpers
@@ -132,6 +136,14 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-16 (evening): Implemented content-aware recommendations - v2.4.0
+  - Created ContentExtractor module to analyze page content and detect business type
+  - Built DynamicRecommendationGenerator for personalized recommendations
+  - Recommendations now use actual content from analyzed pages (before/after examples)
+  - Added comprehensive error handling for universal URL support
+  - Fixed TypeScript compatibility issues with Set operations
+  - Added extractedContent to API response structure
+  - Successfully tested with various websites (TAP Company, Stripe, GitHub, etc.)
 - 2025-07-16 (evening): Enhanced user experience with emotional results - v2.3.0
   - Added EmotionalResultsReveal component with 4-stage animation flow
   - Created FriendlyRecommendationCard with gamified experience

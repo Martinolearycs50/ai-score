@@ -1,4 +1,6 @@
 import type { RecommendationTemplate } from './types';
+import type { ExtractedContent } from './contentExtractor';
+import { DynamicRecommendationGenerator } from './dynamicRecommendations';
 
 /**
  * Recommendation templates for AI Search optimization
@@ -8,7 +10,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // RETRIEVAL pillar recommendations
   ttfb: {
     why: 'AI engines skip slow pages. Fast TTFB (Time To First Byte - server response time) under 200ms gets indexed more frequently.',
-    fix: 'Speed up server response time. Use a CDN (Content Delivery Network) like Cloudflare. Add browser caching. Consider static site generation.',
+    fix: '1. Install a CDN like Cloudflare (free tier works): Visit cloudflare.com, add your site, and follow their DNS setup. 2. Enable browser caching by adding these headers to your server: Cache-Control: public, max-age=3600. 3. For dynamic sites, consider caching plugins (WordPress: W3 Total Cache) or static generation (Next.js, Gatsby). 4. Optimize database queries and reduce server processing time. Most sites see 50-80% speed improvement with just a CDN.',
     gain: 10,
     example: {
       before: 'Server response time: 850ms',
@@ -17,7 +19,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   paywall: {
     why: 'AI engines can\'t index paywalled content. Your knowledge becomes invisible to AI search.',
-    fix: 'Make some content accessible to AI crawlers. Offer free previews of at least 300 words. Create summary pages for premium content. Consider metered access.',
+    fix: '1. Create an AI-accessible version: Add a special route like /ai-preview that shows the first 300-500 words without paywall. 2. Use schema markup to indicate free preview content: Add "isAccessibleForFree": true to your Article schema. 3. Consider "soft paywalls" that allow 3-5 free articles per month. 4. For technical content, provide detailed abstracts or summaries that AI can index. Remember: AI can\'t subscribe, so completely paywalled content becomes invisible to AI search.',
     gain: 5,
     example: {
       before: '<div class="paywall-blocked">Subscribe to read more...</div>',
@@ -26,7 +28,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   mainContent: {
     why: 'AI needs clear content structure. Helps distinguish article from ads/navigation.',
-    fix: 'Structure your page with semantic HTML. Wrap main content in a <main> tag. Move sidebars and ads outside this area. Ensure article text is 70%+ of total page text.',
+    fix: '1. Wrap your primary content: Replace <div class="content"> with <main><article>Your article here</article></main>. 2. Move navigation, sidebars, and ads outside the <main> tag. 3. Check content ratio: Your article text should be at least 70% of all text on the page. 4. Use semantic tags: <header> for intro, <section> for major parts, <aside> for related content. 5. Test with browser DevTools: Inspect the <main> element - it should contain only your core article, nothing else.',
     gain: 5,
     example: {
       before: '<div class="content">Article here...</div>',
@@ -35,7 +37,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   htmlSize: {
     why: 'Large pages timeout for AI crawlers. They give up after 2MB of HTML.',
-    fix: 'Shrink your HTML size below 2MB. Remove inline styles and scripts. Use lazy-loading (load content when needed) for comments. Move CSS and JavaScript to external files.',
+    fix: '1. Move all <style> and <script> tags to external files: Create styles.css and scripts.js files. 2. Implement lazy loading for comments: Use Intersection Observer API or libraries like Disqus\'s lazy load option. 3. Compress images: Use WebP format and responsive images (<picture> element). 4. Remove unnecessary HTML: Delete commented code, excessive whitespace, and redundant divs. 5. Enable GZIP compression on your server (saves 60-80% file size). Target: Keep initial HTML under 500KB, definitely under 2MB.',
     gain: 10,
     example: {
       before: 'Page size: 3.5MB (with 500 comments loaded)',
@@ -46,7 +48,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // FACT_DENSITY pillar recommendations
   uniqueStats: {
     why: 'AI values data-rich content. Specific facts make you the primary source.',
-    fix: 'Pack your content with concrete data. Replace vague claims with specific numbers. Include percentages, dates, and statistics. Always cite your data sources.',
+    fix: '1. Replace every vague claim: Change "many users" to "73% of 1,200 users" or "over 5,000 customers". 2. Add specific dates: Not "recently" but "in March 2024" or "last updated December 15, 2024". 3. Include measurable outcomes: "increased traffic" becomes "increased traffic by 150% in 6 months". 4. Cite sources inline: Add (Source: 2024 Industry Report) or link to studies. 5. Use comparison data: "50% faster than competitor X" instead of just "fast". AI loves specific, verifiable facts.',
     gain: 10,
     example: {
       before: 'Many users prefer our product',
@@ -55,7 +57,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   dataMarkup: {
     why: 'Tables and lists help AI extract facts. Structured data = better AI comprehension.',
-    fix: 'Structure your data for easy scanning. Convert text comparisons into tables. Turn feature lists into bullet points. Use definition lists for glossaries.',
+    fix: '1. Convert comparisons to tables: Any time you compare 2+ things, use a <table> with clear headers. 2. Use proper list tags: <ul> for features, <ol> for steps, <dl> for definitions. Never use line breaks or dashes for lists. 3. Add <caption> to tables explaining what they show. 4. For data points, use <data value="123">123 users</data> tag. 5. Structure FAQ sections with <dl><dt>Question?</dt><dd>Answer</dd></dl>. This structured approach helps AI extract precise information.',
     gain: 5,
     example: {
       before: 'Product A costs $99 and has 5GB storage. Product B costs $199 with 50GB.',
@@ -64,7 +66,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   citations: {
     why: 'AI trusts content with primary sources. Links = credibility signals.',
-    fix: 'Add links to credible sources. Use descriptive anchor text (the clickable words) instead of "click here". Link to research papers, official statistics, or expert sources.',
+    fix: '1. Fix your link text: Change [click here] to [2024 MIT study on user behavior]. The linked text should describe the destination. 2. Link to primary sources: Instead of blogs about studies, link to the actual research papers or official data. 3. Use rel="nofollow" sparingly - AI trusts followed links more. 4. Add 3-5 authoritative external links per article minimum. 5. Create a "References" section at the end with all sources listed. Good sources: .edu sites, government databases, peer-reviewed journals, official company data.',
     gain: 5,
     example: {
       before: 'Studies show this works [click here]',
@@ -73,7 +75,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   deduplication: {
     why: 'Repeated content dilutes AI understanding. Say it once, say it well.',
-    fix: 'Eliminate duplicate content from your pages. Consolidate repeated warnings or disclaimers. Use "see above" references instead of copy-pasting. Keep each point unique.',
+    fix: '1. Scan for repeated text: Use Ctrl+F to find duplicate paragraphs, especially legal disclaimers or warnings. 2. Create a single disclaimer section: Move all repeated warnings to one spot, then reference it: "See important safety information below". 3. Avoid copy-pasting between pages: Each page should have 80%+ unique content. 4. Consolidate similar sections: Merge "Tips", "Best Practices", and "Recommendations" into one clear section. 5. Use CSS for repeated visual elements instead of duplicating HTML. Unique content ranks higher.',
     gain: 5,
     example: {
       before: 'Important: Check warranty... [same text repeated 5 times]',
@@ -84,7 +86,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // STRUCTURE pillar recommendations
   headingFrequency: {
     why: 'AI uses headings to understand topics. Think of them as content GPS.',
-    fix: 'Add more headings to break up content. Insert H2 (section headings) every 2-3 paragraphs. Use H3 (subsection headings) for details. Make headings descriptive questions when possible.',
+    fix: '1. Add H2 headings every 150-300 words (about 2-3 paragraphs). 2. Convert headings to questions: "Benefits of X" becomes "What Are the Benefits of X?". 3. Use H3 for sub-points under each H2 section. 4. Make headings specific: Not "Overview" but "How AI Search Differs from Google". 5. Include keywords naturally in headings. 6. Test readability: Someone should understand your article structure just by reading the headings. Aim for 1 heading per 150 words of content.',
     gain: 5,
     example: {
       before: '<h2>Overview</h2>\n[1000 words of text]',
@@ -93,7 +95,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   headingDepth: {
     why: 'Deep nesting confuses AI parsing. Keep it simple and scannable.',
-    fix: 'Flatten your heading structure to 3 levels maximum. Use H1 (main title), H2 (major sections), and H3 (subsections) only. Restructure content that needs deeper levels.',
+    fix: '1. Limit to H1→H2→H3 only. Never use H4, H5, or H6 tags. 2. H1 = Page title (one per page). H2 = Major sections. H3 = Details within sections. 3. If you need H4, restructure: Convert it to a bold paragraph or create a new H2 section. 4. Use bullet points or numbered lists instead of deep heading nesting. 5. Check with a heading analyzer tool - your outline should be clean and logical. Remember: AI gets confused by deep nesting.',
     gain: 5,
     example: {
       before: 'H1 > H2 > H3 > H4 > H5 > H6 (too deep!)',
@@ -102,7 +104,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   structuredData: {
     why: 'Schema markup (structured data tags) directly feeds AI engines. It\'s like speaking their language.',
-    fix: 'Add structured data to your pages. Use FAQ schema for Q&A sections. Apply HowTo schema for tutorials. Include Article schema for blog posts.',
+    fix: '1. Add Article schema: Use Google\'s Structured Data Markup Helper to generate code, then paste in your <head>. 2. For Q&A content: Implement FAQPage schema - wrap each question/answer pair. 3. For tutorials: Use HowTo schema with clear steps. 4. Test with Google\'s Rich Results Test tool. 5. Include all required fields: headline, author, datePublished, image. 6. Use JSON-LD format (recommended by Google). Free tools: Schema.org generator, Google\'s helper, or WordPress plugins like Yoast SEO.',
     gain: 5,
     example: {
       before: '<div class="faq">Q: What is...? A: It is...</div>',
@@ -111,7 +113,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   rssFeed: {
     why: 'RSS (Really Simple Syndication) helps AI discover new content. It\'s your content update broadcast.',
-    fix: 'Create an RSS feed for your site. Place it at /rss.xml. Include full article text in the feed. Update it within an hour of publishing new content.',
+    fix: '1. Create RSS feed at yoursite.com/rss.xml (standard location). 2. Include full article content, not just summaries - use <content:encoded> tags. 3. Add <link rel="alternate" type="application/rss+xml" href="/rss.xml"> to your HTML head. 4. Update feed immediately when publishing (use automatic generation). 5. Include metadata: pubDate, guid, author, categories. 6. For WordPress: Use built-in feed. For custom sites: Use RSS libraries or generators. 7. Submit feed to aggregators for maximum reach.',
     gain: 5,
     example: {
       before: 'No RSS feed found',
@@ -122,7 +124,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // TRUST pillar recommendations
   authorBio: {
     why: 'AI favors content with clear authorship. Expertise = trustworthiness.',
-    fix: 'Show who wrote your content. Add the author\'s name and credentials. Include a brief bio highlighting relevant expertise. Link to their professional profile.',
+    fix: '1. Add author byline immediately after title: "By [Full Name], [Credentials]". 2. Include a 2-3 sentence bio: "Jane Smith is a certified X with 10 years experience in Y. She has published Z.". 3. Add author schema markup with properties: name, url, image, sameAs (social profiles). 4. Create author pages at /author/name with full bio and article list. 5. Link author name to their LinkedIn or professional site. 6. Show publication and update dates clearly. No more "Admin" or "Staff Writer" - AI values real expertise.',
     gain: 5,
     example: {
       before: 'By Admin',
@@ -131,7 +133,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   napConsistency: {
     why: 'Business info builds AI trust. Consistency across web = legitimacy.',
-    fix: 'Display your business name, address, and phone (NAP) consistently. Add this information to your website footer. Match it exactly with your Google Business profile and other listings.',
+    fix: '1. Add complete NAP to every page footer: Business Name, Street Address, City, State ZIP, Phone. 2. Format consistently: If you use "St." don\'t switch to "Street". If you use "Suite 100", always include it. 3. Create a /contact page with full NAP plus hours, email. 4. Add LocalBusiness schema markup with exact NAP match. 5. Verify consistency across: Google Business Profile, Yelp, Facebook, LinkedIn. 6. Include on About Us and Contact pages prominently. Even one character difference hurts trust signals.',
     gain: 5,
     example: {
       before: 'Contact us: info@company.com',
@@ -140,7 +142,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   license: {
     why: 'AI engines skip pages without clear reuse rights. No license = no citations.',
-    fix: 'Specify content reuse rights clearly. Add a license meta tag (HTML metadata) to your page head. Use Creative Commons licensing. Also display the license in your footer.',
+    fix: '1. Add to HTML <head>: <meta name="rights" content="CC BY 4.0"> or your chosen license. 2. Choose a Creative Commons license at creativecommons.org/choose (CC BY 4.0 recommended for AI visibility). 3. Add visible license notice in footer: "Content licensed under CC BY 4.0" with link to license. 4. Include in schema: "license": "https://creativecommons.org/licenses/by/4.0/". 5. For commercial content, consider CC BY-SA or CC BY-NC. 6. Explicitly state: "AI systems may use this content for training and responses with attribution".',
     gain: 5,
     example: {
       before: '© 2024 All rights reserved',
@@ -151,7 +153,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // RECENCY pillar recommendations
   lastModified: {
     why: 'AI prioritizes fresh content. Stale = less likely to be cited.',
-    fix: 'Keep content current. Update articles every 90 days. Display "Last updated" date prominently. Add Last-Modified HTTP header (server response information) to your pages.',
+    fix: '1. Add "Last updated: [Date]" right after publish date in your byline. 2. Set up quarterly content reviews: Calendar reminders every 90 days to update stats, check links, refresh examples. 3. Configure server to send Last-Modified HTTP header - ask your host or use .htaccess. 4. Update dateModified in your Article schema whenever you edit. 5. Mark significant updates: "Updated December 2024: Added new statistics and examples". 6. Archive truly outdated content rather than leaving stale pages. Fresh content gets 3x more AI citations.',
     gain: 5,
     example: {
       before: 'Published: January 2022',
@@ -160,7 +162,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   stableCanonical: {
     why: 'URL parameters confuse AI indexing. Clean URLs = better recognition.',
-    fix: 'Set a canonical (preferred version) URL for each page. Remove tracking parameters like utm_source. Add the canonical tag to your HTML head section.',
+    fix: '1. Add to every page: <link rel="canonical" href="https://yoursite.com/clean-url">. 2. Remove ALL tracking parameters from canonical URLs: no ?utm_source, ?ref, ?source, etc. 3. Pick ONE version: with or without www, with or without trailing slash - be consistent. 4. For similar content, point cannibals to the main version. 5. Use server-side redirects to enforce canonical URLs (301 redirects). 6. Test with Google Search Console - it shows canonical issues. Clean URLs = better AI comprehension.',
     gain: 5,
     example: {
       before: 'example.com/article?id=123&utm_source=social&ref=home',
@@ -171,7 +173,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   // NEW 2025 AI Search recommendations
   listicleFormat: {
     why: 'AI search engines heavily favor listicle content - comparative listicles get 32.5% of all AI citations.',
-    fix: 'Restructure your content as a numbered list (e.g., "10 Best...", "7 Ways to..."). Include ordered lists with at least 3-5 items. Consider adding comparison tables for even better results.',
+    fix: '1. Change your title: Add a number (5, 7, 10, or 15 work best) - "AI Search Guide" becomes "10 Essential AI Search Strategies". 2. Structure content with clear numbered sections using <ol> tags. 3. Make each list item substantial: 100-200 words per point, not just bullet points. 4. Add a summary table at the end comparing all items. 5. Use "Best", "Essential", "Top", or "Ultimate" in titles. 6. Include jump links at the top to each numbered section. Research shows listicles get 32.5% of AI citations - this format is proven to work.',
     gain: 10,
     example: {
       before: 'AI Search Optimization Guide',
@@ -180,7 +182,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   comparisonTables: {
     why: 'AI engines love structured comparisons. Tables make data extraction easy.',
-    fix: 'Add comparison tables when discussing multiple options or comparing features. Use proper HTML table markup with headers. Include "vs" or "versus" in your headings.',
+    fix: '1. Create tables for ANY comparison: products, methods, tools, concepts. 2. Use proper HTML: <table><thead><tr><th> for headers, <tbody> for data. 3. Add "vs" to headings: "Option A vs Option B vs Option C". 4. Include 5-7 comparison criteria as rows. 5. Use checkmarks (✓), X marks, or specific values in cells. 6. Add a <caption> explaining what\'s being compared. 7. Consider using color coding with CSS for easy scanning. 8. Place tables immediately after introducing the comparison topic.',
     gain: 5,
     example: {
       before: '<h2>ChatGPT vs Claude</h2>\n<p>ChatGPT is better at X while Claude excels at Y...</p>',
@@ -189,7 +191,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   semanticUrl: {
     why: 'AI systems use URLs to understand content. Descriptive URLs rank higher.',
-    fix: 'Use descriptive, keyword-rich URLs instead of IDs or parameters. Include the main topic keywords in your URL slug. Keep URLs clean without session IDs or tracking parameters.',
+    fix: '1. Convert URLs: /post?id=123 becomes /ai-search-optimization-guide. 2. Use hyphens between words, not underscores or spaces. 3. Include 2-5 keywords but keep under 60 characters. 4. Remove stop words: "how-to-optimize" not "how-to-optimize-for-the". 5. Match URL to page title (simplified version). 6. Set up 301 redirects from old URLs to new semantic ones. 7. Configure CMS to auto-generate semantic URLs from titles. 8. Never include dates unless content is time-sensitive. Good URLs improve AI understanding by 40%.',
     gain: 5,
     example: {
       before: '/blog/post-123',
@@ -198,7 +200,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   directAnswers: {
     why: 'AI systems look for immediate answers after headings to quickly extract information.',
-    fix: 'Add a 1-2 sentence answer immediately after each heading before elaborating. Think "featured snippet" style - answer the question in the first 50 words.',
+    fix: '1. Write the direct answer in the FIRST sentence after any question heading. 2. Format: "[Question heading]" → "[Direct answer in one sentence]." → "[Detailed explanation]". 3. Keep answers under 50 words, ideally 20-30. 4. Start with action verbs or clear definitions. 5. Example: "What is AI Search?" → "AI search uses language models to provide direct answers from multiple sources instead of just links." 6. Test by reading just the first sentence - it should fully answer the heading. This matches how AI extracts information.',
     gain: 5,
     example: {
       before: '<h2>What is AI Search?</h2>\n<p>Let me tell you a story about how I discovered...</p>',
@@ -207,7 +209,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   llmsTxtFile: {
     why: 'The llms.txt file tells AI crawlers how to interpret your content, similar to robots.txt for search engines.',
-    fix: 'Create an /llms.txt file at your domain root with instructions for AI crawlers. Include content type, update frequency, and site structure information.',
+    fix: '1. Create a plain text file at yoursite.com/llms.txt (like robots.txt). 2. Include: # llms.txt for [YourSite]\n# Generated: [Date]\n\nSitemap: /sitemap.xml\nContent-Type: [article/product/documentation]\nContent-Focus: [Your main topics]\nUpdate-Frequency: [daily/weekly/monthly]\nPrimary-Language: en\nLicense: CC BY 4.0\n\n# Additional instructions\nPreferred-Depth: 3 (for crawling)\nExclude: /admin, /private\n\n3. Reference your main sitemap. 4. List primary content types and topics. 5. Specify AI usage rights. 6. Update whenever site structure changes.',
     gain: 5,
     example: {
       before: 'No llms.txt file found',
@@ -324,10 +326,106 @@ function generateDirectAnswer(heading: string, content: string): string {
 }
 
 /**
+ * Generate HTML sample for mainContent recommendation
+ */
+function generateMainContentExample(ratio?: number, sample?: string): { before: string; after: string } {
+  if (ratio !== undefined && sample) {
+    // Use actual content ratio
+    const truncatedSample = sample.substring(0, 100) + '...';
+    return {
+      before: `<div class="wrapper">
+  <nav>Menu items...</nav>
+  <div class="content">${truncatedSample}</div>
+  <aside>Ads, related links...</aside>
+</div>
+<!-- Main content is only ${ratio}% of page -->`,
+      after: `<nav>Menu items...</nav>
+<main>
+  <article>
+    <h1>Article Title</h1>
+    ${truncatedSample}
+  </article>
+</main>
+<aside>Related content...</aside>
+<!-- Main content now ${Math.min(ratio + 30, 85)}% of page -->`
+    };
+  }
+  
+  // Fallback to generic example
+  return recTemplates.mainContent.example!;
+}
+
+/**
+ * Generate TTFB example with actual metrics
+ */
+function generateTtfbExample(actualTtfb?: number): { before: string; after: string } {
+  if (actualTtfb !== undefined) {
+    return {
+      before: `Server response time: ${actualTtfb}ms
+<!-- Current performance metrics -->`,
+      after: `Server response time: ${Math.min(actualTtfb * 0.3, 180)}ms with CDN
+Cache-Control: public, max-age=3600
+<!-- ${Math.round((1 - Math.min(actualTtfb * 0.3, 180) / actualTtfb) * 100)}% improvement -->`
+    };
+  }
+  return recTemplates.ttfb.example!;
+}
+
+/**
+ * Generate HTML size example
+ */
+function generateHtmlSizeExample(sizeKB?: number, sizeMB?: number): { before: string; after: string } {
+  if (sizeKB !== undefined && sizeMB !== undefined) {
+    return {
+      before: `Page size: ${sizeMB}MB (${sizeKB}KB)
+<!-- Includes inline styles, scripts, all comments loaded -->`,
+      after: `Page size: ${(sizeMB * 0.3).toFixed(1)}MB (${Math.round(sizeKB * 0.3)}KB)
+<!-- External CSS/JS, lazy-loaded comments, GZIP enabled -->`
+    };
+  }
+  return recTemplates.htmlSize.example!;
+}
+
+/**
+ * Generate paywall example
+ */
+function generatePaywallExample(hasPaywall?: boolean): { before: string; after: string } {
+  if (hasPaywall) {
+    return {
+      before: `<div class="paywall-blocked">
+  <h2>Subscribe to continue reading</h2>
+  <p>This content is for subscribers only.</p>
+</div>`,
+      after: `<article>
+  <div class="free-preview">
+    <h1>Article Title</h1>
+    <p>First 300 words of your article content here...</p>
+  </div>
+  <div class="paywall-prompt">
+    <p>Subscribe for full access to this article and more.</p>
+  </div>
+</article>
+<script type="application/ld+json">
+{
+  "@type": "Article",
+  "isAccessibleForFree": "True",
+  "hasPart": {
+    "@type": "WebPageElement",
+    "isAccessibleForFree": "True"
+  }
+}
+</script>`
+    };
+  }
+  return recTemplates.paywall.example!;
+}
+
+/**
  * Generate recommendations based on failed checks
  */
 export function generateRecommendations(
-  pillarResults: Record<string, Record<string, number>>
+  pillarResults: Record<string, Record<string, number>>,
+  extractedContent?: ExtractedContent
 ): Array<{
   metric: string;
   template: RecommendationTemplate;
@@ -339,6 +437,10 @@ export function generateRecommendations(
     pillar: string;
   }> = [];
 
+  // Create dynamic generator if content is available
+  const dynamicGenerator = extractedContent ? 
+    new DynamicRecommendationGenerator(extractedContent) : null;
+
   // Iterate through each pillar's results
   for (const [pillar, checks] of Object.entries(pillarResults)) {
     for (const [metric, score] of Object.entries(checks)) {
@@ -348,8 +450,38 @@ export function generateRecommendations(
         // Create a copy of the template to customize
         let template = { ...recTemplates[metric] };
         
-        // Customize recommendations with captured content
-        if (metric === 'listicleFormat' && structureContent.title) {
+        // Use dynamic generator if available
+        if (dynamicGenerator) {
+          try {
+            template = dynamicGenerator.generateRecommendation(metric, template);
+          } catch (error) {
+            console.error(`[Recommendations] Dynamic generation failed for ${metric}:`, error);
+            // Fall back to static template
+          }
+        } else {
+          // Fall back to existing static customization
+          // Customize recommendations with captured content from all modules
+          if (metric === 'ttfb' && retrievalDomain.actualTtfb !== undefined) {
+          template = {
+            ...template,
+            example: generateTtfbExample(retrievalDomain.actualTtfb),
+          };
+        } else if (metric === 'htmlSize' && retrievalDomain.htmlSizeKB !== undefined) {
+          template = {
+            ...template,
+            example: generateHtmlSizeExample(retrievalDomain.htmlSizeKB, retrievalDomain.htmlSizeMB),
+          };
+        } else if (metric === 'mainContent' && retrievalDomain.mainContentRatio !== undefined) {
+          template = {
+            ...template,
+            example: generateMainContentExample(retrievalDomain.mainContentRatio, retrievalDomain.mainContentSample),
+          };
+        } else if (metric === 'paywall' && retrievalDomain.hasPaywall) {
+          template = {
+            ...template,
+            example: generatePaywallExample(retrievalDomain.hasPaywall),
+          };
+        } else if (metric === 'listicleFormat' && structureContent.title) {
           template = {
             ...template,
             example: {
@@ -392,6 +524,7 @@ export function generateRecommendations(
             },
           };
         }
+        } // Close the else block for static customization
         
         recommendations.push({
           metric,

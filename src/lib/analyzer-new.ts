@@ -3,7 +3,8 @@ import * as cheerio from 'cheerio';
 import { validateAndNormalizeUrl } from '@/utils/validators';
 import { DEFAULT_HEADERS, TIMEOUTS } from '@/utils/constants';
 import { score, type ScoringResult } from './scorer-new';
-import type { PillarResults } from './types';
+import type { PillarResults, WebsiteProfile } from './types';
+import { ContentExtractor, type ExtractedContent } from './contentExtractor';
 
 // Import audit modules
 import * as retrieval from './audit/retrieval';
@@ -19,6 +20,8 @@ export interface AnalysisResultNew {
   timestamp: string;
   pageTitle?: string;
   pageDescription?: string;
+  websiteProfile?: WebsiteProfile;
+  extractedContent?: ExtractedContent;
 }
 
 export class AiSearchAnalyzer {
@@ -53,10 +56,24 @@ export class AiSearchAnalyzer {
       // Load HTML with Cheerio
       const $ = cheerio.load(html);
       
-      // Extract basic metadata
+      // Extract comprehensive metadata for website profile
       const pageTitle = $('title').text() || $('meta[property="og:title"]').attr('content') || '';
       const pageDescription = $('meta[name="description"]').attr('content') || 
                              $('meta[property="og:description"]').attr('content') || '';
+      
+      // Extract content for dynamic recommendations
+      let extractedContent;
+      try {
+        const contentExtractor = new ContentExtractor(html);
+        extractedContent = contentExtractor.extract();
+        console.log('[AiSearchAnalyzer] Content extracted successfully');
+      } catch (error) {
+        console.error('[AiSearchAnalyzer] Content extraction failed:', error);
+        // Continue without extracted content - will use static recommendations
+      }
+      
+      // Build website profile
+      const websiteProfile = this.buildWebsiteProfile(normalizedUrl, $, pageTitle, pageDescription);
 
       // Run all audit modules
       const pillarResults: PillarResults = {
@@ -67,8 +84,8 @@ export class AiSearchAnalyzer {
         RECENCY: await recency.run(html, headers),
       };
 
-      // Calculate scores
-      const scoringResult = score(pillarResults);
+      // Calculate scores with extracted content
+      const scoringResult = score(pillarResults, extractedContent);
 
       return {
         url: normalizedUrl,
@@ -77,6 +94,8 @@ export class AiSearchAnalyzer {
         timestamp: new Date().toISOString(),
         pageTitle,
         pageDescription,
+        websiteProfile,
+        extractedContent,
       };
     } catch (error) {
       console.error('[AiSearchAnalyzer] Analysis failed:', error);
@@ -115,5 +134,111 @@ export class AiSearchAnalyzer {
         throw new Error(`Network error: ${error.message}`);
       }
     }
+  }
+
+  private buildWebsiteProfile(url: string, $: cheerio.CheerioAPI, title: string, description: string): WebsiteProfile {
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname;
+    
+    // Detect language
+    const language = $('html').attr('lang') || 
+                    $('meta[property="og:locale"]').attr('content') || 
+                    $('meta[name="language"]').attr('content') || 
+                    'en';
+    
+    // Count words in main content
+    const mainContent = $('main').text() || $('article').text() || $('body').text();
+    const wordCount = mainContent.split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Check for images
+    const hasImages = $('img').length > 0;
+    
+    // Get OpenGraph image
+    const ogImage = $('meta[property="og:image"]').attr('content') || '';
+    
+    // Detect content type based on various signals
+    const contentType = this.detectContentType($, urlObj, title);
+    
+    // Extract primary topics (from headings and key content)
+    const primaryTopics = this.extractPrimaryTopics($);
+    
+    return {
+      domain,
+      title: title || domain,
+      description: description || `Analysis of ${domain}`,
+      language: language.split('-')[0], // Just the language code, not locale
+      contentType,
+      primaryTopics,
+      wordCount,
+      hasImages,
+      hasFavicon: this.checkFavicon($),
+      ogImage,
+    };
+  }
+
+  private detectContentType($: cheerio.CheerioAPI, urlObj: URL, title: string): WebsiteProfile['contentType'] {
+    const path = urlObj.pathname.toLowerCase();
+    const bodyText = $('body').text().toLowerCase();
+    
+    // E-commerce indicators
+    if ($('.product, .price, .add-to-cart, .cart, .checkout').length > 0 ||
+        bodyText.includes('add to cart') || bodyText.includes('buy now')) {
+      return 'ecommerce';
+    }
+    
+    // News indicators
+    if ($('.article-date, .publish-date, .byline, .news-category').length > 0 ||
+        path.includes('/news/') || path.includes('/article/') ||
+        title.toLowerCase().includes('news')) {
+      return 'news';
+    }
+    
+    // Documentation indicators
+    if ($('.docs, .documentation, .api-reference, .code-sample').length > 0 ||
+        path.includes('/docs/') || path.includes('/documentation/') ||
+        path.includes('/api/')) {
+      return 'documentation';
+    }
+    
+    // Blog indicators
+    if ($('.blog-post, .post-date, .author-bio, .comments').length > 0 ||
+        path.includes('/blog/') || path.includes('/post/')) {
+      return 'blog';
+    }
+    
+    // Corporate/business site
+    if ($('.about-us, .services, .team, .contact-us').length > 0 ||
+        bodyText.includes('about us') || bodyText.includes('our services')) {
+      return 'corporate';
+    }
+    
+    return 'other';
+  }
+
+  private extractPrimaryTopics($: cheerio.CheerioAPI): string[] {
+    const topics = new Set<string>();
+    
+    // Extract from headings
+    $('h1, h2, h3').each((_, el) => {
+      const text = $(el).text().trim();
+      // Extract key phrases (2-3 word combinations)
+      const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      if (words.length >= 2) {
+        topics.add(words.slice(0, 3).join(' '));
+      }
+    });
+    
+    // Extract from meta keywords if available
+    const keywords = $('meta[name="keywords"]').attr('content');
+    if (keywords) {
+      keywords.split(',').slice(0, 3).forEach(kw => topics.add(kw.trim()));
+    }
+    
+    // Return top 5 topics
+    return Array.from(topics).slice(0, 5);
+  }
+
+  private checkFavicon($: cheerio.CheerioAPI): boolean {
+    return $('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]').length > 0;
   }
 }
