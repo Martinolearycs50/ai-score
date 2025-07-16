@@ -28,18 +28,24 @@ AI assistant context for AI Search Optimizer. This file contains stable architec
 
 ### Directory Structure
 ```
-app/
-├── page.tsx              # Homepage
-├── layout.tsx            # Root layout
-└── api/analyze/route.ts  # Analysis endpoint
-
-components/               # UI components
-lib/
-├── analyzer.ts          # Core WebsiteAnalyzer class
-├── scorer.ts            # Scoring logic
-└── types.ts             # TypeScript definitions
-
-utils/                   # Helpers
+src/
+├── app/
+│   ├── page.tsx              # Homepage with comparison mode
+│   ├── layout.tsx            # Root layout
+│   └── api/analyze/route.ts  # Analysis endpoint
+│
+├── components/               # UI components
+│   ├── UrlForm.tsx          # URL input (single/comparison modes)
+│   ├── ComparisonView.tsx   # Side-by-side comparison display
+│   ├── ScoreDifference.tsx  # Visual score difference indicators
+│   └── PillarScoreDisplay.tsx # Score display (normal/compact)
+│
+├── lib/
+│   ├── analyzer-new.ts      # Core AiSearchAnalyzer class
+│   ├── scorer-new.ts        # 5-pillar scoring logic
+│   └── types.ts             # TypeScript definitions
+│
+└── utils/                   # Helpers
 ```
 
 ### Scoring System (100 points total)
@@ -122,6 +128,12 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-16: Added website comparison feature
+  - Compare two websites side-by-side with visual indicators
+  - New ComparisonView component for detailed comparison display
+  - ScoreDifference component shows score differences with arrows
+  - Responsive design: side-by-side on desktop, stacked on mobile
+  - Fixed pillar display issues in comparison view
 - 2025-07-15: Fixed local development server setup
   - Resolved CSS import issues by switching to Next.js font optimization for Inter font
   - Added development-only debug logging to frontend and API

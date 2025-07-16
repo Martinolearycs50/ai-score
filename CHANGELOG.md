@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-07-16
+
+### Added
+- Website comparison feature for side-by-side analysis
+  - Compare two websites simultaneously
+  - Visual score difference indicators (green/red arrows)
+  - Detailed pillar-by-pillar comparison
+  - Winner/loser announcement with total score difference
+  - Responsive design (side-by-side on desktop, stacked on mobile)
+- New components:
+  - `ComparisonView`: Handles comparison display logic
+  - `ScoreDifference`: Visual indicators for score differences
+- Compact mode for `PillarScoreDisplay` component
+- Toggle between single analysis and comparison modes
+
+### Fixed
+- Comparison view pillar display showing array indices instead of names
+- NaN values in score calculations for comparison view
+- Proper pillar matching between compared websites
+
 ## [2.0.0] - 2025-07-15
 
 ### Changed

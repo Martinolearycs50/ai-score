@@ -10,6 +10,7 @@ Instantly analyze any website to see how well it's optimized for AI search engin
 
 - **🤖 AI Platform Analysis**: Comprehensive scoring for ChatGPT, Claude, Perplexity, and Gemini
 - **📊 5-Pillar AI-First Scoring**: 100-point system optimized for AI retrieval and comprehension
+- **🔍 Website Comparison**: Compare two websites side-by-side to benchmark performance
 - **⚡ Instant Results**: Get your analysis in seconds
 - **💡 Actionable Insights**: Specific recommendations with examples for improvement
 - **🎨 Clean Interface**: Professional, minimalist design for clarity
@@ -51,6 +52,23 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 ```
+
+## 🎯 Usage
+
+### Single Website Analysis
+1. Enter a website URL in the input field
+2. Click "Analyze" to get instant results
+3. View your AI Search Score and detailed breakdown
+4. Follow recommendations to improve your score
+
+### Website Comparison
+1. Click "Compare Websites" to switch to comparison mode
+2. Enter two website URLs to compare
+3. Click "Compare" to analyze both sites
+4. View side-by-side results with visual indicators:
+   - Green arrows (↑) indicate better performance
+   - Red arrows (↓) indicate lower performance
+   - See detailed pillar-by-pillar comparison
 
 ## 📏 AI-First Scoring System
 
