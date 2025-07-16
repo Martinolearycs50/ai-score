@@ -121,11 +121,11 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
   const theme = getEmotionalTheme(result.aiSearchScore);
 
   useEffect(() => {
-    // Progression through stages with better pacing
+    // Progression through stages with extended timing for readability
     const timers = [
-      setTimeout(() => setStage('reveal'), 2000),  // Increased from 1s
-      setTimeout(() => setStage('details'), 6000), // Increased from 3.5s
-      setTimeout(() => setStage('complete'), 9000), // Increased from 4.5s
+      setTimeout(() => setStage('reveal'), 2000),    // 2s wait before reveal
+      setTimeout(() => setStage('details'), 8000),   // 6s to read reveal content
+      setTimeout(() => setStage('complete'), 13000), // 5s to read details
     ];
 
     return () => timers.forEach(clearTimeout);

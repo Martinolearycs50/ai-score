@@ -9,6 +9,7 @@ import AIRecommendationCard from '@/components/AIRecommendationCard';
 import FriendlyRecommendationCard from '@/components/FriendlyRecommendationCard';
 import ComparisonView from '@/components/ComparisonView';
 import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
+import EmotionalComparisonReveal from '@/components/EmotionalComparisonReveal';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { recTemplates } from '@/lib/recommendations';
 
@@ -95,7 +96,7 @@ export default function Home() {
           behavior: 'smooth',
           block: 'start'
         });
-      }, 10000); // Extended wait for better paced emotional reveal
+      }, 14000); // Wait for full emotional reveal (13s) plus buffer
 
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -344,7 +345,9 @@ export default function Home() {
             </div>
 
             <div id="results" className="max-w-6xl mx-auto">
-              <ComparisonView results={[comparisonState.results[0], comparisonState.results[1]]} />
+              <EmotionalComparisonReveal results={[comparisonState.results[0], comparisonState.results[1]]}>
+                <ComparisonView results={[comparisonState.results[0], comparisonState.results[1]]} />
+              </EmotionalComparisonReveal>
             </div>
           </div>
         )}
