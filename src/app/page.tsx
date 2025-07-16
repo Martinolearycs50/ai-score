@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
 import PillarScoreDisplay from '@/components/PillarScoreDisplay';
 import AIRecommendationCard from '@/components/AIRecommendationCard';
 import ComparisonView from '@/components/ComparisonView';
+import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { recTemplates } from '@/lib/recommendations';
 
@@ -86,13 +88,13 @@ export default function Home() {
         error: null
       });
 
-      // Smooth scroll to results
+      // Smooth scroll to results after emotional reveal completes
       setTimeout(() => {
         document.getElementById('results')?.scrollIntoView({ 
           behavior: 'smooth',
           block: 'start'
         });
-      }, 100);
+      }, 5000); // Wait for emotional reveal to complete
 
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -253,45 +255,69 @@ export default function Home() {
               </button>
             </div>
 
-            <div id="results" className="max-w-4xl mx-auto space-y-8">
-              <PillarScoreDisplay result={analysisState.result} />
-              
-              {/* Enhanced Recommendations Section */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-medium text-center mb-8" style={{ color: 'var(--foreground)' }}>
-                  Recommendations
-                </h2>
-                
-                {analysisState.result.scoringResult.recommendations.length === 0 ? (
-                  <div className="card p-12 text-center">
-                    <p className="text-lg font-medium mb-2" style={{ color: 'var(--foreground)' }}>
-                      Excellent AI Optimization!
-                    </p>
-                    <p className="text-muted">
-                      Your website is well-optimized for AI search platforms.
-                    </p>
-                  </div>
-                ) : (
+            <div id="results" className="max-w-4xl mx-auto">
+              <EmotionalResultsReveal result={analysisState.result}>
+                <div className="space-y-8">
+                  <PillarScoreDisplay result={analysisState.result} />
+                  
+                  {/* Enhanced Recommendations Section */}
                   <div className="space-y-4">
-                    {analysisState.result.scoringResult.recommendations.map((rec, index) => {
-                      // Get the full template data if available
-                      const template = recTemplates[rec.metric];
-                      
-                      return (
-                        <AIRecommendationCard
-                          key={index}
-                          metric={rec.metric}
-                          why={template?.why || rec.why}
-                          fix={template?.fix || rec.fix}
-                          gain={rec.gain}
-                          pillar={rec.pillar}
-                          example={template?.example}
-                        />
-                      );
-                    })}
+                    <h2 className="text-2xl font-medium text-center mb-8" style={{ color: 'var(--foreground)' }}>
+                      Recommendations
+                    </h2>
+                    
+                    {analysisState.result.scoringResult.recommendations.length === 0 ? (
+                      <div className="card p-12 text-center">
+                        <p className="text-lg font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                          Excellent AI Optimization!
+                        </p>
+                        <p className="text-muted">
+                          Your website is well-optimized for AI search platforms.
+                        </p>
+                      </div>
+                    ) : (
+                      <motion.div 
+                        className="space-y-4"
+                        initial="hidden"
+                        animate="show"
+                        variants={{
+                          hidden: { opacity: 0 },
+                          show: {
+                            opacity: 1,
+                            transition: {
+                              staggerChildren: 0.1
+                            }
+                          }
+                        }}
+                      >
+                        {analysisState.result.scoringResult.recommendations.map((rec, index) => {
+                          // Get the full template data if available
+                          const template = recTemplates[rec.metric];
+                          
+                          return (
+                            <motion.div
+                              key={index}
+                              variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                show: { opacity: 1, y: 0 }
+                              }}
+                            >
+                              <AIRecommendationCard
+                                metric={rec.metric}
+                                why={template?.why || rec.why}
+                                fix={template?.fix || rec.fix}
+                                gain={rec.gain}
+                                pillar={rec.pillar}
+                                example={template?.example}
+                              />
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              </EmotionalResultsReveal>
             </div>
           </div>
         )}

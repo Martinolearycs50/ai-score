@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 
 interface PillarScoreDisplayProps {
@@ -160,16 +161,22 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
 
       {/* Pillar Breakdown */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-center mb-6" style={{ color: 'var(--foreground)' }}>
+        <motion.h3 
+          className="text-lg font-medium text-center mb-6" 
+          style={{ color: 'var(--foreground)' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           Score Breakdown by Pillar
-        </h3>
+        </motion.h3>
         
-        {scoringResult.breakdown.map((pillar) => {
+        {scoringResult.breakdown.map((pillar, index) => {
           const info = PILLAR_INFO[pillar.pillar];
           const percentage = (pillar.earned / pillar.max) * 100;
           
           return (
-            <div
+            <motion.div
               key={pillar.pillar}
               className="card p-6 transition-all cursor-pointer"
               onMouseEnter={() => setHoveredPillar(pillar.pillar)}
@@ -177,6 +184,9 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
               style={{
                 borderColor: hoveredPillar === pillar.pillar ? 'var(--accent)' : 'transparent',
               }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 * index, duration: 0.5 }}
             >
               <div className="flex items-start gap-4">
                 <div className="text-3xl">{info.icon}</div>
@@ -234,13 +244,18 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Platform Readiness - Updated */}
-      <div className="card p-8">
+      <motion.div 
+        className="card p-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.5 }}
+      >
         <h3 className="text-lg font-medium mb-6 text-center" style={{ color: 'var(--foreground)' }}>
           AI Platform Insights
         </h3>
@@ -282,7 +297,7 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
