@@ -198,7 +198,7 @@ export default function UrlForm({
             onKeyPress={handleKeyPress}
             placeholder="Enter website URL"
             disabled={isLoading || disabled}
-            className="search-input pr-32"
+            className="search-input pr-36"
             style={{ 
               color: 'var(--foreground)',
               opacity: isLoading || disabled ? 0.5 : 1
@@ -211,7 +211,7 @@ export default function UrlForm({
             type="button"
             onClick={handleSubmit}
             disabled={isLoading || disabled || !url.trim()}
-            className="btn-primary absolute right-2 top-1/2 -translate-y-1/2"
+            className="btn-primary absolute right-4 top-1/2 -translate-y-1/2"
             style={{
               opacity: !url.trim() || isLoading || disabled ? 0.5 : 1,
               cursor: !url.trim() || isLoading || disabled ? 'not-allowed' : 'pointer'

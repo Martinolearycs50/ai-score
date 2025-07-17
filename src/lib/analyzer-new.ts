@@ -3,7 +3,7 @@ import * as cheerio from 'cheerio';
 import { validateAndNormalizeUrl } from '@/utils/validators';
 import { DEFAULT_HEADERS, TIMEOUTS } from '@/utils/constants';
 import { score, type ScoringResult } from './scorer-new';
-import type { PillarResults, WebsiteProfile } from './types';
+import type { PillarResults, WebsiteProfile, PageType } from './types';
 import { ContentExtractor, type ExtractedContent } from './contentExtractor';
 
 // Import audit modules
@@ -64,7 +64,7 @@ export class AiSearchAnalyzer {
       // Extract content for dynamic recommendations
       let extractedContent;
       try {
-        const contentExtractor = new ContentExtractor(html);
+        const contentExtractor = new ContentExtractor(html, normalizedUrl);
         extractedContent = contentExtractor.extract();
         console.log('[AiSearchAnalyzer] Content extracted successfully');
       } catch (error) {
@@ -73,7 +73,7 @@ export class AiSearchAnalyzer {
       }
       
       // Build website profile
-      const websiteProfile = this.buildWebsiteProfile(normalizedUrl, $, pageTitle, pageDescription);
+      const websiteProfile = this.buildWebsiteProfile(normalizedUrl, $, pageTitle, pageDescription, extractedContent?.pageType || 'general');
 
       // Run all audit modules
       const pillarResults: PillarResults = {
@@ -136,7 +136,7 @@ export class AiSearchAnalyzer {
     }
   }
 
-  private buildWebsiteProfile(url: string, $: cheerio.CheerioAPI, title: string, description: string): WebsiteProfile {
+  private buildWebsiteProfile(url: string, $: cheerio.CheerioAPI, title: string, description: string, pageType: PageType): WebsiteProfile {
     const urlObj = new URL(url);
     const domain = urlObj.hostname;
     
@@ -173,6 +173,7 @@ export class AiSearchAnalyzer {
       hasImages,
       hasFavicon: this.checkFavicon($),
       ogImage,
+      pageType,
     };
   }
 

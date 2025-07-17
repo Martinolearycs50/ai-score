@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import type { WebsiteProfile } from '@/lib/types';
+import type { WebsiteProfile, PageType } from '@/lib/types';
 
 interface WebsiteProfileCardProps {
   profile: WebsiteProfile;
@@ -17,8 +17,21 @@ const CONTENT_TYPE_LABELS = {
   other: { label: 'Website', icon: '🌐', color: '#6B7280' },
 };
 
+const PAGE_TYPE_INFO: Record<PageType, { icon: string; label: string; tip: string }> = {
+  homepage: { icon: '🏠', label: 'Homepage', tip: 'Main entry point for your site' },
+  article: { icon: '📝', label: 'Article/Blog', tip: 'Content-focused page' },
+  product: { icon: '🛍️', label: 'Product Page', tip: 'Individual product showcase' },
+  category: { icon: '📂', label: 'Category Page', tip: 'Product or content listing' },
+  about: { icon: 'ℹ️', label: 'About Page', tip: 'Company or personal information' },
+  contact: { icon: '📧', label: 'Contact Page', tip: 'Contact information and forms' },
+  documentation: { icon: '📚', label: 'Documentation', tip: 'Technical or help content' },
+  search: { icon: '🔍', label: 'Search Results', tip: 'Search or filter results' },
+  general: { icon: '📄', label: 'General Page', tip: 'Standard content page' },
+};
+
 export default function WebsiteProfileCard({ profile, score }: WebsiteProfileCardProps) {
   const contentTypeInfo = CONTENT_TYPE_LABELS[profile.contentType || 'other'];
+  const pageTypeInfo = PAGE_TYPE_INFO[profile.pageType || 'general'];
   
   return (
     <motion.div
@@ -108,6 +121,19 @@ export default function WebsiteProfileCard({ profile, score }: WebsiteProfileCar
             </span>
           </div>
           
+          <div className="flex items-center gap-2">
+            <span 
+              className="px-3 py-1 text-xs font-medium rounded-full"
+              style={{ 
+                backgroundColor: 'var(--accent)' + '10',
+                color: 'var(--accent)'
+              }}
+              title={pageTypeInfo.tip}
+            >
+              {pageTypeInfo.icon} {pageTypeInfo.label}
+            </span>
+          </div>
+          
           {profile.language && profile.language !== 'en' && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted">Language:</span>
@@ -141,6 +167,9 @@ export default function WebsiteProfileCard({ profile, score }: WebsiteProfileCar
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
+        <p className="text-sm text-muted mb-2">
+          <strong>Page Analysis:</strong> We analyzed this {pageTypeInfo.label.toLowerCase()} specifically
+        </p>
         <p className="text-sm" style={{ color: contentTypeInfo.color }}>
           {getPersonalizedMessage(profile.contentType || 'other', score)}
         </p>

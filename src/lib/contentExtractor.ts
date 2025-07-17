@@ -1,10 +1,12 @@
 import * as cheerio from 'cheerio';
+import type { PageType } from './types';
 
 export interface ExtractedContent {
   // Core content identification
   primaryTopic: string;
   detectedTopics: string[];
   businessType: 'payment' | 'ecommerce' | 'blog' | 'news' | 'documentation' | 'corporate' | 'educational' | 'other';
+  pageType: PageType;
   
   // Extracted content samples
   contentSamples: {
@@ -45,10 +47,12 @@ export interface ExtractedContent {
 export class ContentExtractor {
   private $: cheerio.CheerioAPI;
   private contentText: string;
+  private pageUrl?: string;
   
-  constructor(html: string) {
+  constructor(html: string, pageUrl?: string) {
     try {
       this.$ = cheerio.load(html || '');
+      this.pageUrl = pageUrl;
       // Get main content area or fallback to body
       this.contentText = this.$('main, article, [role="main"], .content, #content').text() || this.$('body').text() || '';
       
@@ -73,11 +77,13 @@ export class ContentExtractor {
       const headings = this.extractHeadings();
       const topics = this.detectTopics(title, headings);
       const businessType = this.detectBusinessType(topics);
+      const pageType = this.detectPageType();
       
       return {
         primaryTopic: topics.primary,
         detectedTopics: topics.all,
         businessType,
+        pageType,
         contentSamples: {
           title,
           headings,
@@ -104,6 +110,7 @@ export class ContentExtractor {
       primaryTopic: 'general content',
       detectedTopics: [],
       businessType: 'other',
+      pageType: 'general',
       contentSamples: {
         title: '',
         headings: [],
@@ -606,6 +613,102 @@ export class ContentExtractor {
     }
   }
   
+  /**
+   * Detect the type of page based on URL patterns and DOM analysis
+   */
+  private detectPageType(): PageType {
+    try {
+      // URL-based detection
+      let path = '';
+      if (this.pageUrl) {
+        const url = new URL(this.pageUrl);
+        path = url.pathname.toLowerCase();
+      }
+      
+      // Homepage detection
+      if (path === '/' || path === '' || path === '/index' || path === '/index.html' || path === '/index.php') {
+        return 'homepage';
+      }
+      
+      // Check for article/blog patterns
+      if (this.hasArticleSignals(path)) {
+        return 'article';
+      }
+      
+      // Product page detection
+      if (path.includes('/product') || path.includes('/item') || path.includes('/p/') ||
+          this.$('.product-page, .product-detail, .product-info').length > 0 ||
+          this.$('[itemtype*="Product"]').length > 0) {
+        return 'product';
+      }
+      
+      // Category/listing page detection
+      if (path.includes('/category') || path.includes('/categories') || path.includes('/shop') ||
+          path.includes('/collection') || path.includes('/catalog') ||
+          this.$('.category-grid, .product-grid, .listing-grid').length > 0) {
+        return 'category';
+      }
+      
+      // About page detection
+      if (path.includes('/about') || path.includes('/team') || path.includes('/company') ||
+          path.includes('/who-we-are') || path.includes('/our-story')) {
+        return 'about';
+      }
+      
+      // Contact page detection
+      if (path.includes('/contact') || path.includes('/get-in-touch') || path.includes('/reach-us') ||
+          this.$('form[action*="contact"], form[action*="mail"]').length > 0) {
+        return 'contact';
+      }
+      
+      // Documentation detection
+      if (path.includes('/docs') || path.includes('/documentation') || path.includes('/api') ||
+          path.includes('/guide') || path.includes('/manual') || path.includes('/wiki') ||
+          this.$('.docs-content, .documentation, .api-reference').length > 0) {
+        return 'documentation';
+      }
+      
+      // Search results page detection
+      if (path.includes('/search') || path.includes('/results') || 
+          this.pageUrl?.includes('q=') || this.pageUrl?.includes('query=') ||
+          this.$('.search-results, .results-list').length > 0) {
+        return 'search';
+      }
+      
+      // If none match, return general
+      return 'general';
+      
+    } catch (error) {
+      console.warn('[ContentExtractor] detectPageType failed:', error);
+      return 'general';
+    }
+  }
+  
+  /**
+   * Check if URL or content indicates an article/blog post
+   */
+  private hasArticleSignals(path: string): boolean {
+    // URL patterns for articles
+    if (path.includes('/blog/') || path.includes('/post/') || path.includes('/article/') ||
+        path.includes('/news/') || path.includes('/story/')) {
+      return true;
+    }
+    
+    // Date patterns in URL (e.g., /2023/07/article-title)
+    if (path.match(/\/\d{4}\/\d{2}\//)) {
+      return true;
+    }
+    
+    // Check DOM for article indicators
+    if (this.$('article, .article, .post, .blog-post').length > 0 ||
+        this.$('[itemtype*="Article"], [itemtype*="BlogPosting"]').length > 0 ||
+        this.$('.publish-date, .post-date, .article-date, .byline, .author-info').length > 0) {
+      return true;
+    }
+    
+    return false;
+  }
+
   private isCommonWord(word: string): boolean {
     const common = [
       'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',

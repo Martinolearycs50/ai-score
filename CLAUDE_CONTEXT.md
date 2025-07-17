@@ -136,6 +136,14 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-17: Implemented page type detection - v2.5.0
+  - Added PageType type definition (homepage, article, product, category, about, contact, documentation, search, general)
+  - Created detectPageType() method in ContentExtractor with URL pattern and DOM analysis
+  - Integrated page type detection through analyzer-new.ts pipeline
+  - Updated WebsiteProfileCard to display page type with icons and clear messaging
+  - Updated homepage text: "AI Search Score" with subtitle "Want AI tools like ChatGPT to mention your site? This shows you how."
+  - Added clarification about single-page analysis throughout UI
+  - Fixed CSS button positioning issue (right-4, height 40px, font-size 0.875rem)
 - 2025-07-16 (evening): Implemented content-aware recommendations - v2.4.0
   - Created ContentExtractor module to analyze page content and detect business type
   - Built DynamicRecommendationGenerator for personalized recommendations

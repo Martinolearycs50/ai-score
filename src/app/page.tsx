@@ -194,7 +194,7 @@ export default function Home() {
       {/* Header */}
       <header className="absolute top-0 left-0 p-8">
         <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          AI Search Optimizer
+          AI Search Score
         </span>
       </header>
 
@@ -204,13 +204,13 @@ export default function Home() {
           <div className="min-h-screen flex flex-col items-center justify-center px-6">
             <div className="w-full max-w-2xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
-                AI Search Optimizer
+                AI Search Score
               </h1>
               <p className="text-xl mb-4 text-muted">
-                Optimize your content for ChatGPT, Claude, Perplexity & more
+                Want AI tools like ChatGPT to mention your site? This shows you how.
               </p>
               <p className="text-sm mb-12 text-muted">
-                See how AI platforms understand and rank your content
+                We analyze individual pages, not entire websites. Try your homepage, a blog post, or product page.
               </p>
               
               <UrlForm 

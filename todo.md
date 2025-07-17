@@ -11,6 +11,7 @@
 
 ### High Priority
 - [x] Implement content-aware recommendations based on actual website content (COMPLETED - v2.4.0)
+- [x] Add page type detection (homepage, article, product, etc.) for better analysis (COMPLETED - v2.5.0)
 - [ ] Implement Redis-based rate limiting for production (currently using in-memory)
 - [ ] Add URL analysis history/cache to avoid re-analyzing same URLs
 - [ ] Implement batch URL analysis capability

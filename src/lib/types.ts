@@ -1,5 +1,8 @@
 // Types and interfaces for the AI Search Optimizer
 
+// Page type detection
+export type PageType = 'homepage' | 'article' | 'product' | 'category' | 'about' | 'contact' | 'documentation' | 'search' | 'general';
+
 // API Request
 export interface AnalysisRequest {
   url: string;
@@ -143,4 +146,5 @@ export interface WebsiteProfile {
   hasImages?: boolean;
   hasFavicon?: boolean;
   ogImage?: string;
+  pageType: PageType; // The type of page being analyzed
 }
