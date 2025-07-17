@@ -329,17 +329,17 @@ export class NarrativeEngine {
    * Identify the key missing element for this site
    */
   private getKeyMissingElement(): string {
-    const breakdown = this.analysisResult.scoringResult.breakdown;
+    const scoreBreakdown = this.analysisResult.scoringResult.pillars;
     
     // Find the weakest pillar
     let weakestPillar = '';
     let lowestPercentage = 100;
     
-    breakdown.forEach((pillar) => {
-      const percentage = (pillar.earned / pillar.max) * 100;
+    Object.entries(scoreBreakdown).forEach(([pillar, data]) => {
+      const percentage = (data.score / data.maxScore) * 100;
       if (percentage < lowestPercentage) {
         lowestPercentage = percentage;
-        weakestPillar = pillar.pillar;
+        weakestPillar = pillar;
       }
     });
     
@@ -358,11 +358,10 @@ export class NarrativeEngine {
    * Get top 3 actionable steps based on analysis
    */
   private getTopActionSteps(): string[] {
-    // Get top 3 recommendations by gain
     const recommendations = this.analysisResult.scoringResult.recommendations
-      .sort((a, b) => b.gain - a.gain)
+      .filter(rec => rec.priority === 'high')
       .slice(0, 3)
-      .map(rec => rec.metric);
+      .map(rec => rec.title);
     
     if (recommendations.length < 3) {
       // Add some from business persona if needed

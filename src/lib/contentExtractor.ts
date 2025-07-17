@@ -121,7 +121,14 @@ export class ContentExtractor {
     ];
     
     // Remove elements we want to skip
-    elements.find(skipSelectors.join(', ')).remove();
+    try {
+      const skipElements = elements.find(skipSelectors.join(', '));
+      if (skipElements && skipElements.length > 0) {
+        skipElements.remove();
+      }
+    } catch (e) {
+      // Ignore errors when removing skip elements
+    }
     
     // Process text nodes with proper spacing
     const processNode = (node: any) => {
