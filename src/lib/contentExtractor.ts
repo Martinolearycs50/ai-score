@@ -8,6 +8,26 @@ export interface ExtractedContent {
   businessType: 'payment' | 'ecommerce' | 'blog' | 'news' | 'documentation' | 'corporate' | 'educational' | 'other';
   pageType: PageType;
   
+  // Enhanced business attributes for personalization
+  businessAttributes: {
+    industry: string | null;
+    targetAudience: string | null;
+    mainProduct: string | null;
+    mainService: string | null;
+    uniqueValue: string | null;
+    missionStatement: string | null;
+    yearFounded: string | null;
+    location: string | null;
+    teamSize: string | null;
+  };
+  
+  // Competitor intelligence
+  competitorMentions: Array<{
+    name: string;
+    context: string;
+    sentiment: 'positive' | 'negative' | 'neutral';
+  }>;
+  
   // Extracted content samples
   contentSamples: {
     title: string;
@@ -101,8 +121,7 @@ export class ContentExtractor {
     ];
     
     // Remove elements we want to skip
-    const skipElements = elements.find(skipSelectors.join(', '));
-    skipElements.remove();
+    elements.find(skipSelectors.join(', ')).remove();
     
     // Process text nodes with proper spacing
     const processNode = (node: any) => {
@@ -199,6 +218,18 @@ export class ContentExtractor {
           detectedTopics: ['error'],
           businessType: 'other',
           pageType: 'general',
+          businessAttributes: {
+            industry: null,
+            targetAudience: null,
+            mainProduct: null,
+            mainService: null,
+            uniqueValue: null,
+            missionStatement: null,
+            yearFounded: null,
+            location: null,
+            teamSize: null,
+          },
+          competitorMentions: [],
           contentSamples: {
             title: this.extractTitle() || 'Error',
             headings: [],
@@ -236,6 +267,8 @@ export class ContentExtractor {
         detectedTopics: topics.all,
         businessType,
         pageType,
+        businessAttributes: this.extractBusinessAttributes(),
+        competitorMentions: this.extractCompetitorMentions(),
         contentSamples: {
           title,
           headings,
@@ -263,6 +296,18 @@ export class ContentExtractor {
       detectedTopics: [],
       businessType: 'other',
       pageType: 'general',
+      businessAttributes: {
+        industry: null,
+        targetAudience: null,
+        mainProduct: null,
+        mainService: null,
+        uniqueValue: null,
+        missionStatement: null,
+        yearFounded: null,
+        location: null,
+        teamSize: null,
+      },
+      competitorMentions: [],
       contentSamples: {
         title: '',
         headings: [],
@@ -912,6 +957,212 @@ export class ContentExtractor {
     }
     
     return false;
+  }
+  
+  /**
+   * Extract detailed business attributes for personalization
+   */
+  private extractBusinessAttributes(): ExtractedContent['businessAttributes'] {
+    try {
+      const attributes: ExtractedContent['businessAttributes'] = {
+        industry: null,
+        targetAudience: null,
+        mainProduct: null,
+        mainService: null,
+        uniqueValue: null,
+        missionStatement: null,
+        yearFounded: null,
+        location: null,
+        teamSize: null,
+      };
+      
+      const text = this.contentText.toLowerCase();
+      const $ = this.$;
+      
+      // Extract industry
+      const industryPatterns = [
+        /(?:we are|we're|company is|business is)\s+(?:a|an)?\s*([\w\s]+)\s+(?:company|business|startup|agency|firm)/i,
+        /(?:leading|premier|top)\s+([\w\s]+)\s+(?:provider|solution|platform|service)/i,
+        /in the\s+([\w\s]+)\s+(?:industry|sector|space|market)/i
+      ];
+      
+      for (const pattern of industryPatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.industry = match[1].trim();
+          break;
+        }
+      }
+      
+      // Extract target audience
+      const audiencePatterns = [
+        /(?:built for|designed for|made for|created for)\s+([\w\s,]+)/i,
+        /(?:help|helps|helping|serve|serves|serving)\s+([\w\s,]+)\s+(?:to|with|by)/i,
+        /for\s+(businesses|companies|enterprises|startups|developers|teams|professionals|individuals)\s+(?:who|that)/i
+      ];
+      
+      for (const pattern of audiencePatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.targetAudience = match[1].trim().substring(0, 100);
+          break;
+        }
+      }
+      
+      // Extract main product/service
+      const productNames = this.extractProductNames();
+      if (productNames.length > 0) {
+        attributes.mainProduct = productNames[0];
+      }
+      
+      // Look for service descriptions
+      const servicePatterns = [
+        /we\s+(?:provide|offer|deliver)\s+([\w\s]+)\s+(?:services|solutions)/i,
+        /our\s+([\w\s]+)\s+(?:service|solution|platform|software)/i
+      ];
+      
+      for (const pattern of servicePatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.mainService = match[1].trim();
+          break;
+        }
+      }
+      
+      // Extract unique value proposition
+      const valuePatterns = [
+        /(?:only|first|unique)\s+([^.]+)\s+(?:that|to|in the)/i,
+        /unlike\s+(?:other|traditional)\s+[\w\s]+,\s+(?:we|our)\s+([^.]+)/i,
+        /what makes us different[:\s]+([^.]+)/i
+      ];
+      
+      for (const pattern of valuePatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.uniqueValue = match[1].trim().substring(0, 200);
+          break;
+        }
+      }
+      
+      // Extract mission statement
+      const missionPatterns = [
+        /(?:our mission|mission is|we believe)\s*[:\s]+([^.]+)/i,
+        /(?:committed to|dedicated to)\s+([^.]+)/i
+      ];
+      
+      for (const pattern of missionPatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.missionStatement = match[1].trim().substring(0, 200);
+          break;
+        }
+      }
+      
+      // Extract year founded
+      const yearMatch = this.contentText.match(/(?:founded|established|started|since)\s+(?:in\s+)?(\d{4})/i);
+      if (yearMatch) {
+        attributes.yearFounded = yearMatch[1];
+      }
+      
+      // Extract location
+      const locationPatterns = [
+        /(?:based in|located in|headquarters in)\s+([\w\s,]+)/i,
+        /(?:offices in|presence in)\s+([\w\s,]+)/i
+      ];
+      
+      for (const pattern of locationPatterns) {
+        const match = this.contentText.match(pattern);
+        if (match) {
+          attributes.location = match[1].trim().substring(0, 100);
+          break;
+        }
+      }
+      
+      // Extract team size
+      const teamMatch = this.contentText.match(/(\d+[\+]?)\s*(?:employees|team members|people)/i);
+      if (teamMatch) {
+        attributes.teamSize = teamMatch[1];
+      }
+      
+      return attributes;
+    } catch (error) {
+      console.warn('[ContentExtractor] extractBusinessAttributes failed:', error);
+      return {
+        industry: null,
+        targetAudience: null,
+        mainProduct: null,
+        mainService: null,
+        uniqueValue: null,
+        missionStatement: null,
+        yearFounded: null,
+        location: null,
+        teamSize: null,
+      };
+    }
+  }
+  
+  /**
+   * Extract competitor mentions for competitive intelligence
+   */
+  private extractCompetitorMentions(): ExtractedContent['competitorMentions'] {
+    try {
+      const mentions: ExtractedContent['competitorMentions'] = [];
+      const comparisons = this.extractComparisons();
+      
+      // Look for direct competitor mentions
+      const competitorPatterns = [
+        /(?:unlike|compared to|vs\.?|versus)\s+([A-Z][\w\s]+)/gi,
+        /([A-Z][\w\s]+)\s+(?:alternative|competitor)/gi,
+        /better than\s+([A-Z][\w\s]+)/gi,
+        /(?:compete with|competing with)\s+([A-Z][\w\s]+)/gi
+      ];
+      
+      const processedNames = new Set<string>();
+      
+      for (const pattern of competitorPatterns) {
+        let match;
+        while ((match = pattern.exec(this.contentText)) !== null) {
+          const name = match[1].trim();
+          
+          // Filter out common words and very long matches
+          if (name.length > 2 && name.length < 50 && !this.isCommonWord(name.toLowerCase())) {
+            const normalizedName = name.replace(/\s+/g, ' ');
+            
+            if (!processedNames.has(normalizedName.toLowerCase())) {
+              processedNames.add(normalizedName.toLowerCase());
+              
+              // Extract context around the mention
+              const startIndex = Math.max(0, match.index - 100);
+              const endIndex = Math.min(this.contentText.length, match.index + match[0].length + 100);
+              const context = this.contentText.substring(startIndex, endIndex).trim();
+              
+              // Determine sentiment
+              let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
+              const contextLower = context.toLowerCase();
+              
+              if (contextLower.includes('better than') || contextLower.includes('superior to') || 
+                  contextLower.includes('outperform') || contextLower.includes('advantage over')) {
+                sentiment = 'positive';
+              } else if (contextLower.includes('worse than') || contextLower.includes('inferior') || 
+                         contextLower.includes('lacking') || contextLower.includes('behind')) {
+                sentiment = 'negative';
+              }
+              
+              mentions.push({
+                name: normalizedName,
+                context: context,
+                sentiment: sentiment
+              });
+            }
+          }
+        }
+      }
+      
+      return mentions.slice(0, 10); // Limit to 10 competitor mentions
+    } catch (error) {
+      console.warn('[ContentExtractor] extractCompetitorMentions failed:', error);
+      return [];
+    }
   }
 
   private isCommonWord(word: string): boolean {

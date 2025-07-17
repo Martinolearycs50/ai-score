@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2025-07-17 - AI Battle Comparison for Free Tier
+
+### Added
+- **AI Battle Comparison Mode** for free tier users
+  - Fun, engaging "AI battle" theme with VS animations
+  - Crown emoji (👑) for the winning website
+  - Battle-themed language throughout the experience
+  - 13-second emotional reveal animation sequence
+  - Upgrade CTA encouraging pro tier for detailed analysis
+
+### Changed
+- Enabled `showComparisonMode: true` for free tier in tierConfig
+- Modified ComparisonView to respect tier limitations:
+  - Free tier: Shows only total scores and winner announcement
+  - Pro tier: Includes detailed pillar breakdowns and quick wins
+- Added conditional rendering based on feature flags
+
+### Benefits
+- Increases engagement for free tier users
+- Creates viral sharing potential ("My site beat yours!")
+- Clear upgrade path to see detailed battle analysis
+- Reuses existing battle-themed components and animations
+
+## [2.7.1] - 2025-07-17 - Tier Architecture Refactoring
+
+### Changed
+- **BREAKING**: Replaced prop-based tier system with centralized feature flag architecture
+  - Components no longer accept `tier` prop
+  - All tier logic centralized in `tierConfig.ts`
+  - React Context (TierContext) manages tier state across application
+  - URL parameter reading handled automatically by TierProvider
+
+### Added
+- **Feature Flag System**
+  - `tierConfig.ts` - Single source of truth for all tier features
+  - `TierContext.tsx` - React Context for tier state management
+  - `useTier()` hook - Type-safe access to features throughout components
+  - Comprehensive TypeScript types for all features
+- **PillarScoreDisplayV2** - New component using feature flags instead of tier prop
+- **TIER_MIGRATION_GUIDE.md** - Documentation for gradual component migration
+- **Tier configuration tests** - 100% coverage for tier system integrity
+
+### Refactored
+- Migrated all components from `tier === 'pro'` checks to `features.showX` patterns
+- Updated page.tsx to use feature flags for:
+  - WebsiteProfile visibility (`features.showWebsiteProfile`)
+  - Recommendations section (`features.showRecommendations`)
+  - Comparison mode (`features.showComparisonMode`)
+- Removed tier state management from HomeContent component
+- Eliminated prop drilling of tier throughout component tree
+
+### Fixed
+- Removed unused `useEffect` import from page.tsx
+- Development server CSS loading issues (missing .next directory)
+
+### Developer Experience
+- Adding new features now requires only updating `tierConfig.ts`
+- Type safety ensures all tiers have consistent feature definitions
+- Easier testing - mock features instead of entire tier states
+- Follows Open/Closed Principle for better extensibility
+
 ## [2.7.0] - 2025-07-17 - Freemium Model Implementation
 
 ### Added

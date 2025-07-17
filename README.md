@@ -33,6 +33,7 @@ The AI Search Analyzer evaluates any website URL and provides:
 - **Pro only**: Side-by-side website comparisons
 
 > **📖 For detailed technical documentation, see [MVP_DOCUMENTATION.md](./MVP_DOCUMENTATION.md)**
+> **🏗️ For current technical requirements and architecture, see [TECHNICAL_REQUIREMENTS.md](./TECHNICAL_REQUIREMENTS.md)**
 
 ## ✨ Key Features
 
@@ -160,11 +161,24 @@ Freshness indicators for AI prioritization
 
 - **Framework**: [Next.js 15](https://nextjs.org/) with App Router
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (strict mode)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4
+- **State Management**: React Context + Custom Hooks
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Testing**: [Jest](https://jestjs.io/) with React Testing Library
 - **Deployment**: [Vercel](https://vercel.com/)
 - **Architecture**: Client-side analysis with serverless API routes
 - **Development**: 100% AI-driven using Claude Code in Cursor
+
+### Tier Architecture (v2.7.1+)
+
+The application uses a feature flag architecture for tier management:
+
+- **`tierConfig.ts`**: Single source of truth for all tier features
+- **`TierContext`**: React Context managing tier state across the app
+- **`useTier()` hook**: Type-safe access to features in components
+- **URL-based tier detection**: `?tier=free` (default) or `?tier=pro`
+
+This architecture eliminates prop drilling and scattered conditionals, making it easy to add new features or tiers by simply updating the configuration.
 
 ## 📂 Project Structure
 

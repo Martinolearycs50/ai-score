@@ -33,6 +33,31 @@ User Input (URL) → API Route → URL Validation → Content Fetching
 → Recommendation Generation → Results Display
 ```
 
+### Tier System Architecture (v2.7.1+)
+
+The application uses a feature flag architecture for managing free/pro tiers:
+
+#### Components
+1. **`tierConfig.ts`** - Centralized feature configuration
+   - Single source of truth for all tier features
+   - Type-safe feature definitions
+   - Easy to extend with new tiers
+
+2. **`TierContext.tsx`** - React Context implementation
+   - Reads tier from URL parameters (`?tier=pro`)
+   - Provides features to entire component tree
+   - No prop drilling required
+
+3. **`useTier()` hook** - Component integration
+   - Type-safe access to features
+   - Clean conditional rendering
+   - Example: `if (features.showRecommendations) { ... }`
+
+4. **Feature-based components** - Clean separation
+   - Components check features, not tiers
+   - Example: `PillarScoreDisplayV2` uses features internally
+   - Easier testing and maintenance
+
 ## Core Features
 
 ### 1. Five-Pillar Scoring System

@@ -40,7 +40,7 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showPillarBreakdown: false,
     showRecommendations: false,
     showWebsiteProfile: false,
-    showComparisonMode: false,
+    showComparisonMode: true,
     showImplementationTime: false,
     showExamples: false,
     

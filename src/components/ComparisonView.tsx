@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import PillarScoreDisplay from './PillarScoreDisplay';
 import ScoreDifference from './ScoreDifference';
+import { useTier } from '@/hooks/useTier';
 
 interface ComparisonViewProps {
   results: [AnalysisResultNew, AnalysisResultNew];
@@ -39,6 +40,7 @@ const PILLAR_INFO: Record<string, { name: string; emoji: string; tip: string }> 
 };
 
 export default function ComparisonView({ results }: ComparisonViewProps) {
+  const { features } = useTier();
   const [result1, result2] = results;
   
   // Calculate score differences
@@ -171,7 +173,8 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         </div>
       </div>
 
-      {/* Detailed pillar comparison */}
+      {/* Detailed pillar comparison - only for pro users */}
+      {features.showPillarBreakdown && (
       <motion.div 
         className="mt-12"
         initial={{ opacity: 0 }}
@@ -305,6 +308,34 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
           </motion.div>
         )}
       </motion.div>
+      )}
+
+      {/* Upgrade CTA for free tier users */}
+      {features.showUpgradeCTA && (
+        <motion.div 
+          className="mt-12 p-8 rounded-lg text-center"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)',
+            border: '2px solid rgba(59, 130, 246, 0.2)'
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h3 className="text-2xl font-medium mb-3" style={{ color: 'var(--foreground)' }}>
+            Want the Full Battle Analysis? ⚔️
+          </h3>
+          <p className="text-lg text-muted mb-6">
+            Unlock detailed pillar breakdowns, strategic recommendations, and quick wins to dominate the AI search game!
+          </p>
+          <button 
+            className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            onClick={() => window.location.href = '/?tier=pro'}
+          >
+            Upgrade to Pro →
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }

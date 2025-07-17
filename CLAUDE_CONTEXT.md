@@ -155,6 +155,14 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-17: Re-enabled AI Battle Comparison for Free Tier - v2.8.0
+  - Enabled comparison mode for free tier users (showComparisonMode: true)
+  - Modified ComparisonView to respect tier limitations
+  - Free tier shows basic scores and winner announcement only
+  - Pro tier retains detailed pillar breakdowns and quick wins
+  - Added upgrade CTA to comparison view for free users
+  - Maintained existing battle theme with crown emoji and animations
+  - Feature creates viral potential with fun AI battle comparisons
 - 2025-07-17: Completed Tier Architecture Refactoring - v2.7.1
   - Implemented feature flag architecture replacing scattered tier conditionals
   - Created tierConfig.ts with centralized configuration (single source of truth)
