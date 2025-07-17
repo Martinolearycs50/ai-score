@@ -329,7 +329,7 @@ export class NarrativeEngine {
    * Identify the key missing element for this site
    */
   private getKeyMissingElement(): string {
-    const scoreBreakdown = this.analysisResult.scoringResult.pillars;
+    const scoreBreakdown = this.analysisResult.scoringResult.pillarScores;
     
     // Find the weakest pillar
     let weakestPillar = '';
@@ -359,9 +359,9 @@ export class NarrativeEngine {
    */
   private getTopActionSteps(): string[] {
     const recommendations = this.analysisResult.scoringResult.recommendations
-      .filter(rec => rec.priority === 'high')
+      .filter(rec => rec.gain >= 5) // High impact = gain >= 5
       .slice(0, 3)
-      .map(rec => rec.title);
+      .map(rec => rec.fix);
     
     if (recommendations.length < 3) {
       // Add some from business persona if needed

@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0] - 2025-01-17 - Sophisticated SaaS Pricing Page
+
+### Added
+- **3-Tier Pricing Structure**
+  - Free tier: $0/month, 5 analyses, basic score only
+  - Pro tier: $39/month, unlimited analyses, full features
+  - Consultation tier: Custom pricing, 1-on-1 expert consultancy
+- **Dedicated Pricing Page** at `/pricing` route
+  - PricingCard component with hover animations and "Most Popular" badge
+  - FeatureComparisonTable with responsive mobile/desktop views
+  - TrustSignals section (14-day money back, security badges, etc.)
+  - ValuePropositions replacing testimonials (new product)
+  - FAQAccordion with 10 comprehensive questions
+  - Final CTA section with dual action buttons
+- **Global Navigation Header**
+  - Added to all pages via layout.tsx
+  - Links to home and pricing pages
+  - "Upgrade to Pro" CTA button
+- **Consultation Tier Configuration**
+  - Added to tierConfig.ts with full feature access
+  - Custom pricing display in TIER_METADATA
+
+### Changed
+- Updated site metadata in layout.tsx for better SEO
+- Fixed TypeScript build errors in narrativeEngine.ts
+  - Changed `pillars` to `pillarScores` property
+  - Updated recommendation filtering logic
+
+### Technical Improvements
+- Implemented behavioral economics principles:
+  - Anchoring effect with consultation tier
+  - Social proof with "Most Popular" and user count
+  - Loss aversion with annual savings message
+  - Risk reversal with money-back guarantee
+- Smooth framer-motion animations throughout
+- Fully responsive design optimized for conversions
+- Clean, minimalist styling matching brand guidelines
+
 ## [2.8.0] - 2025-07-17 - AI Battle Comparison for Free Tier
 
 ### Added

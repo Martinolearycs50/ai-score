@@ -37,6 +37,7 @@ export function TierProvider({
   // Read tier from URL parameters
   useEffect(() => {
     const tierParam = searchParams.get('tier');
+    
     if (tierParam && isValidTier(tierParam)) {
       setTier(tierParam);
     }

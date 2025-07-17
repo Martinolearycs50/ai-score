@@ -330,7 +330,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
           </p>
           <button 
             className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            onClick={() => window.location.href = '/?tier=pro'}
+            onClick={() => window.location.href = '/pricing'}
           >
             Upgrade to Pro →
           </button>

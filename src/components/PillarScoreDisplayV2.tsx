@@ -146,7 +146,10 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
             <p className="text-lg text-muted mb-6">
               Unlock detailed recommendations, specific fixes, and actionable insights to improve your AI search ranking
             </p>
-            <button className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
+            <button 
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
+              onClick={() => window.location.href = '/pricing'}
+            >
               Upgrade to Pro - $39/month
             </button>
             <p className="text-sm text-muted mt-4">

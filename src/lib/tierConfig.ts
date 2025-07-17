@@ -4,7 +4,7 @@
  */
 
 // Available tier types
-export type TierType = 'free' | 'pro';
+export type TierType = 'free' | 'pro' | 'consultation';
 
 // Feature flags for each tier
 export interface TierFeatures {
@@ -69,6 +69,24 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showEmotionalReveal: true,
     showParticleEffects: true,
     showUpgradeCTA: false,
+  },
+  consultation: {
+    // Display features
+    showDetailedScores: true,
+    showPillarBreakdown: true,
+    showRecommendations: true,
+    showWebsiteProfile: true,
+    showComparisonMode: true,
+    showImplementationTime: true,
+    showExamples: true,
+    
+    // Limits
+    maxAnalysesPerMonth: 100, // Effectively unlimited
+    
+    // UI features
+    showEmotionalReveal: true,
+    showParticleEffects: true,
+    showUpgradeCTA: false,
   }
 } as const;
 
@@ -101,10 +119,15 @@ export const TIER_METADATA: Record<TierType, { name: string; price: string; desc
     name: 'Pro',
     price: '$39/month',
     description: 'Full analysis with recommendations'
+  },
+  consultation: {
+    name: 'Consultation',
+    price: 'Custom',
+    description: '1-on-1 expert consultancy'
   }
 };
 
 // Type guard to check if a string is a valid tier
 export function isValidTier(tier: string): tier is TierType {
-  return tier === 'free' || tier === 'pro';
+  return tier === 'free' || tier === 'pro' || tier === 'consultation';
 }

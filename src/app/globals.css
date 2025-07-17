@@ -10,6 +10,7 @@
     --border: #E5E5E5;
     --card: #FFFFFF;
     --error: #DC2626;
+    --success: #10B981;
     
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
