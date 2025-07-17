@@ -546,20 +546,20 @@ export function generateRecommendations(
         const priorityMultiplier = getPageTypePriorityMultiplier(pageType, metric);
         const adjustedGain = template.gain * priorityMultiplier;
         
+        // Store the adjusted gain in the template for sorting
+        template.gain = adjustedGain;
+        
         recommendations.push({
           metric,
           template,
           pillar,
-          priority: adjustedGain,
         });
       }
     }
   }
 
-  // Sort by adjusted priority (considers page type), then by gain
+  // Sort by gain (which now includes page type priority adjustment)
   return recommendations.sort((a, b) => {
-    const priorityDiff = (b.priority || b.template.gain) - (a.priority || a.template.gain);
-    if (priorityDiff !== 0) return priorityDiff;
     return b.template.gain - a.template.gain;
   });
 }
