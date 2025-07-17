@@ -44,6 +44,16 @@ The AI Search Analyzer operates on a freemium model designed to provide value to
 
 ## Technical Implementation
 
+### New Feature Flag Architecture (v2.7.0+)
+
+We've implemented a centralized feature flag system that replaces scattered tier conditionals with clean, maintainable feature checks.
+
+#### Core Components
+
+1. **tierConfig.ts** - Single source of truth for all tier features
+2. **TierContext.tsx** - React Context for tier state management
+3. **useTier.ts** - Custom hook for accessing features
+
 ### Accessing Tiers
 
 #### URL Parameters
@@ -52,29 +62,57 @@ The AI Search Analyzer operates on a freemium model designed to provide value to
 
 ### Component Architecture
 
-#### Tier Detection
+#### Feature-Based Rendering (New Approach)
 ```typescript
-// src/app/page.tsx
-const searchParams = useSearchParams();
-const [tier, setTier] = useState<'free' | 'pro'>('free'); // Default to free
+// Import the hook
+import { useTier } from '@/hooks/useTier';
 
-useEffect(() => {
-  const tierParam = searchParams.get('tier');
-  if (tierParam === 'free' || tierParam === 'pro') {
-    setTier(tierParam);
-  }
-}, [searchParams]);
+// In your component
+function MyComponent() {
+  const { features } = useTier();
+  
+  return (
+    <>
+      {features.showWebsiteProfile && <WebsiteProfileCard />}
+      {features.showRecommendations && <Recommendations />}
+    </>
+  );
+}
 ```
 
-#### Conditional Rendering
+#### Adding New Features
 ```typescript
-// Hide pro features for free tier
+// 1. Add to TierFeatures interface in tierConfig.ts
+export interface TierFeatures {
+  // ... existing features
+  showNewFeature: boolean;
+}
+
+// 2. Configure for each tier
+export const TIER_CONFIG = {
+  free: {
+    showNewFeature: false,
+    // ...
+  },
+  pro: {
+    showNewFeature: true,
+    // ...
+  }
+};
+
+// 3. Use in components
+const { features } = useTier();
+if (features.showNewFeature) {
+  // Feature logic
+}
+```
+
+#### Legacy Implementation (Being Phased Out)
+```typescript
+// Old prop-based approach (still works but deprecated)
 {tier === 'pro' && (
   <WebsiteProfileCard profile={profile} score={score} />
 )}
-
-// Different display for PillarScoreDisplay
-<PillarScoreDisplay result={result} tier={tier} />
 ```
 
 ### Performance Rating System
@@ -186,11 +224,26 @@ it('should show only ratings in free tier', () => {
 
 ## Best Practices
 
+### Architecture Best Practices
+1. **Use Feature Flags, Not Tier Checks**: Check `features.showX` not `tier === 'pro'`
+2. **Centralized Configuration**: All tier features in `tierConfig.ts`
+3. **Type Safety**: Let TypeScript enforce feature availability
+4. **Component Isolation**: Components shouldn't know about tiers
+5. **Easy Testing**: Mock features, not tiers
+
+### Business Best Practices
 1. **Always Default to Free**: Encourages upgrades
 2. **Clear Value Proposition**: Make pro benefits obvious
 3. **No Feature Degradation**: Free tier works perfectly within limits
 4. **Consistent Branding**: Both tiers feel premium
 5. **Easy Upgrade Path**: One-click upgrade flow
+
+### Development Best Practices
+1. **Add Features in One Place**: Just update `tierConfig.ts`
+2. **Use the Hook**: Always use `useTier()` for feature access
+3. **Test Both Tiers**: Ensure features work correctly for each tier
+4. **Document New Features**: Update this guide when adding features
+5. **Gradual Migration**: Keep old components during transition
 
 ## Conversion Optimization
 

@@ -155,6 +155,17 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-17: Completed Tier Architecture Refactoring - v2.7.1
+  - Implemented feature flag architecture replacing scattered tier conditionals
+  - Created tierConfig.ts with centralized configuration (single source of truth)
+  - Created TierContext.tsx for React state management with URL parameter reading
+  - Created useTier.ts custom hook for type-safe feature access
+  - Migrated all components to use feature flags instead of tier prop passing
+  - Replaced PillarScoreDisplay with PillarScoreDisplayV2 (feature-based)
+  - Updated page.tsx to use feature flags for WebsiteProfile, Recommendations, and Comparison mode
+  - Removed old tier state management from HomeContent component
+  - Added comprehensive tests for tier configuration integrity
+  - This completes the architecture refactoring requested by the user
 - 2025-07-17: Implemented Freemium Model with Proper Tier Separation - v2.7.0
   - Created performanceRatings.ts with type definitions and rating converter functions
   - Added tier parameter support (?tier=free or ?tier=pro) to the application

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
+import { TierProvider } from '@/contexts/TierContext';
+import { useTier } from '@/hooks/useTier';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
-import PillarScoreDisplay from '@/components/PillarScoreDisplay';
+import PillarScoreDisplayV2 from '@/components/PillarScoreDisplayV2';
 import AIRecommendationCard from '@/components/AIRecommendationCard';
 import FriendlyRecommendationCard from '@/components/FriendlyRecommendationCard';
 import ComparisonView from '@/components/ComparisonView';
@@ -28,8 +29,7 @@ interface ComparisonState {
 }
 
 function HomeContent() {
-  const searchParams = useSearchParams();
-  const [tier, setTier] = useState<'free' | 'pro'>('free');
+  const { features } = useTier();
   const [comparisonMode, setComparisonMode] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
@@ -41,14 +41,6 @@ function HomeContent() {
     results: [null, null],
     errors: [null, null]
   });
-
-  // Read tier from URL parameters
-  useEffect(() => {
-    const tierParam = searchParams.get('tier');
-    if (tierParam === 'free' || tierParam === 'pro') {
-      setTier(tierParam);
-    }
-  }, [searchParams]);
 
   const handleAnalyze = async (url: string) => {
     // Development logging
@@ -228,8 +220,8 @@ function HomeContent() {
                 onSubmit={handleAnalyze}
                 onCompare={handleCompare}
                 isLoading={false}
-                comparisonMode={comparisonMode}
-                onComparisonModeChange={setComparisonMode}
+                comparisonMode={comparisonMode && features.showComparisonMode}
+                onComparisonModeChange={(value) => features.showComparisonMode && setComparisonMode(value)}
               />
             </div>
           </div>
@@ -287,18 +279,18 @@ function HomeContent() {
             <div id="results" className="max-w-4xl mx-auto">
               <EmotionalResultsReveal result={analysisState.result}>
                 <div className="space-y-8">
-                  {/* Website Profile Card - Pro tier only */}
-                  {tier === 'pro' && analysisState.result.websiteProfile && (
+                  {/* Website Profile Card - Feature flag based */}
+                  {features.showWebsiteProfile && analysisState.result.websiteProfile && (
                     <WebsiteProfileCard 
                       profile={analysisState.result.websiteProfile} 
                       score={analysisState.result.aiSearchScore}
                     />
                   )}
                   
-                  <PillarScoreDisplay result={analysisState.result} tier={tier} />
+                  <PillarScoreDisplayV2 result={analysisState.result} />
                   
-                  {/* Enhanced Recommendations Section - Pro tier only */}
-                  {tier === 'pro' && (
+                  {/* Enhanced Recommendations Section - Feature flag based */}
+                  {features.showRecommendations && (
                   <div className="space-y-6">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -399,7 +391,9 @@ function HomeContent() {
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <HomeContent />
+      <TierProvider>
+        <HomeContent />
+      </TierProvider>
     </Suspense>
   );
 }
