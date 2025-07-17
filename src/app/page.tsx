@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TierProvider } from '@/contexts/TierContext';
 import { useTier } from '@/hooks/useTier';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
@@ -388,18 +387,6 @@ function HomeContent() {
   );
 }
 
-function HomeWithTier() {
-  return (
-    <TierProvider>
-      <HomeContent />
-    </TierProvider>
-  );
-}
-
 export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <HomeWithTier />
-    </Suspense>
-  );
+  return <HomeContent />;
 }

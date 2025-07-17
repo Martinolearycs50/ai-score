@@ -19,8 +19,8 @@ export default function PricingPage() {
     } else if (tierId === 'free') {
       router.push('/');
     } else if (tierId === 'pro') {
-      // For now, just show an alert. In production, this would go to a payment flow
-      alert('Pro plan signup would go here - integrate with Stripe/payment provider');
+      // Navigate to main page with Pro tier enabled (force reload to ensure params are read)
+      window.location.href = '/?tier=pro';
     }
   };
 

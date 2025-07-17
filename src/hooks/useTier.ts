@@ -10,6 +10,13 @@ import { TierType, TierFeatures } from '@/lib/tierConfig';
 export function useTier() {
   const { tier, features, setTier, isLoading } = useTierContext();
 
+  // Debug logging
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('[useTier] Current tier:', tier);
+    console.log('[useTier] Show recommendations:', features.showRecommendations);
+    console.log('[useTier] Show detailed scores:', features.showDetailedScores);
+  }
+
   return {
     // Current tier
     tier,

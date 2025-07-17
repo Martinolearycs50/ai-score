@@ -155,6 +155,21 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-17: Fixed Pro Tier Access and Identified Enhancement Needs - v2.9.1
+  - Fixed Pro tier navigation from pricing page (now uses window.location.href)
+  - Added TierDebug component for development (shows current tier and features)
+  - Added comprehensive logging to TierContext and useTier hooks
+  - Created extensive tier system tests (src/__tests__/tierSystem.test.tsx)
+  - Fixed TierContext to properly read URL parameters on navigation
+  - Moved TierProvider to root layout for app-wide access
+  - Made Navigation tier-aware (hides "Upgrade to Pro" for pro users)
+  - Updated pricing page content (removed false claims, changed SEO to AI search)
+  - **IDENTIFIED ISSUES**:
+    - Pro tier needs more "wow factor" - currently too similar to free tier
+    - Comparison mode should be Pro-only (currently available in free tier)
+    - Need AI integrations (OpenAI/Anthropic) for intelligent insights
+    - Need better visual differentiation between tiers
+    - Monthly usage limits not enforced (5 for free, 30 for pro)
 - 2025-01-17: Implemented Sophisticated SaaS Pricing Page - v2.9.0
   - Added 3-tier pricing structure: Free, Pro, and Consultation (custom pricing)
   - Created dedicated pricing page at /pricing route with conversion-focused design

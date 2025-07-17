@@ -33,7 +33,7 @@ The AI Search Analyzer evaluates any website URL and provides:
 - **Pro only**: Side-by-side website comparisons
 
 > **📖 For detailed technical documentation, see [MVP_DOCUMENTATION.md](./MVP_DOCUMENTATION.md)**
-> **🏗️ For current technical requirements and architecture, see [TECHNICAL_REQUIREMENTS.md](./TECHNICAL_REQUIREMENTS.md)**
+> **📊 For current project status and architecture, see [PROJECT_STATUS.md](./PROJECT_STATUS.md)**
 
 ## ✨ Key Features
 

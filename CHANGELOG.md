@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.1] - 2025-07-17 - Pro Tier Access Fixes and Diagnostics
+
+### Fixed
+- Pro tier navigation from pricing page now properly applies tier parameter
+- TierContext now correctly reads URL parameters on client-side navigation
+- Navigation component now hides "Upgrade to Pro" button when in Pro tier
+
+### Added
+- TierDebug component for development diagnostics
+- Comprehensive tier system test suite
+- Debug logging in TierContext and useTier hooks
+- TierProvider moved to root layout for app-wide tier access
+
+### Changed
+- Pricing page now uses window.location.href for tier navigation
+- Updated pricing content (SEO → AI search, removed false claims)
+
+### Identified for Next Release
+- Pro tier needs AI integrations (OpenAI/Anthropic) for "wow factor"
+- Comparison mode should be Pro-only
+- Need better visual differentiation between tiers
+- Monthly usage limits need enforcement
+
 ## [2.9.0] - 2025-01-17 - Sophisticated SaaS Pricing Page
 
 ### Added

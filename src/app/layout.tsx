@@ -1,6 +1,10 @@
-import type { Metadata } from "next";
+'use client';
+
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Suspense } from "react";
 import Navigation from "@/components/Navigation";
+import { TierProvider } from "@/contexts/TierContext";
+import TierDebug from "@/components/TierDebug";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,10 +23,7 @@ const inter = Inter({
   weight: ["400", "500"],
 });
 
-export const metadata: Metadata = {
-  title: "AI Search Analyzer - SEO Analysis & Optimization",
-  description: "Analyze your website's SEO performance with AI-powered insights. Get actionable recommendations to improve your search rankings.",
-};
+// Note: Metadata export removed because this is now a client component due to TierProvider
 
 export default function RootLayout({
   children,
@@ -34,8 +35,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
-        <Navigation />
-        {children}
+        <Suspense fallback={<div>Loading...</div>}>
+          <TierProvider>
+            <Navigation />
+            {children}
+            <TierDebug />
+          </TierProvider>
+        </Suspense>
       </body>
     </html>
   );

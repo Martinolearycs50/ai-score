@@ -38,11 +38,20 @@ export function TierProvider({
   useEffect(() => {
     const tierParam = searchParams.get('tier');
     
+    console.log('[TierContext] URL tier parameter:', tierParam);
+    console.log('[TierContext] Current tier state:', tier);
+    console.log('[TierContext] Search params string:', searchParams.toString());
+    
     if (tierParam && isValidTier(tierParam)) {
+      console.log('[TierContext] Setting tier to:', tierParam);
       setTier(tierParam);
+    } else {
+      console.log('[TierContext] Using default tier:', defaultTier);
+      // Reset to default if no tier param
+      setTier(defaultTier);
     }
     setIsLoading(false);
-  }, [searchParams]);
+  }, [searchParams, searchParams.toString()]); // Add searchParams.toString() to force re-render
 
   // Memoize features to prevent unnecessary re-renders
   const features = useMemo(() => {

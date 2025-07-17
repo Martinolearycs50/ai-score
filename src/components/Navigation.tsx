@@ -4,9 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useTier } from '@/hooks/useTier';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { tier } = useTier();
 
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -42,17 +44,19 @@ export default function Navigation() {
             >
               Pricing
             </Link>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="/pricing"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            {tier !== 'pro' && tier !== 'consultation' && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Upgrade to Pro
-              </Link>
-            </motion.div>
+                <Link 
+                  href="/pricing"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Upgrade to Pro
+                </Link>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
