@@ -24,13 +24,83 @@ export class DynamicRecommendationGenerator {
       template.example = this.generateDynamicExample(metric, template.example);
     }
     
-    // Personalize the "why" message based on content
+    // Personalize the "why" message based on content and page type
     template.why = this.personalizeWhy(metric, template.why);
     
-    // Make the fix instructions more specific
+    // Make the fix instructions more specific based on page type
     template.fix = this.personalizeFix(metric, template.fix);
     
     return template;
+  }
+  
+  /**
+   * Get page-type specific context for recommendations
+   */
+  private getPageTypeContext(): { prefix: string; suffix: string; emphasis?: string } {
+    switch (this.content.pageType) {
+      case 'homepage':
+        return {
+          prefix: 'As your homepage,',
+          suffix: 'This helps AI understand your entire site\'s purpose and structure.',
+          emphasis: 'first impression'
+        };
+      
+      case 'article':
+        return {
+          prefix: 'For blog content,',
+          suffix: 'This increases chances of being cited as a source by AI.',
+          emphasis: 'citation potential'
+        };
+      
+      case 'product':
+        return {
+          prefix: 'On product pages,',
+          suffix: 'This helps AI recommend your products in shopping queries.',
+          emphasis: 'purchase decisions'
+        };
+      
+      case 'category':
+        return {
+          prefix: 'For category pages,',
+          suffix: 'This helps AI understand your product organization.',
+          emphasis: 'navigation clarity'
+        };
+      
+      case 'documentation':
+        return {
+          prefix: 'In documentation,',
+          suffix: 'This makes your docs the go-to reference for AI coding assistance.',
+          emphasis: 'technical accuracy'
+        };
+      
+      case 'about':
+        return {
+          prefix: 'On your about page,',
+          suffix: 'This establishes credibility and expertise for AI.',
+          emphasis: 'trust signals'
+        };
+      
+      case 'contact':
+        return {
+          prefix: 'For contact pages,',
+          suffix: 'This ensures AI can accurately direct users to you.',
+          emphasis: 'accessibility'
+        };
+      
+      case 'search':
+        return {
+          prefix: 'On search results,',
+          suffix: 'This helps AI understand your content organization.',
+          emphasis: 'content discovery'
+        };
+      
+      default: // 'general'
+        return {
+          prefix: '',
+          suffix: 'This improves overall AI comprehension of your content.',
+          emphasis: 'clarity'
+        };
+    }
   }
   
   private generateDynamicExample(metric: string, defaultExample: { before: string; after: string }): { before: string; after: string } {
@@ -305,34 +375,46 @@ export class DynamicRecommendationGenerator {
   private personalizeWhy(metric: string, defaultWhy: string): string {
     const topic = this.content.primaryTopic;
     const businessType = this.content.businessType;
+    const pageContext = this.getPageTypeContext();
+    
+    // Add page type prefix if available
+    let contextualWhy = pageContext.prefix ? `${pageContext.prefix} ${defaultWhy}` : defaultWhy;
     
     // Add context based on detected content
     const personalizations: Record<string, string> = {
       listicleFormat: businessType === 'payment' 
-        ? `Payment-related content performs 40% better in listicle format. ${defaultWhy}`
-        : defaultWhy,
+        ? `Payment-related content performs 40% better in listicle format. ${contextualWhy}`
+        : contextualWhy,
       
       uniqueStats: this.content.contentSamples.statistics.length === 0
-        ? `Your ${topic} content lacks specific data points. ${defaultWhy}`
-        : `You have some statistics, but adding more will strengthen your ${topic} content. ${defaultWhy}`,
+        ? `Your ${topic} content lacks specific data points. ${contextualWhy}`
+        : `You have some statistics, but adding more will strengthen your ${topic} content. ${contextualWhy}`,
       
-      structuredData: `Help AI understand your ${businessType} content better. ${defaultWhy}`,
+      structuredData: `Help AI understand your ${businessType} content better. ${contextualWhy}`,
       
       directAnswers: this.content.detectedFeatures.hasQuestions
-        ? `Your questions need immediate answers for AI comprehension. ${defaultWhy}`
-        : defaultWhy,
+        ? `Your questions need immediate answers for AI comprehension. ${contextualWhy}`
+        : contextualWhy,
     };
     
-    return personalizations[metric] || defaultWhy;
+    // Get the personalized message or use the contextual default
+    const personalizedMessage = personalizations[metric] || contextualWhy;
+    
+    // Add page type suffix
+    return pageContext.suffix ? `${personalizedMessage} ${pageContext.suffix}` : personalizedMessage;
   }
   
   private personalizeFix(metric: string, defaultFix: string): string {
     const topic = this.content.primaryTopic;
     const businessType = this.content.businessType;
+    const pageType = this.content.pageType;
+    
+    // Start with the default fix
+    let personalizedFix = defaultFix;
     
     // Make fixes more specific to the content
     if (metric === 'listicleFormat' && businessType === 'payment') {
-      return defaultFix.replace(
+      personalizedFix = defaultFix.replace(
         'AI Search Guide',
         `${topic} Implementation Guide`
       );
@@ -340,10 +422,48 @@ export class DynamicRecommendationGenerator {
     
     if (metric === 'structuredData') {
       const schemaType = this.getSchemaType();
-      return defaultFix.replace('Article schema', `${schemaType} schema`);
+      personalizedFix = defaultFix.replace('Article schema', `${schemaType} schema`);
     }
     
-    return defaultFix;
+    // Add page-type specific instructions
+    const pageTypeInstructions = this.getPageTypeSpecificFix(metric, pageType);
+    if (pageTypeInstructions) {
+      personalizedFix += ` ${pageTypeInstructions}`;
+    }
+    
+    return personalizedFix;
+  }
+  
+  /**
+   * Get page-type specific fix instructions
+   */
+  private getPageTypeSpecificFix(metric: string, pageType: string): string | null {
+    const fixes: Record<string, Record<string, string>> = {
+      uniqueStats: {
+        homepage: 'For homepages, include company metrics like "serving 10,000+ customers" or "99.9% uptime".',
+        product: 'For products, add specifications like dimensions, weight, materials, and performance metrics.',
+        article: 'Include research data, survey results, or case study metrics to boost credibility.',
+        documentation: 'Add performance benchmarks, version numbers, and compatibility statistics.',
+      },
+      structuredData: {
+        homepage: 'Use Organization schema with complete NAP (Name, Address, Phone) data.',
+        product: 'Implement Product schema with price, availability, and review data.',
+        article: 'Add Article or BlogPosting schema with author and datePublished.',
+        documentation: 'Use TechArticle or HowTo schema for technical content.',
+      },
+      mainContent: {
+        homepage: 'Ensure your value proposition and key services are inside <main> tags.',
+        category: 'Place product listings and filters within <main> tags.',
+        search: 'Wrap search results in <main> tags, exclude sidebars and ads.',
+      },
+      directAnswers: {
+        homepage: 'Answer "What does [company] do?" in the first paragraph.',
+        product: 'Start with "This product is..." or "[Product] helps you...".',
+        documentation: 'Begin each section with a one-sentence summary of what it covers.',
+      },
+    };
+    
+    return fixes[metric]?.[pageType] || null;
   }
   
   private createDirectAnswer(question: string, content: string): string {

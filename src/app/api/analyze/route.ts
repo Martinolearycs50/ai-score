@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
         errorMessage = 'Page not found. Please check the URL and try again.';
         statusCode = 404;
       } else if (message.includes('forbidden') || message.includes('403')) {
-        errorMessage = 'Access to this page is forbidden.';
+        errorMessage = 'Access denied. This website blocks automated analysis.';
         statusCode = 403;
       } else if (message.includes('network') || message.includes('connect')) {
         errorMessage = 'Unable to connect to the website. Please check the URL.';
@@ -236,6 +236,10 @@ export async function POST(request: NextRequest) {
       } else if (message.includes('invalid url')) {
         errorMessage = error.message;
         statusCode = 400;
+      } else if (message.includes('server returned')) {
+        // Parse server error responses more clearly
+        errorMessage = 'The website returned an error. It may be blocking automated access or experiencing issues.';
+        statusCode = 502;
       } else {
         errorMessage = error.message;
       }

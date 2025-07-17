@@ -232,17 +232,32 @@ export default function Home() {
 
         {analysisState.status === 'error' && (
           <div className="min-h-screen flex items-center justify-center px-6">
-            <div className="text-center max-w-md">
-              <p className="text-lg mb-4" style={{ color: 'var(--foreground)' }}>
+            <motion.div 
+              className="text-center max-w-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="mb-6">
+                <span className="text-6xl">⚠️</span>
+              </div>
+              <h2 className="text-2xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+                Unable to Analyze This Page
+              </h2>
+              <p className="text-lg mb-6" style={{ color: 'var(--foreground-muted)' }}>
                 {analysisState.error}
               </p>
-              <button
-                onClick={handleReset}
-                className="text-muted hover:text-foreground transition-colors"
-              >
-                Try again
-              </button>
-            </div>
+              <div className="space-y-4">
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-3 bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Try Another URL
+                </button>
+                <p className="text-sm text-muted">
+                  Some websites block automated analysis for security reasons.
+                </p>
+              </div>
+            </motion.div>
           </div>
         )}
 
@@ -330,6 +345,7 @@ export default function Home() {
                                 domain: analysisState.result.websiteProfile.domain,
                                 title: analysisState.result.websiteProfile.title,
                                 contentType: analysisState.result.websiteProfile.contentType,
+                                pageType: analysisState.result.websiteProfile.pageType,
                               } : undefined}
                             />
                           );

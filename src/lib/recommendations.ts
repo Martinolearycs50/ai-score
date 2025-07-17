@@ -1,6 +1,7 @@
 import type { RecommendationTemplate } from './types';
 import type { ExtractedContent } from './contentExtractor';
 import { DynamicRecommendationGenerator } from './dynamicRecommendations';
+import { getPageTypePriorityMultiplier, shouldShowMetric, getPageTypeCustomMessage } from './pageTypeRecommendations';
 
 /**
  * Recommendation templates for AI Search optimization
@@ -437,6 +438,9 @@ export function generateRecommendations(
     pillar: string;
   }> = [];
 
+  // Get page type for filtering and prioritization
+  const pageType = extractedContent?.pageType || 'general';
+  
   // Create dynamic generator if content is available
   const dynamicGenerator = extractedContent ? 
     new DynamicRecommendationGenerator(extractedContent) : null;
@@ -444,11 +448,23 @@ export function generateRecommendations(
   // Iterate through each pillar's results
   for (const [pillar, checks] of Object.entries(pillarResults)) {
     for (const [metric, score] of Object.entries(checks)) {
+      // Skip metrics not relevant for this page type
+      if (!shouldShowMetric(pageType, metric)) {
+        continue;
+      }
+      
       // If check failed or has partial score, add recommendation
       const maxScore = getMaxScoreForMetric(metric);
       if (score < maxScore && recTemplates[metric]) {
         // Create a copy of the template to customize
         let template = { ...recTemplates[metric] };
+        
+        // Apply page-type specific custom message if available
+        const customMessage = getPageTypeCustomMessage(pageType, metric);
+        if (customMessage) {
+          // Prepend the custom message to the why
+          template.why = customMessage + ' ' + template.why;
+        }
         
         // Use dynamic generator if available
         if (dynamicGenerator) {
@@ -526,15 +542,24 @@ export function generateRecommendations(
         }
         } // Close the else block for static customization
         
+        // Calculate priority based on page type
+        const priorityMultiplier = getPageTypePriorityMultiplier(pageType, metric);
+        const adjustedGain = template.gain * priorityMultiplier;
+        
         recommendations.push({
           metric,
           template,
           pillar,
+          priority: adjustedGain,
         });
       }
     }
   }
 
-  // Sort by potential gain (highest first)
-  return recommendations.sort((a, b) => b.template.gain - a.template.gain);
+  // Sort by adjusted priority (considers page type), then by gain
+  return recommendations.sort((a, b) => {
+    const priorityDiff = (b.priority || b.template.gain) - (a.priority || a.template.gain);
+    if (priorityDiff !== 0) return priorityDiff;
+    return b.template.gain - a.template.gain;
+  });
 }

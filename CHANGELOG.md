@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2025-07-17 - MVP Release
+
+### Added
+- **Page Type Detection System** - Automatic identification of page types for better recommendations
+  - Detects: homepage, article, product, category, documentation, about, contact, search results
+  - Page-specific optimization suggestions
+  - Improved recommendation relevance
+- **MVP_DOCUMENTATION.md** - Comprehensive technical documentation
+  - System architecture overview
+  - Detailed feature descriptions
+  - Technical implementation details
+  - Performance metrics and testing info
+
+### Changed
+- **Content Extraction Improvements**
+  - Added proper text spacing between HTML elements
+  - Filters out navigation and UI element text
+  - Improved title extraction to remove embedded UI text
+  - Better handling of dynamically generated content
+- **Scoring Algorithm Enhancements**
+  - Page type awareness in scoring calculations
+  - More accurate content analysis
+  - Better handling of edge cases
+
+### Fixed
+- **CSS Styling Issues** - Fixed PostCSS configuration
+  - Changed plugins from array to object format in postcss.config.mjs
+  - Resolved Tailwind CSS v4 compatibility issues
+  - Fixed styling not being applied in production
+- **Content Display Bug** - Fixed concatenated text appearing during analysis
+  - Removed UI element text from page titles
+  - Improved text extraction with proper spacing
+  - Filtered out common navigation patterns
+- **Development Server Issues**
+  - Fixed server startup and connection problems
+  - Resolved dependency conflicts
+  - Improved error handling
+
+### Developer Experience
+- Cleaned up project structure
+- Updated all documentation to reflect current features
+- Removed debug and test files from production
+- Comprehensive commit for MVP checkpoint
+
 ## [2.4.0] - 2025-07-16
 
 ### Added
@@ -192,7 +236,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript configuration
 - Tailwind CSS integration
 
-[Unreleased]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Martinolearycs50/a-search-v2/compare/v2.1.0...v2.2.0

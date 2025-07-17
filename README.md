@@ -1,26 +1,33 @@
 # AI Search Analyzer
 
-A professional web application that analyzes websites for optimization across major AI search platforms (ChatGPT, Claude, Perplexity, Gemini).
+A comprehensive web application that analyzes websites for AI search engine optimization. Get your AI Search Score and actionable recommendations to improve visibility in AI-powered search platforms like ChatGPT, Claude, and Perplexity.
 
 ## 🎯 What It Does
 
-Instantly analyze any website to see how well it's optimized for AI search engines. Get actionable insights to improve your visibility in AI-powered search results.
+The AI Search Analyzer evaluates any website URL and provides:
+- An overall AI Search Score (0-100)
+- Detailed analysis across 5 key pillars
+- Personalized, actionable recommendations
+- Content-aware suggestions based on page type
+- Side-by-side website comparisons
 
-## ✨ Features
+> **📖 For detailed technical documentation, see [MVP_DOCUMENTATION.md](./MVP_DOCUMENTATION.md)**
 
-- **🤖 AI Platform Analysis**: Comprehensive scoring for ChatGPT, Claude, Perplexity, and Gemini
-- **📊 5-Pillar AI-First Scoring**: 100-point system optimized for AI retrieval and comprehension
-- **🔍 Website Comparison**: Compare two websites side-by-side to benchmark performance
-- **🎯 Content-Aware Recommendations**: Personalized advice using your actual website content
-- **🏢 Business Type Detection**: Tailored suggestions for payment, ecommerce, blogs, and more
-- **🎮 Gamified Experience**: Engaging animations and encouraging messages make optimization fun
-- **✨ Emotional Results Reveal**: 4-stage animated score presentation that builds anticipation
-- **🎯 Friendly Recommendations**: Interactive cards with time estimates and progress tracking
-- **⚔️ Battle Mode Comparisons**: Exciting VS animations for website competitions
-- **⚡ Instant Results**: Get your analysis in seconds with delightful animations
-- **💡 Actionable Insights**: Specific recommendations with examples from your actual content
-- **🎨 Clean Interface**: Professional, minimalist design with engaging interactions
-- **🧪 Comprehensive Testing**: Full test coverage ensuring reliable analysis
+## ✨ Key Features
+
+### Core Functionality
+- **🎯 AI Search Score**: Get a comprehensive 0-100 score for your website
+- **📊 5-Pillar Analysis**: Detailed breakdown across Retrieval, Fact Density, Structure, Trust, and Recency
+- **🔍 Page Type Detection**: Automatic identification of homepage, article, product, and other page types
+- **💡 Smart Recommendations**: Context-aware suggestions based on your content and page type
+- **⚡ Website Comparison**: Analyze two websites side-by-side with visual comparisons
+
+### User Experience
+- **✨ Emotional Score Reveal**: Animated presentation with encouraging messages
+- **🎨 Interactive UI**: Smooth animations powered by Framer Motion
+- **📱 Responsive Design**: Works perfectly on all devices
+- **🚀 Fast Analysis**: Results in 2-5 seconds
+- **🎯 Clear Guidance**: Step-by-step recommendations with examples
 
 ## 🚀 Getting Started
 
@@ -199,16 +206,11 @@ Analyzes a website for AI search optimization.
 - No data persistence (privacy-first)
 - TypeScript strict mode for type safety
 
-## 🔜 Roadmap
+## 📈 Version
 
-- [ ] User accounts and saved analyses
-- [ ] Bulk URL analysis
-- [ ] API access for developers
-- [ ] Competitor comparison
-- [ ] Weekly monitoring and alerts
-- [ ] Export reports (PDF/CSV)
-- [ ] Chrome extension
-- [ ] WordPress plugin
+Current Version: **v2.5.0** (MVP Release)
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ## 🤝 Contributing
 
@@ -236,15 +238,15 @@ Martin O'Leary - [@Martinolearycs50](https://github.com/Martinolearycs50)
 - Inspired by the need for better AI search visibility
 - Thanks to the open-source community
 
-## 📊 Performance
+## 📊 Performance & Quality
 
-- **Build Status**: ✅ Production Ready (v2.4.0)
+- **Build Status**: ✅ Production Ready (v2.5.0)
 - **Test Coverage**: Comprehensive unit and integration tests
+- **Analysis Speed**: 2-5 seconds average
 - **Lighthouse Score**: 95+ Performance
 - **Accessibility**: WCAG 2.1 AA compliant
-- **User Experience**: Engaging animations with optimal timing
 - **TypeScript**: Strict mode with full type safety
-- **Content Analysis**: Intelligent content extraction and business type detection
+- **Reliability**: Handles edge cases gracefully
 
 ---
 

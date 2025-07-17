@@ -53,8 +53,15 @@ export class ContentExtractor {
     try {
       this.$ = cheerio.load(html || '');
       this.pageUrl = pageUrl;
-      // Get main content area or fallback to body
-      this.contentText = this.$('main, article, [role="main"], .content, #content').text() || this.$('body').text() || '';
+      
+      // Extract text with proper spacing
+      const mainContent = this.$('main, article, [role="main"], .content, #content');
+      
+      if (mainContent.length > 0) {
+        this.contentText = this.extractTextWithSpacing(mainContent);
+      } else {
+        this.contentText = this.extractTextWithSpacing(this.$('body'));
+      }
       
       // Limit content size to prevent memory issues
       if (this.contentText.length > 100000) {
@@ -69,10 +76,155 @@ export class ContentExtractor {
   }
   
   /**
+   * Extract text from elements with proper spacing
+   */
+  private extractTextWithSpacing(elements: cheerio.Cheerio<any>): string {
+    const textParts: string[] = [];
+    
+    // Define elements and text patterns to skip
+    const skipPatterns = [
+      /^(logo|icon|image|img|svg|close|open|toggle|menu|nav|navigation)$/i,
+      /^(button|btn|link|click here|tap here|swipe)$/i,
+      /^(loading|spinner|loader|processing)$/i,
+      /^[<>×✕✖✗]$/, // Close button symbols
+      /^(show|hide|expand|collapse|more|less)$/i,
+    ];
+    
+    // Skip common navigation class/id patterns
+    const skipSelectors = [
+      '.nav', '.navigation', '.menu', '.header', '.footer',
+      '[class*="logo"]', '[class*="icon"]', '[class*="button"]',
+      '[id*="logo"]', '[id*="icon"]', '[id*="button"]',
+      '.mobile-nav', '.mobile-menu', '#mobile-nav', '#mobile-menu',
+      '[aria-label*="navigation"]', '[role="navigation"]',
+      'button', 'nav', 'header', 'footer'
+    ];
+    
+    // Remove elements we want to skip
+    const skipElements = elements.find(skipSelectors.join(', '));
+    skipElements.remove();
+    
+    // Process text nodes with proper spacing
+    const processNode = (node: any) => {
+      if (node.type === 'text') {
+        const text = node.data.trim();
+        if (text && text.length > 1) {
+          // Check if text matches skip patterns
+          const shouldSkip = skipPatterns.some(pattern => pattern.test(text));
+          if (!shouldSkip) {
+            textParts.push(text);
+          }
+        }
+      } else if (node.children) {
+        // For block-level elements, add spacing
+        const blockElements = ['p', 'div', 'section', 'article', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'td', 'th', 'blockquote', 'pre'];
+        
+        node.children.forEach((child: any) => {
+          processNode(child);
+          
+          // Add space after block elements
+          if (child.type === 'tag' && blockElements.includes(child.name)) {
+            textParts.push(' ');
+          }
+        });
+      }
+    };
+    
+    elements.each((_, el) => {
+      processNode(el);
+    });
+    
+    // Join with spaces and clean up excessive whitespace
+    return textParts
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .replace(/\s+([.,!?;:])/g, '$1')
+      .trim();
+  }
+
+  /**
+   * Detect if the page is an error or blocked page
+   */
+  private isErrorPage(): boolean {
+    const errorIndicators = [
+      // Common error messages
+      'suite of APIs powering online payment processing',
+      'Accept payments and scale faster',
+      'error', '404', '403', '500', '502', '503',
+      'page not found', 'access denied', 'forbidden',
+      'blocked', 'rate limit', 'too many requests',
+      // Bot detection messages
+      'captcha', 'verify you are human', 'robot check',
+      'cloudflare', 'security check',
+      // Empty content indicators
+      'javascript is required', 'enable javascript',
+      'browser not supported'
+    ];
+    
+    const lowerContent = this.contentText.toLowerCase();
+    const lowerTitle = this.extractTitle().toLowerCase();
+    
+    // Check for error indicators in content
+    for (const indicator of errorIndicators) {
+      if (lowerContent.includes(indicator) || lowerTitle.includes(indicator)) {
+        // Additional check: if the page has very little content and contains error words
+        if (this.contentText.length < 500 || this.$('main, article').text().length < 100) {
+          console.log(`[ContentExtractor] Detected error/blocked page: contains "${indicator}"`);
+          return true;
+        }
+      }
+    }
+    
+    // Check for Stripe-specific API description page
+    if (lowerContent.includes('stripe is a suite of apis') && 
+        lowerContent.includes('powering online payment') &&
+        this.$('body').text().length < 1000) {
+      console.log('[ContentExtractor] Detected Stripe API error page');
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
    * Extract all content information from the page
    */
   extract(): ExtractedContent {
     try {
+      // Check if this is an error page first
+      if (this.isErrorPage()) {
+        console.log('[ContentExtractor] Error page detected, returning minimal content');
+        return {
+          primaryTopic: 'Error Page',
+          detectedTopics: ['error'],
+          businessType: 'other',
+          pageType: 'general',
+          contentSamples: {
+            title: this.extractTitle() || 'Error',
+            headings: [],
+            paragraphs: ['This page appears to be blocked or returning an error.'],
+            lists: [],
+            statistics: [],
+            comparisons: [],
+          },
+          detectedFeatures: {
+            hasPaymentForms: false,
+            hasProductListings: false,
+            hasAPIDocumentation: false,
+            hasPricingInfo: false,
+            hasBlogPosts: false,
+            hasTutorials: false,
+            hasComparisons: false,
+            hasQuestions: false,
+          },
+          keyTerms: [],
+          productNames: [],
+          technicalTerms: [],
+          wordCount: 0,
+          language: 'en',
+        };
+      }
+
       const title = this.extractTitle();
       const headings = this.extractHeadings();
       const topics = this.detectTopics(title, headings);
@@ -139,10 +291,44 @@ export class ContentExtractor {
   
   private extractTitle(): string {
     try {
-      return this.$('title').text() || 
-             this.$('meta[property="og:title"]').attr('content') || 
-             this.$('h1').first().text() || 
-             '';
+      let title = this.$('title').text() || 
+                  this.$('meta[property="og:title"]').attr('content') || 
+                  this.$('h1').first().text() || 
+                  '';
+      
+      // Clean up title by removing common UI/navigation text patterns
+      // Look for the actual title part (usually before the first occurrence of these patterns)
+      const uiPatterns = [
+        'logo', 'icon', 'navigation', 'menu', 'close', 'open', 
+        'toggle', 'button', 'click', 'tap', 'swipe'
+      ];
+      
+      // Find the first occurrence of any UI pattern
+      let cutoffIndex = title.length;
+      for (const pattern of uiPatterns) {
+        const index = title.toLowerCase().indexOf(pattern);
+        if (index > 0 && index < cutoffIndex) {
+          cutoffIndex = index;
+        }
+      }
+      
+      // If we found UI patterns, truncate before them
+      if (cutoffIndex < title.length) {
+        title = title.substring(0, cutoffIndex).trim();
+      }
+      
+      // Also handle common title separators
+      const separators = ['|', '-', '–', '—', '::'];
+      for (const sep of separators) {
+        const parts = title.split(sep);
+        if (parts.length > 1 && parts[0].trim().length > 5) {
+          // Keep only the first meaningful part
+          title = parts[0].trim();
+          break;
+        }
+      }
+      
+      return title;
     } catch (error) {
       console.warn('[ContentExtractor] extractTitle failed:', error);
       return '';
@@ -620,14 +806,32 @@ export class ContentExtractor {
     try {
       // URL-based detection
       let path = '';
+      let hostname = '';
       if (this.pageUrl) {
         const url = new URL(this.pageUrl);
         path = url.pathname.toLowerCase();
+        hostname = url.hostname.toLowerCase();
       }
       
-      // Homepage detection
-      if (path === '/' || path === '' || path === '/index' || path === '/index.html' || path === '/index.php') {
+      // Homepage detection - enhanced with more patterns and DOM checks
+      if (path === '/' || path === '' || path === '/index' || path === '/index.html' || path === '/index.php' ||
+          path === '/home' || path === '/home.html' || path === '/default.html' || path === '/default.aspx') {
+        console.log(`[ContentExtractor] Detected homepage by URL pattern: ${this.pageUrl} (path: "${path}")`);
         return 'homepage';
+      }
+      
+      // Additional homepage detection through DOM analysis
+      if (path.length <= 1 || (path.length < 20 && !path.includes('/'))) {
+        // Check for homepage indicators in content
+        const hasHeroSection = this.$('.hero, .hero-section, .homepage-hero, .main-banner').length > 0;
+        const hasMultipleSections = this.$('section').length > 3;
+        const hasNavWithHome = this.$('nav a[href="/"], nav a[href="#home"]').length > 0;
+        const titleIsCompanyName = this.$('title').text().toLowerCase().includes(hostname.split('.')[0]);
+        
+        if (hasHeroSection || (hasMultipleSections && hasNavWithHome) || titleIsCompanyName) {
+          console.log(`[ContentExtractor] Detected homepage by DOM indicators: ${this.pageUrl}`);
+          return 'homepage';
+        }
       }
       
       // Check for article/blog patterns
@@ -676,6 +880,7 @@ export class ContentExtractor {
       }
       
       // If none match, return general
+      console.log(`[ContentExtractor] No specific page type detected, defaulting to general: ${this.pageUrl}`);
       return 'general';
       
     } catch (error) {

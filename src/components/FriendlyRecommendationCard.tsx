@@ -18,6 +18,7 @@ interface FriendlyRecommendationCardProps {
     domain: string;
     title: string;
     contentType?: string;
+    pageType?: string;
   };
 }
 
@@ -72,6 +73,19 @@ const FRIENDLY_PILLARS: Record<string, { name: string; color: string; metaphor: 
   },
 };
 
+// Page type icons for context
+const PAGE_TYPE_ICONS: Record<string, string> = {
+  homepage: '🏠',
+  article: '📝',
+  product: '🛍️',
+  category: '📂',
+  documentation: '📚',
+  about: 'ℹ️',
+  contact: '📧',
+  search: '🔍',
+  general: '📄',
+};
+
 export default function FriendlyRecommendationCard({
   metric,
   why,
@@ -84,6 +98,11 @@ export default function FriendlyRecommendationCard({
 }: FriendlyRecommendationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Debug logging
+  if (index === 0) {
+    console.log('[FriendlyRecommendationCard] First card - websiteProfile:', websiteProfile);
+  }
   
   const category = gain >= 10 ? 'CRITICAL' : gain >= 5 ? 'HIGH' : 'MEDIUM';
   const friendlyCategory = FRIENDLY_CATEGORIES[category];
@@ -141,6 +160,20 @@ export default function FriendlyRecommendationCard({
                 <span className="text-xs font-medium text-muted">
                   {friendlyCategory.timeEstimate}
                 </span>
+                
+                {/* Page type indicator */}
+                {websiteProfile?.pageType && (
+                  <span 
+                    className="ml-2 px-2 py-1 text-xs font-medium rounded-full"
+                    style={{
+                      backgroundColor: 'var(--accent)' + '20',
+                      color: 'var(--accent)',
+                    }}
+                    title={`For ${websiteProfile.pageType} pages`}
+                  >
+                    {PAGE_TYPE_ICONS[websiteProfile.pageType] || PAGE_TYPE_ICONS.general} {websiteProfile.pageType}
+                  </span>
+                )}
                 
                 {/* Animated point gain preview */}
                 <motion.div

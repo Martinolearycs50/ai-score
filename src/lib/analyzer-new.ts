@@ -57,7 +57,15 @@ export class AiSearchAnalyzer {
       const $ = cheerio.load(html);
       
       // Extract comprehensive metadata for website profile
-      const pageTitle = $('title').text() || $('meta[property="og:title"]').attr('content') || '';
+      // Clean up title text by removing common navigation patterns
+      let pageTitle = $('title').text() || $('meta[property="og:title"]').attr('content') || '';
+      
+      // Remove common navigation/UI text patterns from title
+      pageTitle = pageTitle
+        .replace(/\b(logo|icon|image|menu|nav|navigation|close|open|toggle)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
       const pageDescription = $('meta[name="description"]').attr('content') || 
                              $('meta[property="og:description"]').attr('content') || '';
       
@@ -67,6 +75,9 @@ export class AiSearchAnalyzer {
         const contentExtractor = new ContentExtractor(html, normalizedUrl);
         extractedContent = contentExtractor.extract();
         console.log('[AiSearchAnalyzer] Content extracted successfully');
+        console.log(`[AiSearchAnalyzer] Page type: ${extractedContent.pageType}, Primary topic: ${extractedContent.primaryTopic}`);
+        console.log('[AiSearchAnalyzer] Detected page type:', extractedContent?.pageType);
+        console.log('[AiSearchAnalyzer] Detected business type:', extractedContent?.businessType);
       } catch (error) {
         console.error('[AiSearchAnalyzer] Content extraction failed:', error);
         // Continue without extracted content - will use static recommendations
@@ -74,6 +85,12 @@ export class AiSearchAnalyzer {
       
       // Build website profile
       const websiteProfile = this.buildWebsiteProfile(normalizedUrl, $, pageTitle, pageDescription, extractedContent?.pageType || 'general');
+      console.log('[AiSearchAnalyzer] Website profile built:', {
+        domain: websiteProfile.domain,
+        pageType: websiteProfile.pageType,
+        contentType: websiteProfile.contentType,
+        title: websiteProfile.title
+      });
 
       // Run all audit modules
       const pillarResults: PillarResults = {
