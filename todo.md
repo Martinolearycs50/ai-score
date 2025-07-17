@@ -1,5 +1,18 @@
 # TODO - AI Search Analyzer
 
+## ✅ Completed Features (v2.7.0 - Freemium Phase 1)
+
+### Freemium Model Implementation
+- [x] **Tier System** - Free and Pro tiers with different feature access
+- [x] **Performance Rating Converter** - Converts scores to simple ratings for free tier
+- [x] **Tier-Based Display** - Components adapt based on tier parameter
+- [x] **Free Tier Limitations** - Shows only score and ratings, hides detailed insights
+- [x] **Pro Tier Features** - Full analysis with recommendations and comparisons
+- [x] **Upgrade CTA** - Prominent call-to-action for free users
+- [x] **Default to Free** - Encourages upgrades by defaulting to free tier
+- [x] **Clean Styling** - White background, proper brand colors
+- [x] **Comprehensive Tests** - Full test coverage for rating converter
+
 ## ✅ Completed Features (MVP v2.5.0)
 
 ### Core Functionality
@@ -72,6 +85,6 @@ The AI Search Analyzer MVP successfully delivers:
 
 ---
 
-**Last Updated**: 2025-07-17 (MVP Release v2.5.0)
+**Last Updated**: 2025-07-17 (Freemium Phase 1 - v2.7.0)
 
 *Note: This file now documents completed features only. Future roadmap items have been removed as they may change during the transition to freemium/paid versions.*

@@ -155,6 +155,16 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-17: Implemented Freemium Model with Proper Tier Separation - v2.7.0
+  - Created performanceRatings.ts with type definitions and rating converter functions
+  - Added tier parameter support (?tier=free or ?tier=pro) to the application
+  - Free tier now shows ONLY: overall score, simple ratings, and upgrade CTA
+  - Free tier HIDES: WebsiteProfileCard, all recommendations, detailed breakdowns
+  - Pro tier retains full detailed analysis and recommendations
+  - Changed default tier to 'free' (was 'pro')
+  - Fixed styling issues: white background, proper button colors, clean cards
+  - Added comprehensive tests for the rating converter
+  - No changes to the analysis engine - purely display layer changes
 - 2025-07-17: MVP Release v2.5.0 - Complete AI Search Analyzer
   - Fixed content extraction with proper text spacing and UI element filtering
   - Fixed CSS styling issues (PostCSS configuration for Tailwind v4)

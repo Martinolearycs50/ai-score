@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
 import PillarScoreDisplay from '@/components/PillarScoreDisplay';
@@ -26,7 +27,9 @@ interface ComparisonState {
   errors: [string | null, string | null];
 }
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const [tier, setTier] = useState<'free' | 'pro'>('free');
   const [comparisonMode, setComparisonMode] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
@@ -38,6 +41,14 @@ export default function Home() {
     results: [null, null],
     errors: [null, null]
   });
+
+  // Read tier from URL parameters
+  useEffect(() => {
+    const tierParam = searchParams.get('tier');
+    if (tierParam === 'free' || tierParam === 'pro') {
+      setTier(tierParam);
+    }
+  }, [searchParams]);
 
   const handleAnalyze = async (url: string) => {
     // Development logging
@@ -276,17 +287,18 @@ export default function Home() {
             <div id="results" className="max-w-4xl mx-auto">
               <EmotionalResultsReveal result={analysisState.result}>
                 <div className="space-y-8">
-                  {/* Website Profile Card */}
-                  {analysisState.result.websiteProfile && (
+                  {/* Website Profile Card - Pro tier only */}
+                  {tier === 'pro' && analysisState.result.websiteProfile && (
                     <WebsiteProfileCard 
                       profile={analysisState.result.websiteProfile} 
                       score={analysisState.result.aiSearchScore}
                     />
                   )}
                   
-                  <PillarScoreDisplay result={analysisState.result} />
+                  <PillarScoreDisplay result={analysisState.result} tier={tier} />
                   
-                  {/* Enhanced Recommendations Section */}
+                  {/* Enhanced Recommendations Section - Pro tier only */}
+                  {tier === 'pro' && (
                   <div className="space-y-6">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -353,6 +365,7 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               </EmotionalResultsReveal>
             </div>
@@ -380,5 +393,13 @@ export default function Home() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

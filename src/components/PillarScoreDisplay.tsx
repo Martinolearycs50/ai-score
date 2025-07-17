@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
+import { getPerformanceRating, getRatingColor, getRatingEmoji, PILLAR_DISPLAY_NAMES } from '@/lib/performanceRatings';
 
 interface PillarScoreDisplayProps {
   result: AnalysisResultNew;
   compact?: boolean;
+  tier?: 'free' | 'pro';
 }
 
 // Pillar metadata with plain language explanations
@@ -48,7 +50,7 @@ const PILLAR_INFO = {
   },
 };
 
-export default function PillarScoreDisplay({ result, compact = false }: PillarScoreDisplayProps) {
+export default function PillarScoreDisplay({ result, compact = false, tier = 'pro' }: PillarScoreDisplayProps) {
   const [hoveredPillar, setHoveredPillar] = useState<string | null>(null);
   const { scoringResult } = result;
 
@@ -107,6 +109,84 @@ export default function PillarScoreDisplay({ result, compact = false }: PillarSc
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  // Free tier - simplified rating display
+  if (tier === 'free') {
+    return (
+      <div className="space-y-8">
+        {/* Overall Score Only */}
+        <div className="text-center">
+          <h2 className="text-2xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+            Your AI Search Score
+          </h2>
+          
+          {/* Big Score Display */}
+          <motion.div 
+            className="text-8xl font-bold mb-2" 
+            style={{ color: result.aiSearchScore >= 70 ? '#10B981' : result.aiSearchScore >= 40 ? '#F59E0B' : '#EF4444' }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.8 }}
+          >
+            {result.aiSearchScore}
+          </motion.div>
+          <div className="text-lg text-muted mb-8">out of 100</div>
+          
+          {/* Simple Rating Summary */}
+          <div className="mb-8">
+            <p className="text-xl" style={{ color: 'var(--foreground)' }}>
+              {result.aiSearchScore >= 70 
+                ? "Great job! Your content is well-optimized for AI search."
+                : result.aiSearchScore >= 40
+                ? "Good start! There's room to improve your AI visibility."
+                : "Your content needs optimization for AI search engines."}
+            </p>
+          </div>
+        </div>
+
+        {/* Simple Ratings Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-md mx-auto">
+          {scoringResult.breakdown.map((pillar) => {
+            const rating = getPerformanceRating(pillar.earned, pillar.max);
+            const displayName = PILLAR_DISPLAY_NAMES[pillar.pillar];
+            
+            return (
+              <div
+                key={pillar.pillar}
+                className="text-center p-3"
+              >
+                <div className="text-sm text-muted mb-1">{displayName}</div>
+                <div className={`font-medium ${getRatingColor(rating)}`}>
+                  {rating}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Large CTA */}
+        <motion.div 
+          className="bg-blue-50 rounded-lg p-8 text-center max-w-lg mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--foreground)' }}>
+            Get Your Full Analysis
+          </h3>
+          <p className="text-lg text-muted mb-6">
+            Unlock detailed recommendations, specific fixes, and actionable insights to improve your AI search ranking
+          </p>
+          <button className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
+            Upgrade to Pro - $39/month
+          </button>
+          <p className="text-sm text-muted mt-4">
+            30 analyses per month • Full recommendations • Priority support
+          </p>
+        </motion.div>
       </div>
     );
   }

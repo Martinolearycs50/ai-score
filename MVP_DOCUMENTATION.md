@@ -8,11 +8,12 @@ The AI Search Analyzer is a comprehensive web application that evaluates website
 
 1. [System Architecture](#system-architecture)
 2. [Core Features](#core-features)
-3. [Technical Implementation](#technical-implementation)
-4. [Scoring System](#scoring-system)
-5. [UI/UX Features](#uiux-features)
-6. [Performance Metrics](#performance-metrics)
-7. [Testing & Quality](#testing--quality)
+3. [Freemium Model](#freemium-model)
+4. [Technical Implementation](#technical-implementation)
+5. [Scoring System](#scoring-system)
+6. [UI/UX Features](#uiux-features)
+7. [Performance Metrics](#performance-metrics)
+8. [Testing & Quality](#testing--quality)
 
 ## System Architecture
 
@@ -127,6 +128,70 @@ Sophisticated content processing that:
 - Identifies key content areas
 - Preserves semantic structure
 - Handles dynamic content gracefully
+
+## Freemium Model
+
+### Tier System Implementation
+
+The application now supports two distinct tiers:
+
+#### Free Tier (Default)
+- **Monthly Limit**: 5 analyses
+- **Features**:
+  - Overall AI Search Score (0-100)
+  - Simple performance ratings (Excellent/Good/Fair/Poor/Critical)
+  - Basic assessment of AI readiness
+  - Prominent upgrade CTA
+- **Hidden Elements**:
+  - Detailed pillar scores
+  - WebsiteProfileCard
+  - All recommendations
+  - Implementation guides
+  - Comparison mode
+
+#### Pro Tier ($39/month)
+- **Monthly Limit**: 30 analyses
+- **Additional Features**:
+  - Everything in Free tier
+  - Detailed pillar breakdowns with exact scores
+  - Personalized recommendations with examples
+  - Time estimates and fixes
+  - Website profile analysis
+  - Comparison mode
+  - Implementation guides
+
+### Technical Architecture
+
+#### Tier Parameter
+- Query parameter: `?tier=free` or `?tier=pro`
+- Default: `free` (encourages upgrades)
+- Passed through component hierarchy
+
+#### Performance Rating System
+```typescript
+// src/lib/performanceRatings.ts
+export type PerformanceRating = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Critical';
+
+export function getPerformanceRating(earned: number, max: number): PerformanceRating {
+  const percentage = (earned / max) * 100;
+  if (percentage >= 80) return 'Excellent';
+  if (percentage >= 60) return 'Good';
+  if (percentage >= 40) return 'Fair';
+  if (percentage >= 20) return 'Poor';
+  return 'Critical';
+}
+```
+
+#### Component Updates
+- **PillarScoreDisplay**: Tier-aware rendering
+- **page.tsx**: Tier state management and propagation
+- **EmotionalResultsReveal**: Works for both tiers
+- **WebsiteProfileCard**: Pro-only visibility
+
+### Design Philosophy
+- **Free Tier**: Minimal, focused on conversion
+- **Pro Tier**: Full featured, value-packed
+- **No Analysis Changes**: Same engine, different display
 
 ## Technical Implementation
 

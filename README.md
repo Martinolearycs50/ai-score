@@ -2,14 +2,35 @@
 
 A comprehensive web application that analyzes websites for AI search engine optimization. Get your AI Search Score and actionable recommendations to improve visibility in AI-powered search platforms like ChatGPT, Claude, and Perplexity.
 
+## 🆕 Freemium Model
+
+The AI Search Analyzer now offers two tiers:
+
+### Free Tier (Default)
+- 5 analyses per month
+- AI Search Score (0-100)
+- Simple performance ratings (Excellent/Good/Fair/Poor/Critical)
+- Basic overview of strengths and weaknesses
+- Access with default URL or `?tier=free`
+
+### Pro Tier ($39/month)
+- 30 analyses per month
+- Everything in Free tier, plus:
+- Detailed pillar breakdowns with exact scores
+- Personalized, actionable recommendations
+- Content-aware suggestions with examples
+- Time estimates and implementation guides
+- Website profile analysis
+- Access with `?tier=pro`
+
 ## 🎯 What It Does
 
 The AI Search Analyzer evaluates any website URL and provides:
 - An overall AI Search Score (0-100)
-- Detailed analysis across 5 key pillars
-- Personalized, actionable recommendations
-- Content-aware suggestions based on page type
-- Side-by-side website comparisons
+- Analysis across 5 key pillars
+- Performance ratings for each pillar
+- **Pro only**: Detailed recommendations, scores, and implementation guides
+- **Pro only**: Side-by-side website comparisons
 
 > **📖 For detailed technical documentation, see [MVP_DOCUMENTATION.md](./MVP_DOCUMENTATION.md)**
 
@@ -69,19 +90,31 @@ npm run test:coverage
 ## 🎯 Usage
 
 ### Single Website Analysis
+
+#### Free Tier Experience
+1. Enter a website URL in the input field
+2. Click "Analyze" to start the analysis
+3. View your AI Search Score (0-100)
+4. See simple ratings for each pillar (Excellent/Good/Fair/Poor/Critical)
+5. Get a general assessment of your site's AI readiness
+6. Click "Upgrade to Pro" to unlock detailed insights
+
+#### Pro Tier Experience (`?tier=pro`)
 1. Enter a website URL in the input field
 2. Click "Analyze" to start the experience
 3. Enjoy the animated score reveal with encouraging messages
-4. Explore your detailed breakdown with friendly explanations
+4. Explore your detailed breakdown with exact scores
 5. Click on recommendation cards to see personalized fixes
 6. Track your progress with time estimates and completion buttons
+7. View website profile information and content analysis
 
-### Website Comparison (Battle Mode!)
-1. Click "Compare Websites" to enter battle mode
-2. Enter two website URLs for the competition
-3. Click "Compare" to start the VS animation
-4. Watch the dual score counting and crown the winner
-5. View the enhanced comparison with:
+### Website Comparison (Pro Only)
+1. Access with `?tier=pro`
+2. Click "Compare Websites" to enter battle mode
+3. Enter two website URLs for the competition
+4. Click "Compare" to start the VS animation
+5. Watch the dual score counting and crown the winner
+6. View the enhanced comparison with:
    - Animated winner announcement
    - Friendly pillar breakdowns with emojis
    - Quick Wins section for the underdog
@@ -208,7 +241,7 @@ Analyzes a website for AI search optimization.
 
 ## 📈 Version
 
-Current Version: **v2.5.0** (MVP Release)
+Current Version: **v2.7.0** (Freemium Model - Phase 1)
 
 See [CHANGELOG.md](./CHANGELOG.md) for version history.
 

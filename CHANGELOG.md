@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2025-07-17 - Freemium Model Implementation
+
+### Added
+- **Freemium Model with Proper Tier Separation**
+  - Created `performanceRatings.ts` with type definitions and rating converter functions
+  - Added tier parameter support (`?tier=free` or `?tier=pro`) to the application
+  - Free tier shows ONLY: overall score (big number), simple ratings grid, and prominent upgrade CTA
+  - Free tier HIDES: WebsiteProfileCard, all recommendations, detailed pillar breakdowns, actionable insights
+  - Added comprehensive tests for the rating converter
+
+### Fixed
+- Background color now correctly set to pure white (#FFFFFF) matching brand guidelines
+- Fixed button styling to use correct blue primary color (#3B82F6)
+- Updated card styling in free tier to match the established brand pattern
+- Fixed CSS variable issues affecting the overall design consistency
+
+### Changed
+- Default tier is now 'free' (was 'pro') - users must explicitly use ?tier=pro for full analysis
+- Completely redesigned free tier display to be minimal and focused on upgrade conversion
+- Updated PillarScoreDisplay component to support tier-based display
+- No changes to the analysis engine - purely display layer changes
+
 ## [2.5.0] - 2025-07-17 - MVP Release
 
 ### Added

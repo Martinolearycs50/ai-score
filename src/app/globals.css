@@ -3,10 +3,10 @@
 @layer base {
   :root {
     /* Minimalist Color System */
-    --background: #FAFAFA;
-    --foreground: #111111;
+    --background: #FFFFFF;
+    --foreground: #111827;
     --muted: #666666;
-    --accent: #2563EB;
+    --accent: #3B82F6;
     --border: #E5E5E5;
     --card: #FFFFFF;
     --error: #DC2626;
