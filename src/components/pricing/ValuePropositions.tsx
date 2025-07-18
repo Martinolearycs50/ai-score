@@ -16,19 +16,6 @@ export default function ValuePropositions() {
           whileHover={{ y: -5 }}
           className="text-center"
         >
-          <motion.div
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-            }}
-            transition={{ 
-              duration: 4,
-              repeat: Infinity,
-              delay: index * 0.3
-            }}
-            className="text-4xl mb-4"
-          >
-            {prop.icon}
-          </motion.div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {prop.title}
           </h3>

@@ -148,7 +148,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
             </p>
             <button 
               className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium"
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => window.location.href = '/pricing?from=results'}
             >
               Upgrade to Pro - $39/month
             </button>

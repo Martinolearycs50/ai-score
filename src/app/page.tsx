@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useTier } from '@/hooks/useTier';
 import UrlForm from '@/components/UrlForm';
 import AdvancedLoadingState from '@/components/AdvancedLoadingState';
@@ -28,7 +29,8 @@ interface ComparisonState {
 }
 
 function HomeContent() {
-  const { features } = useTier();
+  const { features, tier } = useTier();
+  const router = useRouter();
   const [comparisonMode, setComparisonMode] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
@@ -93,13 +95,22 @@ function HomeContent() {
         error: null
       });
 
-      // Smooth scroll to results after emotional reveal completes
-      setTimeout(() => {
-        document.getElementById('results')?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 14000); // Wait for full emotional reveal (13s) plus buffer
+      // For Pro users, redirect to dashboard after a short delay
+      if (tier === 'pro') {
+        setTimeout(() => {
+          // Store the analysis result in sessionStorage for the dashboard
+          sessionStorage.setItem('latestAnalysis', JSON.stringify(result));
+          router.push('/dashboard');
+        }, 2000); // Show success briefly then redirect
+      } else {
+        // For free users, smooth scroll to results after emotional reveal completes
+        setTimeout(() => {
+          document.getElementById('results')?.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 14000); // Wait for full emotional reveal (13s) plus buffer
+      }
 
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -193,17 +204,10 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      {/* Header */}
-      <header className="absolute top-0 left-0 p-8">
-        <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          AI Search Score
-        </span>
-      </header>
-
       {/* Main Content */}
       <main className="animate-fade-in">
         {analysisState.status === 'idle' && comparisonState.status === 'idle' && (
-          <div className="min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="min-h-screen flex flex-col items-center pt-24 px-6">
             <div className="w-full max-w-2xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
                 AI Search Score
@@ -227,13 +231,13 @@ function HomeContent() {
         )}
 
         {(analysisState.status === 'loading' || comparisonState.status === 'loading') && (
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex items-center pt-24 px-6">
             <AdvancedLoadingState url={analysisState.result?.url} />
           </div>
         )}
 
         {analysisState.status === 'error' && (
-          <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="min-h-screen flex items-center pt-24 px-6">
             <motion.div 
               className="text-center max-w-md"
               initial={{ opacity: 0, y: 20 }}
