@@ -22,22 +22,45 @@ interface FriendlyRecommendationCardProps {
   };
 }
 
-// Friendly category mapping
+// Friendly category mapping with professional icons
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'CRITICAL':
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 10H20L11 23V14H4L13 1V10Z" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1.5" strokeLinejoin="round"/>
+        </svg>
+      );
+    case 'HIGH':
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L10.09 7.26L4.6 7.27L8.94 10.52L6.92 15.78L12 12.88L17.08 15.78L15.06 10.52L19.4 7.27L13.91 7.26L12 2Z" fill="#8B5CF6" stroke="#8B5CF6" strokeWidth="1.5" strokeLinejoin="round"/>
+        </svg>
+      );
+    case 'MEDIUM':
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="#3B82F6" fillOpacity="0.2" stroke="#3B82F6" strokeWidth="2"/>
+          <path d="M12 8V12L15 15" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
 const FRIENDLY_CATEGORIES = {
-  CRITICAL: { 
-    emoji: '🚀', 
+  CRITICAL: {
     label: 'Quick Win!', 
     timeEstimate: '5-10 min fix',
     encouragement: 'This one change could transform your AI visibility!'
   },
-  HIGH: { 
-    emoji: '💎', 
+  HIGH: {
     label: 'Big Impact', 
     timeEstimate: '15-30 min',
     encouragement: 'A small effort for a huge gain!'
   },
-  MEDIUM: { 
-    emoji: '⭐', 
+  MEDIUM: {
     label: 'Nice Boost', 
     timeEstimate: '30-60 min',
     encouragement: 'Every point counts towards excellence!'
@@ -139,13 +162,12 @@ export default function FriendlyRecommendationCard({
             <div className="flex-1">
               {/* Header with emoji and friendly labels */}
               <div className="flex items-center gap-3 mb-3">
-                <motion.span
-                  className="text-2xl"
+                <motion.div
                   animate={isHovered ? { rotate: [0, -10, 10, 0] } : {}}
                   transition={{ duration: 0.5 }}
                 >
-                  {friendlyCategory.emoji}
-                </motion.span>
+                  {getCategoryIcon(category)}
+                </motion.div>
                 
                 <span
                   className="px-3 py-1 text-xs font-medium rounded-full"
@@ -197,9 +219,16 @@ export default function FriendlyRecommendationCard({
               </p>
 
               {/* Why it matters - made more conversational and personalized */}
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
-                💡 {getPersonalizedWhy(why, metric, websiteProfile)}
-              </p>
+              <div className="flex items-start gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 mt-0.5">
+                  <path d="M12 2C8.13 2 5 5.13 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.13 15.87 2 12 2Z" fill="#F59E0B" fillOpacity="0.2" stroke="#F59E0B" strokeWidth="2"/>
+                  <path d="M9 21H15" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 18V21" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-muted)' }}>
+                  {getPersonalizedWhy(why, metric, websiteProfile)}
+                </p>
+              </div>
 
               {/* Encouragement text */}
               {!isExpanded && (

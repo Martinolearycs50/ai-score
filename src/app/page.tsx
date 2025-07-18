@@ -55,6 +55,13 @@ function HomeContent() {
       error: null
     });
 
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      console.log('[Debug] Request aborted due to timeout');
+    }, 15000); // 15 second timeout
+
     try {
       const requestBody = { url };
       
@@ -69,12 +76,16 @@ function HomeContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
 
       if (process.env.NODE_ENV === 'development') {
         console.log('[Debug] Response status:', response.status);
         console.log('[Debug] Response ok:', response.ok);
       }
+
+      // Clear timeout since request completed
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -109,20 +120,35 @@ function HomeContent() {
             behavior: 'smooth',
             block: 'start'
           });
-        }, 14000); // Wait for full emotional reveal (13s) plus buffer
+        }, 4500); // Scroll after reveal stage (4s) plus small buffer
       }
 
     } catch (error) {
+      // Clear timeout on error
+      clearTimeout(timeoutId);
+
       if (process.env.NODE_ENV === 'development') {
         console.error('[Debug] Error in handleAnalyze:', error);
         console.error('[Debug] Error type:', error instanceof Error ? error.constructor.name : typeof error);
         console.error('[Debug] Error message:', error instanceof Error ? error.message : String(error));
       }
 
+      let errorMessage = 'Analysis failed';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'The analysis is taking longer than expected. Please try again or check if the website is accessible.';
+        } else if (error.message.includes('fetch')) {
+          errorMessage = 'Unable to connect to the analysis service. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       setAnalysisState({
         status: 'error',
         result: null,
-        error: error instanceof Error ? error.message : 'Analysis failed'
+        error: errorMessage
       });
     }
   };
@@ -207,7 +233,7 @@ function HomeContent() {
       {/* Main Content */}
       <main className="animate-fade-in">
         {analysisState.status === 'idle' && comparisonState.status === 'idle' && (
-          <div className="min-h-screen flex flex-col items-center pt-24 px-6">
+          <div className="min-h-screen flex flex-col items-center pt-12 md:pt-16 px-6">
             <div className="w-full max-w-2xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
                 AI Search Score
@@ -231,20 +257,22 @@ function HomeContent() {
         )}
 
         {(analysisState.status === 'loading' || comparisonState.status === 'loading') && (
-          <div className="min-h-screen flex items-center pt-24 px-6">
+          <div className="pt-12 md:pt-16 px-6">
             <AdvancedLoadingState url={analysisState.result?.url} />
           </div>
         )}
 
         {analysisState.status === 'error' && (
-          <div className="min-h-screen flex items-center pt-24 px-6">
+          <div className="pt-12 md:pt-16 px-6">
             <motion.div 
-              className="text-center max-w-md"
+              className="text-center max-w-md mx-auto py-16"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="mb-6">
-                <span className="text-6xl">⚠️</span>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
+                  <path d="M12 9V14M12 17H12.01M10.29 3.86L2.82 18C2.64 18.35 2.55 18.74 2.55 19.13C2.55 20.17 3.38 21 4.41 21H19.59C20.62 21 21.45 20.17 21.45 19.13C21.45 18.74 21.36 18.35 21.18 18L13.71 3.86C13.53 3.5 13.28 3.18 12.96 2.93C12.24 2.36 11.2 2.36 10.48 2.93C10.16 3.18 9.91 3.5 9.73 3.86Z" fill="#F59E0B" fillOpacity="0.2" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
               <h2 className="text-2xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
                 Unable to Analyze This Page
@@ -268,20 +296,21 @@ function HomeContent() {
         )}
 
         {analysisState.status === 'success' && analysisState.result && (
-          <div className="min-h-screen px-6 py-16">
-            {/* Back button */}
-            <div className="max-w-4xl mx-auto mb-12">
-              <button
-                onClick={handleReset}
-                className="text-muted hover:text-foreground transition-colors text-sm"
-              >
-                ← New analysis
-              </button>
-            </div>
+          <div className="bg-gray-50/50 min-h-screen">
+            <div className="px-6 py-8">
+              {/* Back button */}
+              <div className="max-w-6xl mx-auto mb-8">
+                <button
+                  onClick={handleReset}
+                  className="text-muted hover:text-foreground transition-colors text-sm"
+                >
+                  ← New analysis
+                </button>
+              </div>
 
-            <div id="results" className="max-w-4xl mx-auto">
+              <div id="results" className="max-w-6xl mx-auto">
               <EmotionalResultsReveal result={analysisState.result}>
-                <div className="space-y-8">
+                <div className="space-y-12">
                   {/* Website Profile Card - Feature flag based */}
                   {features.showWebsiteProfile && analysisState.result.websiteProfile && (
                     <WebsiteProfileCard 
@@ -294,18 +323,18 @@ function HomeContent() {
                   
                   {/* Enhanced Recommendations Section - Feature flag based */}
                   {features.showRecommendations && (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="text-center mb-8"
                     >
                       <h2 className="text-3xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
-                        Your AI Optimization Journey 🗺️
+                        Your AI Optimization Journey
                       </h2>
                       <p className="text-lg text-muted">
                         {analysisState.result.scoringResult.recommendations.length === 0
-                          ? "You're already at the summit! 🏔️"
+                          ? "You're already at the summit!"
                           : `${analysisState.result.scoringResult.recommendations.length} opportunities to boost your score`}
                       </p>
                     </motion.div>
@@ -318,14 +347,19 @@ function HomeContent() {
                         transition={{ type: "spring" }}
                       >
                         <motion.div
-                          className="text-6xl mb-4"
+                          className="mb-4"
                           animate={{ 
                             rotate: [0, -10, 10, -10, 10, 0],
                             scale: [1, 1.1, 1]
                           }}
                           transition={{ duration: 0.5 }}
                         >
-                          🎉
+                          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
+                            <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="#10B981" stroke="#10B981" strokeWidth="2" strokeLinejoin="round"/>
+                            <circle cx="6" cy="6" r="2" fill="#F59E0B" opacity="0.8"/>
+                            <circle cx="18" cy="6" r="2" fill="#F59E0B" opacity="0.8"/>
+                            <circle cx="12" cy="20" r="2" fill="#F59E0B" opacity="0.8"/>
+                          </svg>
                         </motion.div>
                         <p className="text-xl font-medium mb-2" style={{ color: 'var(--foreground)' }}>
                           Perfect Score Territory!
@@ -363,26 +397,29 @@ function HomeContent() {
                   )}
                 </div>
               </EmotionalResultsReveal>
+              </div>
             </div>
           </div>
         )}
 
         {comparisonState.status === 'success' && comparisonState.results[0] && comparisonState.results[1] && (
-          <div className="min-h-screen px-6 py-16">
-            {/* Back button */}
-            <div className="max-w-6xl mx-auto mb-12">
-              <button
-                onClick={handleReset}
-                className="text-muted hover:text-foreground transition-colors text-sm"
-              >
-                ← New analysis
-              </button>
-            </div>
+          <div className="bg-gray-50/50 min-h-screen">
+            <div className="px-6 py-8">
+              {/* Back button */}
+              <div className="max-w-6xl mx-auto mb-8">
+                <button
+                  onClick={handleReset}
+                  className="text-muted hover:text-foreground transition-colors text-sm"
+                >
+                  ← New analysis
+                </button>
+              </div>
 
-            <div id="results" className="max-w-6xl mx-auto">
+              <div id="results" className="max-w-6xl mx-auto">
               <EmotionalComparisonReveal results={[comparisonState.results[0], comparisonState.results[1]]}>
                 <ComparisonView results={[comparisonState.results[0], comparisonState.results[1]]} />
               </EmotionalComparisonReveal>
+              </div>
             </div>
           </div>
         )}

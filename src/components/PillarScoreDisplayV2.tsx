@@ -84,20 +84,53 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
       <div className="space-y-8">
         {/* Overall Score Only */}
         <div className="text-center">
-          <h2 className="text-2xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+          <h2 className="text-3xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
             Your AI Search Score
           </h2>
           
-          {/* Big Score Display */}
-          <motion.div 
-            className="text-8xl font-bold mb-2" 
-            style={{ color: result.aiSearchScore >= 70 ? '#10B981' : result.aiSearchScore >= 40 ? '#F59E0B' : '#EF4444' }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.8 }}
-          >
-            {result.aiSearchScore}
-          </motion.div>
+          {/* Score Meter Display */}
+          <div className="relative max-w-md mx-auto mb-8">
+            {/* Background Circle */}
+            <svg className="w-64 h-64 mx-auto" viewBox="0 0 200 200">
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="12"
+                strokeDasharray="565.48"
+                className="transform -rotate-90 origin-center"
+              />
+              {/* Score Arc */}
+              <motion.circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke={result.aiSearchScore >= 70 ? '#10B981' : result.aiSearchScore >= 40 ? '#F59E0B' : '#EF4444'}
+                strokeWidth="12"
+                strokeLinecap="round"
+                initial={{ strokeDasharray: "0 565.48" }}
+                animate={{ strokeDasharray: `${(result.aiSearchScore / 100) * 565.48} 565.48` }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                className="transform -rotate-90 origin-center"
+              />
+            </svg>
+            
+            {/* Score Number in Center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div 
+                className="text-6xl font-bold" 
+                style={{ color: result.aiSearchScore >= 70 ? '#10B981' : result.aiSearchScore >= 40 ? '#F59E0B' : '#EF4444' }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                {result.aiSearchScore}
+              </motion.div>
+            </div>
+          </div>
           <div className="text-lg text-muted mb-8">out of 100</div>
           
           {/* Simple Rating Summary */}
@@ -167,7 +200,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
       {/* Overall Score */}
       <div className="text-center">
         <p className="text-sm text-muted mono mb-2">{result.url}</p>
-        <h2 className="text-2xl font-medium mb-4" style={{ color: 'var(--foreground)' }}>
+        <h2 className="text-3xl font-medium mb-6" style={{ color: 'var(--foreground)' }}>
           AI Search Readiness Score
         </h2>
         
@@ -222,16 +255,16 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
         </div>
         
         <motion.p 
-          className="text-muted mt-4 max-w-md mx-auto"
+          className="text-lg text-muted mt-6 max-w-md mx-auto"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
         >
           {result.aiSearchScore >= 80 
-            ? "🌟 Your content is brilliantly optimized for AI search!"
+            ? "Your content is brilliantly optimized for AI search"
             : result.aiSearchScore >= 60
-            ? "💪 Strong foundation - let's polish it to perfection!"
-            : "🚀 Exciting journey ahead - huge potential for growth!"}
+            ? "Strong foundation with room for improvement"
+            : "Significant optimization opportunities available"}
         </motion.p>
       </div>
 
@@ -245,7 +278,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            Your Strengths & Opportunities 📊
+            Your Strengths & Opportunities
           </motion.h3>
           
           {scoringResult.breakdown.map((pillar, index) => {

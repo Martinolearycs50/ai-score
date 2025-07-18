@@ -58,6 +58,8 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const isDev = process.env.NODE_ENV === 'development';
   
+  console.log('[API] Analyze endpoint called at', new Date().toISOString());
+  
   try {
     // Log request details for debugging
     if (isDev) {
@@ -135,6 +137,7 @@ export async function POST(request: NextRequest) {
     const url = String(rawUrl).trim();
 
     // Validate and normalize the URL
+    console.log('[API] Processing URL:', url);
     console.log('API Route - URL from request:', {
       rawUrl,
       url,
@@ -188,9 +191,11 @@ export async function POST(request: NextRequest) {
     console.log('Using normalized URL:', normalizedUrl);
 
     // Perform analysis
+    console.log('[API] Starting analysis for URL:', normalizedUrl);
     console.log(`Starting analysis for URL: ${normalizedUrl}`);
     const analyzer = new AiSearchAnalyzer();
     const result = await analyzer.analyzeUrl(normalizedUrl);
+    console.log('[API] Analysis completed successfully');
 
     const analysisTime = Date.now() - startTime;
     console.log(`Analysis completed in ${analysisTime}ms for: ${normalizedUrl}`);
@@ -212,6 +217,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     const analysisTime = Date.now() - startTime;
+    console.error('[API] Analysis failed:', error);
     console.error('Analysis failed:', error);
 
     // Determine error type and appropriate response

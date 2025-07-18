@@ -58,7 +58,7 @@ export default function AdvancedLoadingState({ url }: AdvancedLoadingStateProps)
   const StageIcon = STAGE_ICONS[currentStage.id as keyof typeof STAGE_ICONS];
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto py-12 md:py-16">
       {/* Main Loading Card */}
       <div className="loading-card rounded-3xl p-8 shadow-lg animate-fade-in">
         {/* Stage Icon */}

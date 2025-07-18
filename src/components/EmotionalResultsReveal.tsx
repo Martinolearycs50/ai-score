@@ -35,7 +35,7 @@ const getEmotionalTheme = (score: number) => {
     };
   } else if (score >= 40) {
     return {
-      title: "Your AI Journey Starts Here! 🚀",
+      title: "Your AI Journey Starts Here!",
       subtitle: "Exciting optimization opportunities await",
       encouragement: "Sites like yours often see 40-60 point improvements!",
       color: '#F59E0B', // Amber
@@ -122,11 +122,11 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
   const websiteName = result.websiteProfile?.title || result.pageTitle || new URL(result.url).hostname;
 
   useEffect(() => {
-    // Progression through stages with extended timing for readability
+    // Progression through stages with optimized timing
     const timers = [
-      setTimeout(() => setStage('reveal'), 2000),    // 2s wait before reveal
-      setTimeout(() => setStage('details'), 8000),   // 6s to read reveal content
-      setTimeout(() => setStage('complete'), 13000), // 5s to read details
+      setTimeout(() => setStage('reveal'), 1500),    // 1.5s wait before reveal
+      setTimeout(() => setStage('details'), 4000),   // 2.5s to read reveal content
+      setTimeout(() => setStage('complete'), 8500),  // 4.5s to read details
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -141,10 +141,10 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="min-h-[600px] flex items-center justify-center"
+          className="py-12 md:py-16"
         >
           <motion.div
-            className="relative"
+            className="relative mx-auto w-fit"
             animate={{
               scale: [1, 1.1, 1],
             }}
@@ -154,11 +154,11 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               ease: "easeInOut",
             }}
           >
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 blur-xl" />
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 blur-xl mx-auto" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <motion.div
-                  className="text-6xl mb-4"
+                  className="mb-4"
                   animate={{
                     rotate: [0, 360],
                   }}
@@ -168,7 +168,11 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                     ease: "linear",
                   }}
                 >
-                  🔍
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" className="text-blue-600"/>
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-blue-600"/>
+                    <circle cx="11" cy="11" r="3" fill="currentColor" className="text-blue-400 opacity-50"/>
+                  </svg>
                 </motion.div>
                 <p className="text-sm text-muted">Analyzing {websiteName}...</p>
               </div>
@@ -184,7 +188,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="min-h-[600px] flex items-center justify-center"
+          className="py-12 md:py-16"
         >
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -302,7 +306,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="min-h-[600px] flex items-center justify-center"
+          className="py-12 md:py-16"
         >
           <motion.div
             className="text-center max-w-2xl mx-auto px-6"
@@ -323,11 +327,27 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                 ease: "easeInOut",
               }}
             >
-              <span className="text-5xl">
-                {theme.emotion === 'celebration' ? '🎉' :
-                 theme.emotion === 'positive' ? '✨' :
-                 theme.emotion === 'encouraging' ? '💪' : '🚀'}
-              </span>
+              {theme.emotion === 'celebration' ? (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+              ) : theme.emotion === 'positive' ? (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C11.45 2 11 2.45 11 3V7C11 7.55 11.45 8 12 8C12.55 8 13 7.55 13 7V3C13 2.45 12.55 2 12 2Z" fill="white"/>
+                  <path d="M18.36 5.64L15.54 8.46C15.15 8.85 15.15 9.49 15.54 9.88C15.93 10.27 16.57 10.27 16.96 9.88L19.78 7.06C20.17 6.67 20.17 6.03 19.78 5.64C19.39 5.25 18.75 5.25 18.36 5.64Z" fill="white"/>
+                  <path d="M5.64 5.64C5.25 6.03 5.25 6.67 5.64 7.06L8.46 9.88C8.85 10.27 9.49 10.27 9.88 9.88C10.27 9.49 10.27 8.85 9.88 8.46L7.06 5.64C6.67 5.25 6.03 5.25 5.64 5.64Z" fill="white"/>
+                  <circle cx="12" cy="16" r="5" fill="white"/>
+                </svg>
+              ) : theme.emotion === 'encouraging' ? (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 10H20L11 23V14H4L13 1V10Z" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1" fill="none" opacity="0.3"/>
+                </svg>
+              )}
             </motion.div>
             
             <motion.h3

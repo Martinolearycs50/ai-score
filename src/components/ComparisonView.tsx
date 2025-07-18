@@ -10,32 +10,27 @@ interface ComparisonViewProps {
   results: [AnalysisResultNew, AnalysisResultNew];
 }
 
-// Friendly pillar info
-const PILLAR_INFO: Record<string, { name: string; emoji: string; tip: string }> = {
+// Pillar information
+const PILLAR_INFO: Record<string, { name: string; tip: string }> = {
   RETRIEVAL: { 
     name: 'Speed & Access', 
-    emoji: '⚡',
-    tip: 'Faster sites get more AI love!'
+    tip: 'Optimization for AI crawler access and speed'
   },
   FACT_DENSITY: { 
     name: 'Rich Content', 
-    emoji: '📊',
-    tip: 'Facts and data make AI happy!'
+    tip: 'Density of facts and structured data'
   },
   STRUCTURE: { 
     name: 'Smart Organization', 
-    emoji: '📋',
-    tip: 'Lists and structure = AI gold!'
+    tip: 'Content structure and formatting quality'
   },
   TRUST: { 
     name: 'Credibility', 
-    emoji: '✓',
-    tip: 'Trust signals boost rankings!'
+    tip: 'Authority and trust signals'
   },
   RECENCY: { 
     name: 'Freshness', 
-    emoji: '🔄',
-    tip: 'Fresh content wins the race!'
+    tip: 'Content recency and update frequency'
   }
 };
 
@@ -54,123 +49,120 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className="text-3xl font-medium" style={{ color: 'var(--foreground)' }}>
-          The AI Battle Results ⚔️
+        <h2 className="text-4xl font-medium" style={{ color: 'var(--foreground)' }}>
+          Analysis Complete
         </h2>
         
-        {/* Winner announcement with celebration */}
+        {/* Winner announcement with sophisticated design */}
         <motion.div 
-          className="flex items-center justify-center gap-4"
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring" }}
+          className="mt-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <div className="text-xl">
-            {totalScoreDiff > 0 ? (
-              <motion.span 
-                style={{ color: 'var(--success)' }}
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                🏆 {result1.websiteProfile?.title || result1.pageTitle || new URL(result1.url).hostname} dominates with +{Math.abs(totalScoreDiff)} points!
-              </motion.span>
-            ) : totalScoreDiff < 0 ? (
-              <motion.span 
-                style={{ color: 'var(--success)' }}
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                🏆 {result2.websiteProfile?.title || result2.pageTitle || new URL(result2.url).hostname} crushes it with +{Math.abs(totalScoreDiff)} points!
-              </motion.span>
-            ) : (
-              <span className="text-muted">
-                🤝 It's a perfect tie! Both sites are equally optimized
+          {totalScoreDiff !== 0 && (
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full border border-green-200">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="#10B981" stroke="#10B981" strokeWidth="2" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-lg font-medium" style={{ color: '#059669' }}>
+                {totalScoreDiff > 0 
+                  ? `${result1.websiteProfile?.title || new URL(result1.url).hostname} leads by ${Math.abs(totalScoreDiff)} points`
+                  : `${result2.websiteProfile?.title || new URL(result2.url).hostname} leads by ${Math.abs(totalScoreDiff)} points`
+                }
               </span>
-            )}
-          </div>
+            </div>
+          )}
+          {totalScoreDiff === 0 && (
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gray-50 rounded-full border border-gray-200">
+              <span className="text-lg text-gray-600">
+                Perfect tie - Both sites score {result1.aiSearchScore} points
+              </span>
+            </div>
+          )}
         </motion.div>
         
-        {/* Encouragement message */}
-        <p className="text-muted">
-          {totalScoreDiff === 0 ? "Every point counts in the AI search game!" :
-           Math.abs(totalScoreDiff) > 20 ? "But remember, there's always room to improve!" :
-           "It's a close race - small optimizations can flip the lead!"}
+        {/* Insight message */}
+        <p className="text-lg text-muted mt-4">
+          {totalScoreDiff === 0 ? "Both sites are equally optimized for AI search engines" :
+           Math.abs(totalScoreDiff) > 20 ? "A significant gap that can be closed with targeted improvements" :
+           "Small optimizations could change the rankings"}
         </p>
       </motion.div>
 
       {/* Side-by-side comparison */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
         {/* Website 1 */}
-        <div className="space-y-4">
+        <motion.div 
+          className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
+            totalScoreDiff > 0 
+              ? 'border-green-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50 shadow-lg' 
+              : totalScoreDiff < 0
+              ? 'border-gray-200 bg-gray-50/50'
+              : 'border-gray-200'
+          }`}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
+              <h3 className="text-xl font-medium truncate" style={{ color: 'var(--foreground)' }}>
                 {result1.websiteProfile?.title || result1.pageTitle || new URL(result1.url).hostname}
               </h3>
-              <p className="text-xs text-muted truncate">{new URL(result1.url).hostname}</p>
+              <p className="text-sm text-muted truncate">{new URL(result1.url).hostname}</p>
             </div>
             {totalScoreDiff > 0 && (
-              <motion.span 
-                className="text-sm px-3 py-1 rounded-full font-medium" 
-                style={{ 
-                  backgroundColor: 'var(--success-bg)', 
-                  color: 'var(--success)' 
-                }}
-                animate={{ rotate: [-2, 2, -2] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                👑 Champion
-              </motion.span>
+              <div className="flex items-center gap-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12L7 7L12 3L17 7L19 12L12 19L5 12Z" fill="#10B981" fillOpacity="0.2" stroke="#10B981" strokeWidth="2"/>
+                  <circle cx="12" cy="8" r="2" fill="#10B981"/>
+                </svg>
+                <span className="text-sm font-medium text-green-700">Winner</span>
+              </div>
             )}
           </div>
           
           <div className="relative">
             <PillarScoreDisplay result={result1} compact />
-            {/* Score difference indicators */}
-            <div className="absolute -right-2 top-8">
-              <ScoreDifference 
-                difference={totalScoreDiff} 
-                showSign 
-              />
-            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Website 2 */}
-        <div className="space-y-4">
+        <motion.div 
+          className={`space-y-4 p-6 rounded-lg border-2 transition-all ${
+            totalScoreDiff < 0 
+              ? 'border-green-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50 shadow-lg' 
+              : totalScoreDiff > 0
+              ? 'border-gray-200 bg-gray-50/50'
+              : 'border-gray-200'
+          }`}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium truncate" style={{ color: 'var(--foreground)' }}>
+              <h3 className="text-xl font-medium truncate" style={{ color: 'var(--foreground)' }}>
                 {result2.websiteProfile?.title || result2.pageTitle || new URL(result2.url).hostname}
               </h3>
-              <p className="text-xs text-muted truncate">{new URL(result2.url).hostname}</p>
+              <p className="text-sm text-muted truncate">{new URL(result2.url).hostname}</p>
             </div>
             {totalScoreDiff < 0 && (
-              <motion.span 
-                className="text-sm px-3 py-1 rounded-full font-medium" 
-                style={{ 
-                  backgroundColor: 'var(--success-bg)', 
-                  color: 'var(--success)' 
-                }}
-                animate={{ rotate: [-2, 2, -2] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                👑 Champion
-              </motion.span>
+              <div className="flex items-center gap-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12L7 7L12 3L17 7L19 12L12 19L5 12Z" fill="#10B981" fillOpacity="0.2" stroke="#10B981" strokeWidth="2"/>
+                  <circle cx="12" cy="8" r="2" fill="#10B981"/>
+                </svg>
+                <span className="text-sm font-medium text-green-700">Winner</span>
+              </div>
             )}
           </div>
           
           <div className="relative">
             <PillarScoreDisplay result={result2} compact />
-            {/* Score difference indicators */}
-            <div className="absolute -left-2 top-8">
-              <ScoreDifference 
-                difference={-totalScoreDiff} 
-                showSign 
-              />
-            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Detailed pillar comparison - only for pro users */}
@@ -182,10 +174,10 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
         transition={{ delay: 0.3 }}
       >
         <h3 className="text-2xl font-medium text-center mb-2" style={{ color: 'var(--foreground)' }}>
-          The Battlefield Breakdown 📊
+          Detailed Breakdown
         </h3>
         <p className="text-center text-muted mb-8">
-          See where each site shines and where they can level up!
+          Category-by-category performance comparison
         </p>
         
         <div className="space-y-4">
@@ -210,16 +202,13 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{PILLAR_INFO[pillar1.pillar]?.emoji}</span>
-                      <div>
-                        <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
-                          {PILLAR_INFO[pillar1.pillar]?.name || pillar1.pillar}
-                        </h4>
-                        <p className="text-xs text-muted">
-                          {PILLAR_INFO[pillar1.pillar]?.tip}
-                        </p>
-                      </div>
+                    <div>
+                      <h4 className="font-medium text-lg" style={{ color: 'var(--foreground)' }}>
+                        {PILLAR_INFO[pillar1.pillar]?.name || pillar1.pillar}
+                      </h4>
+                      <p className="text-sm text-muted">
+                        {PILLAR_INFO[pillar1.pillar]?.tip}
+                      </p>
                     </div>
                   </div>
                   
@@ -293,7 +282,6 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.6 + idx * 0.1 }}
                   >
-                    <span className="text-xl">{PILLAR_INFO[pillar.pillar]?.emoji}</span>
                     <div>
                       <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                         Improve {PILLAR_INFO[pillar.pillar]?.name}
