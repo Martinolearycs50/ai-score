@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.3] - 2025-07-18 - Phase 1 Pro Tier Enhancements with Business Recognition
+
+### Added
+- **Business Type Detection** in ContentExtractor
+  - Detects 8 business types: payment, ecommerce, blog, news, documentation, corporate, educational, other
+  - Extracts competitor mentions from page content
+  - Enhanced business attribute extraction (industry, target audience, products/services)
+- **Business Personas System** (`businessPersonas.ts`)
+  - Comprehensive profiles for each business type
+  - Industry-specific narratives and characteristics
+  - Tailored recommendations per business type
+  - Competitor awareness for each persona
+- **Narrative Engine** (`narrativeEngine.ts`)
+  - 7-stage emotional journey: recognition → curiosity → revelation → concern → hope → action → celebration
+  - Personalized story arcs based on business type and score
+  - Dynamic messaging that adapts to user context
+- **Development Server Stability**
+  - Implemented nodemon for auto-restart on crashes
+  - Added development server scripts and configurations
+  - Created stable-dev.sh for reliable development experience
+- **Error Handling Improvements**
+  - Created ClientWrapper component for proper client/server separation
+  - Enhanced error boundaries with better recovery options
+  - Improved error.tsx with development-mode error details
+
+### Fixed
+- **Root Layout Architecture Issue**
+  - Removed 'use client' from root layout (was causing hydration mismatches)
+  - Created ClientWrapper component to handle client-side providers
+  - Restored proper metadata export in layout.tsx
+- **Pro Tier Activation**
+  - Fixed "Start Free Trial" button to properly redirect to dashboard
+  - Changed from alert to `router.push('/dashboard?tier=pro')`
+  - Pro tier now correctly activates when navigating from pricing page
+- **Navigation Crashes**
+  - Fixed app crashes when clicking navigation links
+  - Resolved issues with "Free Web Page Analyzer" link
+  - Fixed crashes during website analysis
+
+### Changed
+- Updated package.json dev script to use nodemon by default
+- Enhanced project documentation to reflect Phase 1 completion
+- Improved error messages and user feedback throughout
+
+### Developer Experience
+- Much more stable development environment
+- Auto-restart prevents manual server restarts
+- Better error visibility for debugging
+- Clear separation of client and server components
+
+## [2.9.2] - 2025-07-18 - Pricing Page Layout Optimization
+
+### Changed
+- Compressed hero section padding for above-fold pricing visibility
+- Moved trust signals below pricing cards for better flow
+- Reduced overall vertical spacing throughout pricing page
+- Title and text sizes optimized for professional hierarchy
+- Added subtle background gradient for visual flow
+
+### Added
+- Trust badges integrated directly on Pro pricing card
+- SSL encryption and money-back guarantee badges
+
+### Fixed
+- Pricing cards now visible without scrolling on standard laptop screens
+- Professional Silicon Valley SaaS design aesthetic applied
+
 ## [2.9.1] - 2025-07-17 - Pro Tier Access Fixes and Diagnostics
 
 ### Fixed

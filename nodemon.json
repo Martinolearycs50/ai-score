@@ -1,0 +1,9 @@
+{
+  "watch": ["src", "public", ".env.local"],
+  "ext": "js,ts,tsx,json",
+  "ignore": ["src/**/*.test.ts", "src/**/*.spec.ts", ".next/**/*"],
+  "exec": "next dev",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

@@ -16,8 +16,8 @@ export default function PricingPage() {
     if (tierId === 'free') {
       router.push('/');
     } else if (tierId === 'pro') {
-      // For now, show alert. In production, integrate with payment provider
-      alert('Pro trial signup would go here - integrate with Stripe');
+      // Activate Pro tier and redirect to dashboard
+      router.push('/dashboard?tier=pro');
     }
   };
 

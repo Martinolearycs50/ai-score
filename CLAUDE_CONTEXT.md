@@ -48,9 +48,11 @@ src/
 ├── lib/
 │   ├── analyzer-new.ts      # Core AiSearchAnalyzer class
 │   ├── scorer-new.ts        # 5-pillar scoring logic
-│   ├── contentExtractor.ts  # Extracts and analyzes page content
+│   ├── contentExtractor.ts  # Extracts and analyzes page content (enhanced with business detection)
 │   ├── dynamicRecommendations.ts # Generates content-aware recommendations
 │   ├── recommendations.ts   # Recommendation templates and logic
+│   ├── businessPersonas.ts  # Business type profiles and characteristics
+│   ├── narrativeEngine.ts   # Personalized story arc generation
 │   └── types.ts             # TypeScript definitions
 │
 └── utils/                   # Helpers
@@ -93,7 +95,7 @@ Response: {
 }
 ```
 
-## 📋 Current State (v2.5.0 - MVP Complete)
+## 📋 Current State (v2.9.3 - Pro Tier Phase 1 Complete)
 
 ### MVP Features Completed
 - ✅ 5-Pillar AI Scoring System (RETRIEVAL, FACT_DENSITY, STRUCTURE, TRUST, RECENCY)
@@ -104,6 +106,10 @@ Response: {
 - ✅ Comprehensive error handling
 - ✅ Full test coverage
 - ✅ Production deployment on Vercel
+- ✅ Freemium tier system with pricing page
+- ✅ Business type detection and personas (Phase 1)
+- ✅ Personalized narrative engine
+- ✅ Stable development server with nodemon
 
 ### Known Limitations
 | Issue | Impact | Workaround |
@@ -155,6 +161,24 @@ refactor: Restructure code
 
 ### Recent Changes (Claude Code: Update This!)
 <!-- Add new entries at top with date -->
+- 2025-07-18: Complete Phase 1 Pro tier enhancements with business recognition - v2.9.3
+  - Enhanced ContentExtractor with business type detection and competitor extraction
+  - Created businessPersonas.ts with 8 business type profiles (payment, ecommerce, blog, news, documentation, corporate, educational, other)
+  - Built narrativeEngine.ts for personalized story arc generation based on business type and score
+  - Fixed root layout 'use client' issue by creating ClientWrapper component
+  - Fixed Pro tier activation from pricing page - now properly redirects to dashboard with ?tier=pro
+  - Implemented nodemon for stable development server with auto-restart capability
+  - Added comprehensive error boundaries and better error handling
+  - Phase 1 of Pro tier differentiation is complete with personalization foundation in place
+- 2025-07-18: Optimized Pricing Page for Above-Fold Visibility - v2.9.2
+  - Compressed hero section padding (pt-24 pb-20 → pt-16 pb-6) saving ~48px
+  - Reduced title size (text-4xl → text-3xl) and margins for tighter layout
+  - Moved trust signals below pricing cards instead of between hero and cards
+  - Reduced pricing section padding (py-20 → py-8) saving ~48px  
+  - Added trust badges directly on Pro card footer
+  - Added subtle background gradient for visual flow
+  - Total vertical space saved: ~120px, ensuring pricing visible on standard laptops
+  - Professional Silicon Valley SaaS design approach
 - 2025-07-17: Fixed Pro Tier Access and Identified Enhancement Needs - v2.9.1
   - Fixed Pro tier navigation from pricing page (now uses window.location.href)
   - Added TierDebug component for development (shows current tier and features)
