@@ -29,7 +29,7 @@ export const recTemplates: Record<string, RecommendationTemplate> = {
   },
   mainContent: {
     why: 'AI needs clear content structure. Helps distinguish article from ads/navigation.',
-    fix: '1. Wrap your primary content: Replace <div class="content"> with <main><article>Your article here</article></main>. 2. Move navigation, sidebars, and ads outside the <main> tag. 3. Check content ratio: Your article text should be at least 70% of all text on the page. 4. Use semantic tags: <header> for intro, <section> for major parts, <aside> for related content. 5. Test with browser DevTools: Inspect the <main> element - it should contain only your core article, nothing else.',
+    fix: '1. Wrap your primary content: Use semantic HTML tags like <main> or <article> around your main content. 2. If using divs, add clear identifiers: id="content" or class="main-content". 3. Improve content ratio: Aim for main content to be at least 40% of total page text (currently it may be much less). 4. Reduce navigation/sidebar text that dilutes your content. 5. Use role="main" attribute as a fallback. 6. For CMSs like WordPress, ensure your theme uses proper content containers.',
     gain: 5,
     example: {
       before: '<div class="content">Article here...</div>',
@@ -330,16 +330,35 @@ function generateDirectAnswer(heading: string, content: string): string {
  * Generate HTML sample for mainContent recommendation
  */
 function generateMainContentExample(ratio?: number, sample?: string): { before: string; after: string } {
-  if (ratio !== undefined && sample) {
-    // Use actual content ratio
-    const truncatedSample = sample.substring(0, 100) + '...';
-    return {
-      before: `<div class="wrapper">
+  if (ratio !== undefined) {
+    // Customize the recommendation based on actual findings
+    const selector = retrievalDomain.contentSelector || 'Unknown selector';
+    const truncatedSample = sample ? sample.substring(0, 100) + '...' : 'Your content here...';
+    
+    // Provide specific feedback based on what was found
+    let beforeExample = '';
+    if (selector.includes('Heuristic') || selector.includes('Body content')) {
+      beforeExample = `<!-- No semantic content tags found -->
+<!-- Content scattered across page -->
+<div class="page">
+  <div>Navigation...</div>
+  <div>${truncatedSample}</div>
+  <div>Sidebar...</div>
+</div>
+<!-- Main content is only ${ratio}% of page -->
+<!-- Detected using: ${selector} -->`;
+    } else {
+      beforeExample = `<!-- Found content in: ${selector} -->
+<div class="wrapper">
   <nav>Menu items...</nav>
   <div class="content">${truncatedSample}</div>
   <aside>Ads, related links...</aside>
 </div>
-<!-- Main content is only ${ratio}% of page -->`,
+<!-- Main content is only ${ratio}% of page -->`;
+    }
+    
+    return {
+      before: beforeExample,
       after: `<nav>Menu items...</nav>
 <main>
   <article>
@@ -488,8 +507,12 @@ export function generateRecommendations(
             example: generateHtmlSizeExample(retrievalDomain.htmlSizeKB, retrievalDomain.htmlSizeMB),
           };
         } else if (metric === 'mainContent' && retrievalDomain.mainContentRatio !== undefined) {
+          // Customize the why message with actual findings
+          const customWhy = `AI needs clear content structure. Currently only ${retrievalDomain.mainContentRatio}% of your page is identified as main content (found using ${retrievalDomain.contentSelector || 'unknown method'}). AI engines may struggle to distinguish your article from navigation and ads.`;
+          
           template = {
             ...template,
+            why: customWhy,
             example: generateMainContentExample(retrievalDomain.mainContentRatio, retrievalDomain.mainContentSample),
           };
         } else if (metric === 'paywall' && retrievalDomain.hasPaywall) {

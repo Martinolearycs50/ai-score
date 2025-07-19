@@ -39,6 +39,7 @@ function HomeContent() {
   const router = useRouter();
   const [comparisonMode, setComparisonMode] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [enhancementStatus, setEnhancementStatus] = useState<'idle' | 'loading' | 'enhanced'>('idle');
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
     result: null,
@@ -57,6 +58,84 @@ function HomeContent() {
       setShowExitIntent(true);
     }
   }, [analysisState.status, tier]);
+
+  // Enhance analysis with Chrome UX Report data
+  const enhanceWithCruxData = async (url: string, initialResult: AnalysisResultNew) => {
+    try {
+      setEnhancementStatus('loading');
+      
+      const response = await fetch('/api/enhance-score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          initialScores: {
+            retrieval: {
+              score: initialResult.scoringResult.pillarScores.RETRIEVAL,
+              breakdown: initialResult.breakdown?.RETRIEVAL || {}
+            }
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn('Enhancement failed:', await response.text());
+        return;
+      }
+
+      const enhancementData = await response.json();
+      
+      if (enhancementData.enhanced) {
+        console.log('📈 [Enhancement] Updating scores with real-world data:', {
+          previousScore: initialResult.scoringResult.pillarScores.RETRIEVAL,
+          newScore: enhancementData.retrieval.score,
+          improvement: enhancementData.retrieval.improvement,
+          dataSource: enhancementData.dataSource
+        });
+        
+        // Update the analysis state with enhanced scores
+        setAnalysisState(prev => {
+          if (!prev.result) return prev;
+          
+          return {
+            ...prev,
+            result: {
+              ...prev.result,
+              scoringResult: {
+                ...prev.result.scoringResult,
+                pillarScores: {
+                  ...prev.result.scoringResult.pillarScores,
+                  RETRIEVAL: enhancementData.retrieval.score
+                },
+                total: prev.result.scoringResult.total - 
+                  prev.result.scoringResult.pillarScores.RETRIEVAL + 
+                  enhancementData.retrieval.score
+              },
+              breakdown: {
+                ...prev.result.breakdown,
+                RETRIEVAL: enhancementData.retrieval.breakdown
+              },
+              enhancementData: {
+                enhanced: true,
+                dataSource: enhancementData.dataSource,
+                cruxMetrics: enhancementData.cruxMetrics,
+                improvement: enhancementData.retrieval.improvement
+              }
+            }
+          };
+        });
+        
+        setEnhancementStatus('enhanced');
+      } else {
+        console.log('ℹ️ [Enhancement] No enhancement available:', enhancementData.message);
+      }
+    } catch (error) {
+      console.error('Enhancement error:', error);
+      // Silently fail - keep showing initial results
+    }
+  };
 
   const handleAnalyze = async (url: string) => {
     // Development logging
@@ -94,6 +173,9 @@ function HomeContent() {
             result: result,
             error: null
           });
+
+          // Enhance with Chrome UX Report data (progressive enhancement)
+          enhanceWithCruxData(url, result);
 
           // Handle Pro user redirect
           if (tier === 'pro') {
@@ -165,6 +247,9 @@ function HomeContent() {
           result: result,
           error: null
         });
+
+        // Enhance with Chrome UX Report data (progressive enhancement)
+        enhanceWithCruxData(url, result);
 
         // Handle Pro user redirect
         if (tier === 'pro') {
@@ -381,16 +466,20 @@ function HomeContent() {
 
               <div id="results" className="max-w-6xl mx-auto">
               <EmotionalResultsReveal result={analysisState.result}>
-                <div className="space-y-12">
+                <div className="space-y-6">
                   {/* Website Profile Card - Feature flag based */}
                   {features.showWebsiteProfile && analysisState.result.websiteProfile && (
                     <WebsiteProfileCard 
                       profile={analysisState.result.websiteProfile} 
                       score={analysisState.result.aiSearchScore}
+                      compact={true}
                     />
                   )}
                   
-                  <PillarScoreDisplayV2 result={analysisState.result} />
+                  <PillarScoreDisplayV2 
+                    result={analysisState.result} 
+                    enhancementStatus={enhancementStatus}
+                  />
                   
                   {/* Pro Upgrade CTA for Free Tier */}
                   {tier === 'free' && (

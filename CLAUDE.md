@@ -1,10 +1,15 @@
-CLAUDE.md - Technical Implementation Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Technical Implementation Guide
 <!-- CLAUDE CODE: This file contains HOW to build. For WHAT to build, see CLAUDE_CONTEXT.md -->
-🚨 CRITICAL: Start Here
-Read CLAUDE_CONTEXT.md first - it has current project state and what needs building
-Review STYLE_GUIDE.md for all visual design and UI decisions
-Update CLAUDE_CONTEXT.md regularly as you work (see update instructions below)
-Never modify design constants without team approval
+
+### 🚨 CRITICAL: Start Here
+1. Read CLAUDE_CONTEXT.md first - it has current project state and what needs building
+2. Review STYLE_GUIDE.md for all visual design and UI decisions
+3. Update CLAUDE_CONTEXT.md regularly as you work (see update instructions below)
+4. Never modify design constants without team approval
 🎨 Design System
 Note: For complete visual design specifications, animations, and voice/tone guidelines, see STYLE_GUIDE.md
 
@@ -25,9 +30,25 @@ Score-based color coding
 Typography specifications
 Animation timings and principles
 Component patterns
-🛠️ Development Workflow
-Starting Work
-bash
+## 🛠️ Development Workflow
+
+### Essential Commands
+```bash
+# Development
+npm run dev              # Primary dev server (uses nodemon)
+npm run dev:stable       # Alternative stable dev server
+npm test                 # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:coverage    # Generate coverage report
+npm test -- [pattern]    # Run specific test files
+
+# Build & Quality
+npm run build           # Build for production (run before deployment)
+npm run lint            # Check code quality
+```
+
+### Starting Work
+```bash
 # 1. Read current state
 cat CLAUDE_CONTEXT.md  # Understand what needs building
 
@@ -44,6 +65,7 @@ http://localhost:3000?tier=pro  # Pro tier (future)
 # 5. Update CLAUDE_CONTEXT.md
 # - Set "Last Updated" to today
 # - Update "Now Working On" section
+```
 While Coding
 <!-- CLAUDE CODE: Follow these patterns -->
 Component Structure
@@ -122,7 +144,24 @@ New user-facing features added
 Setup process changes
 Dependencies change
 Public API changes
-🏗️ Code Patterns
+## 🏗️ Code Patterns
+
+### Architecture Overview
+
+#### API Flow
+1. User submits URL → `/api/analyze` endpoint
+2. URL validation → Content extraction (via Cloudflare Worker)
+3. 5-pillar analysis (RETRIEVAL, FACT_DENSITY, STRUCTURE, TRUST, RECENCY)
+4. Dynamic scoring based on page type detection
+5. Generate recommendations → Return results
+
+#### Key Modules
+- **lib/audit/** - 5-pillar scoring modules (retrieval.ts, factDensity.ts, etc.)
+- **lib/scorer-new.ts** - Dynamic scoring system with page type weights
+- **lib/pageAnalyzer.ts** - Main analysis orchestration
+- **lib/contentExtractor.ts** - HTML content extraction
+- **lib/chromeUxReport.ts** - Chrome UX Report API integration
+- **lib/types.ts** - Core TypeScript types and interfaces
 File Structure
 typescript
 // 1. Imports (React first, then external, then local)
@@ -185,19 +224,48 @@ typescript
 export interface NewType {
   // definition
 }
-📋 Quick Reference
-Commands
-bash
-npm run dev      # Start dev server
-npm test         # Run tests
-npm run build    # Build for production
-npm run lint     # Check code quality
-File Locations
-/app              # Pages and API routes
-/components       # React components  
-/lib              # Business logic
-/utils            # Helper functions
-/public           # Static assets
+## 📋 Quick Reference
+
+### File Locations
+```
+src/
+├── app/              # Next.js App Router pages and API routes
+│   ├── api/         # API endpoints (analyze, validate-url, etc.)
+│   ├── dashboard/   # Dashboard pages (future Pro tier)
+│   ├── pricing/     # Pricing page
+│   └── page.tsx     # Main landing page
+├── components/      # React components
+├── contexts/        # React contexts (TierContext)
+├── hooks/          # Custom React hooks
+├── lib/            # Business logic
+│   ├── audit/      # 5-pillar analysis modules
+│   └── ...         # Analyzers, scorers, recommendations
+├── utils/          # Utility functions
+└── __tests__/      # Test files
+
+workers/            # Cloudflare Worker (separate deployment)
+```
+
+### API Integration Notes
+
+#### Cloudflare Worker
+- Located in `/workers/cloudflare-cors-proxy/`
+- Handles cross-origin requests for content extraction
+- Deployment pending (see CLAUDE_CONTEXT.md)
+
+#### Chrome UX Report API
+- Progressive enhancement for Core Web Vitals
+- Cached in memory for 1 hour
+- Falls back gracefully if unavailable
+## Important Constraints
+
+1. **Free Tier First**: All features start in free tier, Pro tier is future enhancement
+2. **No Authentication**: Free tier requires no login
+3. **Generic Error Messages**: Never expose technical details to users
+4. **Mobile First**: Test at 375px width minimum
+5. **Design System**: Follow STYLE_GUIDE.md strictly for all UI decisions
+
 <!-- CLAUDE CODE: Add new patterns and learnings as you discover them -->
+
 Remember: This guide is for HOW to build. Check CLAUDE_CONTEXT.md for WHAT to build.
 

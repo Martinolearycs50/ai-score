@@ -96,6 +96,64 @@ Each website is scored across five AI-optimized pillars with dynamic weights bas
 - Real performance data from Chrome UX Report
 - Cross-origin checks via Cloudflare Workers
 
+## 🛠️ Development Setup
+
+### Prerequisites
+- Node.js 18+ and npm
+- Chrome UX Report API key (free)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/ai-search-analyzer-v2.git
+cd ai-search-analyzer-v2
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+
+4. Add your Chrome UX Report API key to `.env.local`:
+```
+CHROME_UX_API_KEY=your_api_key_here
+```
+
+> **Getting a Chrome UX Report API Key (Free)**:
+> 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+> 2. Create a new project or select existing
+> 3. Enable the Chrome UX Report API
+> 4. Create credentials (API Key)
+> 5. Copy the API key to your `.env.local`
+> 
+> The free tier includes 1,000 requests per day.
+
+5. Run the development server:
+```bash
+npm run dev
+```
+
+6. Open [http://localhost:3000](http://localhost:3000)
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run integration tests (requires API key)
+CHROME_UX_API_KEY=your_key npm test -- chromeUxReport.integration
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

@@ -136,7 +136,7 @@ export const FRESHNESS_INDICATORS = [
 
 // Timeout settings
 export const TIMEOUTS = {
-  page_fetch: 10000, // 10 seconds
+  page_fetch: 30000, // 30 seconds - increased for large pages like Wikipedia
   robots_txt: 5000,  // 5 seconds
   ttfb_check: 5000   // 5 seconds for TTFB measurement
 };

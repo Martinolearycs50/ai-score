@@ -6,6 +6,7 @@ import type { WebsiteProfile, PageType } from '@/lib/types';
 interface WebsiteProfileCardProps {
   profile: WebsiteProfile;
   score: number;
+  compact?: boolean;
 }
 
 const CONTENT_TYPE_LABELS = {
@@ -30,10 +31,80 @@ const PAGE_TYPE_INFO: Record<PageType, { icon: string; label: string; tip: strin
   general: { icon: '📄', label: 'General Page', tip: 'Standard content page' },
 };
 
-export default function WebsiteProfileCard({ profile, score }: WebsiteProfileCardProps) {
+export default function WebsiteProfileCard({ profile, score, compact = true }: WebsiteProfileCardProps) {
   const contentTypeInfo = CONTENT_TYPE_LABELS[profile.contentType || 'other'];
   const pageTypeInfo = PAGE_TYPE_INFO[profile.pageType || 'general'];
   
+  // Compact single-line version
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-lg border border-gray-200 p-3 mb-4 shadow-sm"
+      >
+        <div className="flex items-center gap-3">
+          {/* Small favicon/icon */}
+          <div 
+            className="w-8 h-8 rounded flex items-center justify-center text-lg flex-shrink-0"
+            style={{ backgroundColor: contentTypeInfo.color + '20' }}
+          >
+            {profile.hasFavicon ? (
+              <img 
+                src={`https://www.google.com/s2/favicons?domain=${profile.domain}&sz=32`} 
+                alt=""
+                className="w-6 h-6"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <span className={profile.hasFavicon ? 'hidden' : ''}>
+              {contentTypeInfo.icon}
+            </span>
+          </div>
+          
+          {/* Title and domain */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <h2 className="text-sm sm:text-base font-medium text-gray-900 truncate max-w-xs sm:max-w-none">
+                {profile.title}
+              </h2>
+              <span className="text-xs sm:text-sm text-gray-500">{profile.domain}</span>
+            </div>
+          </div>
+          
+          {/* Page type badges - responsive */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span 
+              className="hidden sm:inline-flex px-2 py-1 text-xs font-medium rounded-full"
+              style={{ 
+                backgroundColor: contentTypeInfo.color + '20',
+                color: contentTypeInfo.color 
+              }}
+            >
+              {contentTypeInfo.icon} {contentTypeInfo.label}
+            </span>
+            <span 
+              className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700"
+              title={pageTypeInfo.tip}
+            >
+              {pageTypeInfo.icon} {pageTypeInfo.label}
+            </span>
+            {/* Word count - hidden on mobile */}
+            {profile.wordCount && (
+              <span className="hidden sm:inline text-xs text-gray-500">
+                {profile.wordCount.toLocaleString()} words
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+  
+  // Original full version
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

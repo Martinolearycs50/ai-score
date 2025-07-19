@@ -1,13 +1,15 @@
 /**
  * Chrome UX Report API Client
  * Fetches real-world performance data from Google's Chrome User Experience Report
- * Free API with no authentication required
+ * Requires API key (free tier: 1,000 requests/day)
  */
 
 import axios from 'axios';
+import { logChromeUxFetch } from '@/utils/apiUsageVerification';
 
-// CrUX API endpoint
+// CrUX API endpoint and configuration
 const CRUX_API_URL = 'https://chromeuxreport.googleapis.com/v1/records:queryRecord';
+const CRUX_API_KEY = process.env.CHROME_UX_API_KEY;
 
 // Core Web Vitals thresholds
 export const WEB_VITALS_THRESHOLDS = {
@@ -91,16 +93,30 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
  * Fetches Core Web Vitals data from Chrome UX Report API
  */
 export async function fetchCrUXData(url: string): Promise<CrUXResult> {
+  console.log(`🔍 [CrUX API] Fetching data for: ${url}`);
+  
   try {
+    // Check if API key is configured
+    if (!CRUX_API_KEY) {
+      console.log('❌ [CrUX API] No API key configured, returning no data');
+      return {
+        url,
+        hasData: false,
+        error: 'Chrome UX Report API key not configured',
+      };
+    }
+
     // Check cache first
     const cached = cache.get(url);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log('📦 [CrUX API] Returning cached data');
       return cached.data;
     }
 
-    // Make API request
+    // Make API request with authentication
+    const apiUrl = `${CRUX_API_URL}?key=${CRUX_API_KEY}`;
     const response = await axios.post<CrUXResponse>(
-      CRUX_API_URL,
+      apiUrl,
       {
         url,
         formFactor: 'PHONE', // Mobile-first approach
@@ -132,6 +148,20 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
       },
     };
 
+    console.log('✅ [CrUX API] Data retrieved:', {
+      ttfb: result.metrics?.ttfb,
+      ttfbRating: result.metrics?.ttfbRating,
+      lcp: result.metrics?.lcp,
+      lcpRating: result.metrics?.lcpRating
+    });
+
+    // Log successful fetch for verification
+    logChromeUxFetch(true, {
+      url,
+      ttfb: result.metrics?.ttfb,
+      rating: result.metrics?.ttfbRating
+    });
+
     // Cache the result
     cache.set(url, { data: result, timestamp: Date.now() });
 
@@ -139,6 +169,7 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
   } catch (error) {
     // Check if it's a 404 (no data available for this URL)
     if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.log('ℹ️ [CrUX API] No data available for this URL');
       const result: CrUXResult = {
         url,
         hasData: false,
@@ -152,7 +183,7 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
     }
 
     // Other errors
-    console.error('[CrUX API] Error fetching data:', error);
+    console.error('❌ [CrUX API] Error fetching data:', error);
     return {
       url,
       hasData: false,

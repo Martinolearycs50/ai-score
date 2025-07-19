@@ -13,6 +13,21 @@ import * as structure from './audit/structure';
 import * as trust from './audit/trust';
 import * as recency from './audit/recency';
 
+export interface DataSource {
+  type: 'synthetic' | 'chrome-ux' | 'cloudflare-worker';
+  metric: string;
+  timestamp: number;
+  success: boolean;
+  details?: any;
+}
+
+export interface EnhancementData {
+  enhanced: boolean;
+  dataSource: string;
+  cruxMetrics?: any;
+  improvement?: number;
+}
+
 export interface AnalysisResultNew {
   url: string;
   aiSearchScore: number; // 0-100
@@ -22,6 +37,9 @@ export interface AnalysisResultNew {
   pageDescription?: string;
   websiteProfile?: WebsiteProfile;
   extractedContent?: ExtractedContent;
+  dataSources?: DataSource[];
+  enhancementData?: EnhancementData;
+  breakdown?: Record<string, any>;
 }
 
 export class AiSearchAnalyzer {
@@ -92,6 +110,9 @@ export class AiSearchAnalyzer {
         title: websiteProfile.title
       });
 
+      // Track data sources
+      const dataSources: DataSource[] = [];
+      
       // Run all audit modules
       const pillarResults: PillarResults = {
         RETRIEVAL: await retrieval.run(html, normalizedUrl),
@@ -100,9 +121,43 @@ export class AiSearchAnalyzer {
         TRUST: await trust.run(html),
         RECENCY: await recency.run(html, headers),
       };
+      
+      // Check if CrUX data was used
+      const capturedDomain = retrieval.capturedDomain;
+      if (capturedDomain.cruxData?.hasData) {
+        dataSources.push({
+          type: 'chrome-ux',
+          metric: 'ttfb',
+          timestamp: Date.now(),
+          success: true,
+          details: {
+            ttfb: capturedDomain.cruxData.ttfb,
+            rating: capturedDomain.cruxData.ttfbRating
+          }
+        });
+      } else {
+        dataSources.push({
+          type: 'synthetic',
+          metric: 'ttfb',
+          timestamp: Date.now(),
+          success: true,
+          details: {
+            ttfb: capturedDomain.actualTtfb
+          }
+        });
+      }
 
       // Calculate scores with extracted content
       const scoringResult = score(pillarResults, extractedContent);
+      
+      // Build breakdown for UI
+      const breakdown = {
+        RETRIEVAL: pillarResults.RETRIEVAL,
+        FACT_DENSITY: pillarResults.FACT_DENSITY,
+        STRUCTURE: pillarResults.STRUCTURE,
+        TRUST: pillarResults.TRUST,
+        RECENCY: pillarResults.RECENCY
+      };
 
       return {
         url: normalizedUrl,
@@ -113,6 +168,8 @@ export class AiSearchAnalyzer {
         pageDescription,
         websiteProfile,
         extractedContent,
+        dataSources,
+        breakdown
       };
     } catch (error) {
       console.error('[AiSearchAnalyzer] Analysis failed:', error);

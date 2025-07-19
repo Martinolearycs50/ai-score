@@ -5,10 +5,12 @@ import { motion } from 'framer-motion';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { getPerformanceRating, getRatingColor, getRatingEmoji, PILLAR_DISPLAY_NAMES } from '@/lib/performanceRatings';
 import { useTier } from '@/hooks/useTier';
+import DataSourceBadge from './DataSourceBadge';
 
 interface PillarScoreDisplayV2Props {
   result: AnalysisResultNew;
   compact?: boolean;
+  enhancementStatus?: 'idle' | 'loading' | 'enhanced';
 }
 
 // Pillar information for detailed display
@@ -40,8 +42,20 @@ const PILLAR_INFO: Record<string, { name: string; icon: string; tip: string }> =
   }
 };
 
+// Helper function to get max score for a metric
+function getMaxScoreForMetric(metric: string): number {
+  const maxScores: Record<string, number> = {
+    ttfb: 5,
+    paywall: 5,
+    mainContent: 5,
+    htmlSize: 5,
+    llmsTxtFile: 5,
+  };
+  return maxScores[metric] || 5;
+}
+
 // This is the new version using feature flags instead of tier prop
-export default function PillarScoreDisplayV2({ result, compact = false }: PillarScoreDisplayV2Props) {
+export default function PillarScoreDisplayV2({ result, compact = false, enhancementStatus = 'idle' }: PillarScoreDisplayV2Props) {
   const [hoveredPillar, setHoveredPillar] = useState<string | null>(null);
   const { scoringResult } = result;
   const { features } = useTier();
@@ -66,7 +80,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
     return (
       <div className="space-y-4">
         {/* Compact Score Display */}
-        <div className="text-center">
+        <div className="text-center" data-testid="score-display">
           <div className="text-4xl font-medium mb-2" style={{ color: 'var(--accent)' }}>
             {result.aiSearchScore}
           </div>
@@ -87,7 +101,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                       <span>{info.icon}</span>
                       <span style={{ color: 'var(--foreground)' }}>{info.name}</span>
                     </span>
-                    <span className="text-muted">{pillar.earned}/{pillar.max}</span>
+                    <span className="text-muted" data-testid={`${pillar.pillar.toLowerCase()}-score`}>{pillar.earned}/{pillar.max}</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div
@@ -112,7 +126,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
     return (
       <div className="space-y-8">
         {/* Overall Score Only */}
-        <div className="text-center">
+        <div className="text-center" data-testid="score-display">
           <h2 className="text-3xl font-medium mb-8" style={{ color: 'var(--foreground)' }}>
             Your AI Search Score
           </h2>
@@ -202,7 +216,15 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                 key={pillar.pillar}
                 className="text-center p-3"
               >
-                <div className="text-sm text-muted mb-1">{displayName}</div>
+                <div className="text-sm text-muted mb-1">
+                  {displayName}
+                  {/* Enhancement indicator for RETRIEVAL */}
+                  {pillar.pillar === 'RETRIEVAL' && enhancementStatus === 'enhanced' && (
+                    <span className="ml-1 text-green-600" title="Enhanced with real-world data">
+                      ✓
+                    </span>
+                  )}
+                </div>
                 <div className={`font-medium ${getRatingColor(rating)}`}>
                   {rating}
                 </div>
@@ -244,8 +266,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
   return (
     <div className="space-y-8">
       {/* Overall Score */}
-      <div className="text-center">
-        <p className="text-sm text-muted mono mb-2">{result.url}</p>
+      <div className="text-center" data-testid="score-display">
         <h2 className="text-3xl font-medium mb-6" style={{ color: 'var(--foreground)' }}>
           AI Search Readiness Score
         </h2>
@@ -333,6 +354,26 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
         )}
       </div>
 
+      {/* Data Sources Section - show what data was used */}
+      {result.dataSources && result.dataSources.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.2 }}
+          className="flex justify-center gap-3 flex-wrap"
+        >
+          {result.dataSources.map((source, index) => (
+            <DataSourceBadge
+              key={index}
+              type={source.type}
+              metric={source.metric}
+              value={source.details?.ttfb || source.details?.value}
+              size="sm"
+            />
+          ))}
+        </motion.div>
+      )}
+
       {/* Pillar Breakdown - only if feature is enabled */}
       {features.showPillarBreakdown && (
         <div className="space-y-4">
@@ -369,15 +410,38 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
-                          {info.name}
-                        </h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
+                            {info.name}
+                          </h4>
+                          {/* Enhancement indicator for RETRIEVAL pillar */}
+                          {pillar.pillar === 'RETRIEVAL' && enhancementStatus !== 'idle' && (
+                            <div className="flex items-center gap-1">
+                              {enhancementStatus === 'loading' ? (
+                                <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  Enhancing...
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">
+                                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                  Real-world data
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <p className="text-sm text-muted">{info.tip}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-medium mono" style={{ 
                           color: getScoreColor(pillar.earned, pillar.max) 
-                        }}>
+                        }} data-testid={`${pillar.pillar.toLowerCase()}-score`}>
                           {pillar.earned}/{pillar.max}
                         </div>
                         <div className="text-xs text-muted">
@@ -401,6 +465,25 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                     {hoveredPillar === pillar.pillar && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-muted">{info.tip}</p>
+                        
+                        {/* Show actual metrics for RETRIEVAL */}
+                        {pillar.pillar === 'RETRIEVAL' && result.breakdown?.RETRIEVAL && (
+                          <div className="mt-2">
+                            <p className="text-xs font-medium mb-1">Measured metrics:</p>
+                            <ul className="text-xs text-muted space-y-1">
+                              {result.dataSources?.find(ds => ds.metric === 'ttfb') && (
+                                <li>• TTFB: {result.dataSources.find(ds => ds.metric === 'ttfb')?.details?.ttfb}ms
+                                  <span className="text-green-600 ml-1">
+                                    ({result.dataSources.find(ds => ds.metric === 'ttfb')?.type === 'chrome-ux' ? 'real-world' : 'lab'} data)
+                                  </span>
+                                </li>
+                              )}
+                              {Object.entries(result.breakdown.RETRIEVAL).map(([metric, score]) => (
+                                <li key={metric}>• {metric.replace(/([A-Z])/g, ' $1').trim()}: {String(score)}/{getMaxScoreForMetric(metric)}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         
                         {/* Show failed checks */}
                         {Object.entries(pillar.checks).filter(([_, score]) => score === 0).length > 0 && (
