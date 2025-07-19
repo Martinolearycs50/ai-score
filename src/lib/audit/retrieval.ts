@@ -92,8 +92,15 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   // Capture paywall status
   capturedDomain.hasPaywall = hasPaywall || metaPaywall;
 
-  // Check main content ratio with comprehensive fallbacks
-  const totalContent = $('body').text().trim();
+  // Remove noise elements first
+  const $clone = $.html();
+  const $clean = cheerio.load($clone);
+  
+  // Remove all noise elements
+  $clean('script, style, noscript, nav, header, footer, aside, .nav, .navigation, .menu, .sidebar, .footer, .header, [aria-hidden="true"], [hidden], .ads, .advertisement').remove();
+  
+  // Get clean body text for comparison
+  const totalWords = $clean('body').text().trim().split(/\s+/).filter(w => w.length > 0).length;
   let mainContentText = '';
   let contentSelector = '';
   
@@ -113,7 +120,18 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
     { selector: '.mw-parser-output', name: 'Wikipedia content' },
     { selector: '#mw-content-text', name: 'MediaWiki content' },
     { selector: '.markdown-body', name: 'Markdown content' },
-    { selector: '.container > div', name: 'Container content' }
+    { selector: '.container > div', name: 'Container content' },
+    { selector: 'div[class*="hero"], div[class*="Hero"]', name: 'Hero sections' },
+    { selector: 'section[class*="feature"], section[class*="Feature"]', name: 'Feature sections' },
+    { selector: '.page-content, .site-content', name: 'Page/site content' },
+    { selector: '[data-testid*="content"], [data-testid*="Content"]', name: 'data-testid content' },
+    { selector: 'div#__next main, div#__next > div > main', name: 'Next.js main' },
+    { selector: 'div#__next section', name: 'Next.js sections' },
+    { selector: 'div[class*="wrapper"] section, div[class*="Wrapper"] section', name: 'Wrapper sections' },
+    { selector: 'div[class*="layout"] > section, div[class*="Layout"] > section', name: 'Layout sections' },
+    { selector: '.prose', name: 'Prose content' },
+    { selector: 'div[class*="container"] > div[class*="content"]', name: 'Container > content' },
+    { selector: 'body > div > div > section', name: 'Nested sections' }
   ];
   
   // Try each selector, but keep looking for better content
@@ -121,37 +139,82 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   let bestSelector = '';
   let bestRatio = 0;
   
+  console.log(`🔍 [Retrieval] Trying ${contentSelectors.length} selectors for content detection...`);
+  
   for (const { selector, name } of contentSelectors) {
-    const elements = $(selector);
-    
-    if (elements.length > 0) {
-      let content = '';
-      let selectorName = name;
+    try {
+      const elements = $clean(selector);
       
-      // For multiple elements of the same type, aggregate content
-      if (elements.length > 1 && (selector === 'article' || selector.includes('section') || selector.includes('container'))) {
-        let aggregated = '';
+      if (elements.length > 0) {
+        console.log(`  ✓ Found ${elements.length} element(s) with selector: ${name}`);
+        let extractedText = '';
+        let selectorName = name;
+      
+      // For multiple elements, check if we should aggregate
+      const shouldAggregate = elements.length > 1 && (
+        selector.includes('section') || 
+        selector.includes('article') || 
+        selector.includes('div') ||
+        selector.includes('container') ||
+        selector.includes('hero') ||
+        selector.includes('feature') ||
+        name.includes('sections') ||
+        name.includes('content')
+      );
+      
+      if (shouldAggregate) {
+        let aggregatedParts: string[] = [];
         elements.each((_, elem) => {
-          const elemText = $(elem).text().trim();
-          // Skip empty or skeleton elements
-          if (elemText.length > 50 && !$(elem).attr('aria-label')?.includes('skeleton')) {
-            aggregated += ' ' + elemText;
+          const $elem = $clean(elem);
+          // Extract paragraphs and headings separately
+          const textParts: string[] = [];
+          $elem.find('p, h1, h2, h3, h4, h5, h6, li').each((_, textElem) => {
+            const text = $clean(textElem).text().trim();
+            if (text.length > 20) {
+              textParts.push(text);
+            }
+          });
+          
+          // If no structured text found, get all text
+          if (textParts.length === 0) {
+            const elemText = $elem.text().trim();
+            if (elemText.length > 50 && !$elem.attr('aria-label')?.includes('skeleton')) {
+              textParts.push(elemText);
+            }
+          }
+          
+          if (textParts.length > 0) {
+            aggregatedParts.push(...textParts);
           }
         });
-        content = aggregated.trim();
+        extractedText = aggregatedParts.join(' ');
         selectorName = `${name} (aggregated)`;
       } else {
-        // Single element
-        content = elements.first().text().trim();
+        // Single element - extract structured text
+        const $elem = elements.first();
+        const textParts: string[] = [];
+        $elem.find('p, h1, h2, h3, h4, h5, h6, li').each((_, textElem) => {
+          const text = $clean(textElem).text().trim();
+          if (text.length > 20) {
+            textParts.push(text);
+          }
+        });
+        
+        if (textParts.length > 0) {
+          extractedText = textParts.join(' ');
+        } else {
+          extractedText = $elem.text().trim();
+        }
       }
       
-      // Calculate ratio for this selector
-      if (content && content.length > 100) {
-        const ratio = content.length / totalContent.length;
+      // Calculate word count and ratio
+      const wordCount = extractedText.split(/\s+/).filter(w => w.length > 0).length;
+      if (wordCount > 50) {
+        const ratio = wordCount / totalWords;
         
         // Keep the best content found so far
         if (ratio > bestRatio) {
-          bestContent = content;
+          bestContent = extractedText;
           bestSelector = selectorName;
           bestRatio = ratio;
           
@@ -161,6 +224,9 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
           }
         }
       }
+    }
+    } catch (error) {
+      console.log(`  ❌ Error with selector ${name}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   
@@ -174,26 +240,38 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
   if (!mainContentText) {
     console.log('⚠️ [Retrieval] No standard content container found, using heuristic approach');
     
-    // Find the largest text block, excluding known navigation/footer elements
-    const excludeSelectors = 'nav, header, footer, aside, .sidebar, .navigation, .menu, .breadcrumb, .advertisement, .ads, [aria-label="card-skeleton"]';
-    const bodyClone = $('body').clone();
-    bodyClone.find(excludeSelectors).remove();
+    // Use the already cleaned DOM
+    const bodyClone = $clean('body');
     
     // For React/Next.js sites, try aggregating content from sections and articles
-    const sections = bodyClone.find('section[aria-label], section.container, article[aria-label]');
-    if (sections.length > 0) {
+    const contentElements = bodyClone.find('section, article, div[class*="content"], div[class*="Content"], div[class*="hero"], div[class*="Hero"], div[class*="feature"], div[class*="Feature"]');
+    if (contentElements.length > 0) {
       let aggregatedContent = '';
-      sections.each((_, elem) => {
-        const sectionText = $(elem).text().trim();
-        // Skip skeleton/placeholder sections
-        if (sectionText.length > 50 && !sectionText.includes('filter:grayscale')) {
-          aggregatedContent += ' ' + sectionText;
-        }
+      let elementCount = 0;
+      
+      contentElements.each((_, elem) => {
+        const $elem = $(elem);
+        const elemText = $elem.text().trim();
+        
+        // Skip if element is too small or contains skeleton/placeholder indicators
+        if (elemText.length < 50) return;
+        if ($elem.attr('aria-label')?.includes('skeleton')) return;
+        if ($elem.find('[class*="skeleton" i]').length > 0) return;
+        if (elemText.includes('filter:grayscale')) return;
+        
+        // Skip if this is clearly navigation or footer content
+        const classAttr = $elem.attr('class') || '';
+        const idAttr = $elem.attr('id') || '';
+        if (/nav|footer|header|sidebar|menu/i.test(classAttr + idAttr)) return;
+        
+        // Add to aggregated content
+        aggregatedContent += ' ' + elemText;
+        elementCount++;
       });
       
       if (aggregatedContent.length > 100) {
         mainContentText = aggregatedContent.trim();
-        contentSelector = 'Aggregated sections/articles';
+        contentSelector = `Aggregated content (${elementCount} elements)`;
       }
     }
     
@@ -217,33 +295,62 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
         mainContentText = largestDiv.text().trim();
         contentSelector = 'Heuristic (largest content block)';
       } else {
-        // Last resort: use body content minus navigation
-        mainContentText = bodyClone.text().trim();
-        contentSelector = 'Body content (minus navigation)';
+        // Try a simpler approach - find any divs with substantial text
+        const allDivs = bodyClone.find('div');
+        let combinedText = '';
+        let divCount = 0;
+        
+        allDivs.each((_, elem) => {
+          const $div = $(elem);
+          // Get only direct text content (not from children)
+          const directText = $div.clone().children().remove().end().text().trim();
+          
+          if (directText.length > 100) {
+            combinedText += ' ' + directText;
+            divCount++;
+          }
+        });
+        
+        if (combinedText.length > 200) {
+          mainContentText = combinedText.trim();
+          contentSelector = `Combined text from ${divCount} divs`;
+        } else {
+          // Last resort: use body content minus navigation
+          mainContentText = bodyClone.text().trim();
+          contentSelector = 'Body content (minus navigation)';
+        }
       }
     }
   }
   
   // Calculate content ratio and score
-  if (mainContentText && totalContent) {
-    const contentRatio = mainContentText.length / totalContent.length;
+  if (mainContentText && totalWords > 0) {
+    const mainWords = mainContentText.split(/\s+/).filter(w => w.length > 0).length;
+    const contentRatio = mainWords / totalWords;
     
     // Log what we found
     console.log(`📊 [Retrieval] Main content detection:
+      - URL: ${url}
       - Selector used: ${contentSelector}
-      - Content length: ${mainContentText.length} chars
-      - Total page length: ${totalContent.length} chars
-      - Content ratio: ${(contentRatio * 100).toFixed(1)}%`);
+      - Content words: ${mainWords} words
+      - Total page words: ${totalWords} words
+      - Content ratio: ${(contentRatio * 100).toFixed(1)}%
+      - Score: ${contentRatio >= 0.3 ? 5 : contentRatio >= 0.15 ? 4 : contentRatio >= 0.05 ? 3 : contentRatio >= 0.02 ? 2 : contentRatio >= 0.01 ? 1 : 0}/5`);
     
     // Partial scoring based on content ratio
-    if (contentRatio >= 0.6) {
-      scores.mainContent = 5; // Excellent - 60%+ is main content
-    } else if (contentRatio >= 0.4) {
-      scores.mainContent = 3; // Good - 40-60% is main content
-    } else if (contentRatio >= 0.2) {
-      scores.mainContent = 1; // Poor - 20-40% is main content
+    // Adjusted for modern sites that have lots of JS/CSS in the DOM
+    if (contentRatio >= 0.3) {
+      scores.mainContent = 5; // Excellent - 30%+ is main content
+    } else if (contentRatio >= 0.15) {
+      scores.mainContent = 4; // Good - 15-30% is main content
+    } else if (contentRatio >= 0.05) {
+      scores.mainContent = 3; // Fair - 5-15% is main content  
+    } else if (contentRatio >= 0.02) {
+      scores.mainContent = 2; // Poor - 2-5% is main content
+    } else if (contentRatio >= 0.01) {
+      scores.mainContent = 1; // Very poor - 1-2% is main content
     } else {
-      scores.mainContent = 0; // Very poor - less than 20% is main content
+      scores.mainContent = 0; // Terrible - less than 1% is main content
     }
     
     capturedDomain.mainContentRatio = Math.round(contentRatio * 100);
@@ -251,9 +358,17 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
     capturedDomain.contentSelector = contentSelector;
   } else {
     console.log('❌ [Retrieval] No content found on page');
-    scores.mainContent = 0;
-    capturedDomain.mainContentRatio = 0;
-    capturedDomain.contentSelector = 'None found';
+    // Give partial credit if the page has some text at all
+    if (totalContent && totalContent.length > 200) {
+      scores.mainContent = 1; // Minimal score for having some content
+      capturedDomain.mainContentRatio = 100; // Assume all content is "main" if we can't identify structure
+      capturedDomain.contentSelector = 'Unstructured content';
+      console.log('ℹ️ [Retrieval] Giving minimal score for unstructured content');
+    } else {
+      scores.mainContent = 0;
+      capturedDomain.mainContentRatio = 0;
+      capturedDomain.contentSelector = 'None found';
+    }
   }
 
   // Time to First Byte (TTFB) - Try CrUX data first, fallback to synthetic measurement

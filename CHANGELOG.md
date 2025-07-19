@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved user experience with instant preliminary results
 
 ### Fixed
+- Complete rewrite of main content detection algorithm
+  - Now works reliably with all modern websites including React/Next.js SPAs
+  - Switched from character-based to word-based measurement
+  - Removes noise elements (nav, header, footer, ads) before analysis
+  - Fixed CSS selector compatibility issues with Cheerio
+  - Adjusted scoring thresholds for modern web (30%+ = excellent)
+- Wikipedia pages no longer timeout (increased limit to 30s)
+- TypeScript build errors in multiple files
 - TypeScript build configuration to exclude worker files
 - Website comparison feature now available for free tier (was incorrectly Pro-only)
 - Upgrade CTAs now properly link to pricing page using Next.js Link

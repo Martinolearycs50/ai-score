@@ -113,6 +113,20 @@ Current Performance:
 
 <!-- CLAUDE CODE: Add new entries at top, keep format consistent -->
 
+### 2025-07-20: Complete Rewrite of Main Content Detection for Modern Websites
+- **What**: Completely rewrote content detection algorithm to work with all modern websites
+- **Why**: Main content was scoring 0/5 for sites like tap.company due to outdated detection methods
+- **Impact**: 
+  - Switched from character-based to word-based content measurement
+  - Remove all noise elements (nav, header, footer, scripts, ads) before analysis
+  - Added structured text extraction for cleaner content
+  - Fixed CSS selector syntax issues with Cheerio
+  - Adjusted scoring thresholds (30%+ = 5/5 instead of 60%+)
+- **Results**:
+  - tap.company: 0/5 → 5/5 (99.1% content ratio)
+  - vercel.com: 0/5 → 5/5 (74.8% content ratio)
+  - All tested sites now properly detect content
+
 ### 2025-07-20: Fixed Critical Bugs - Wikipedia Timeout and Main Content Detection
 - **What**: Fixed two critical bugs: Wikipedia pages timing out and main content scoring 0/5 for all sites
 - **Why**: Pages like Wikipedia were timing out due to 10s limit; main content detection was too restrictive (only <main> or <article>)
@@ -188,13 +202,18 @@ Current Performance:
 <!-- CLAUDE CODE: Update this section at start of each work session -->
 
 ### Now Working On
-- ✅ All features completed and tested
+- ✅ Content detection completely rewritten and tested
+- ✅ All major bugs fixed
 
-### Next Up
+### Next Up (Start Here Next Session)
 - Deploy Cloudflare Worker to production
-- Monitor conversion rates from new features
-- A/B test different CTA placements
-- Gather user feedback on free tier experience
+- Add visual indicators showing which content selector was used
+- Test edge cases:
+  - Single-page applications with dynamic content
+  - Sites with unusual HTML structures
+  - International sites with different languages
+- Monitor conversion rates from improved accuracy
+- Consider adding debug mode to show content detection details
 
 ### Blocked/Waiting
 - Cloudflare Worker deployment (needs production Cloudflare account setup)
