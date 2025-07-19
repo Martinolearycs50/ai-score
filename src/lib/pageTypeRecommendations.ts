@@ -40,6 +40,23 @@ export const pageTypeRecommendations: Record<PageType, {
     },
   },
   
+  blog: {
+    priority: [
+      'lastModified',   // Freshness is key
+      'authorBio',      // Author credibility
+      'uniqueStats',    // Data and citations
+      'directAnswers',  // Quick insights
+      'structuredData', // Article/BlogPosting schema
+    ],
+    customMessages: {
+      lastModified: 'AI prioritizes recent content. Always show publish and update dates on blog posts.',
+      authorBio: 'Blog posts need clear author attribution with credentials for AI to trust the content.',
+      uniqueStats: 'Back up claims with data. AI favors posts with specific statistics and sources.',
+      directAnswers: 'Start posts with a brief answer or summary, then elaborate.',
+      structuredData: 'Use BlogPosting schema to help AI understand your content structure.',
+    },
+  },
+  
   product: {
     priority: [
       'structuredData', // Product schema

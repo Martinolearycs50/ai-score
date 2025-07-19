@@ -36,16 +36,16 @@ export interface TierFeatures {
 export const TIER_CONFIG: Record<TierType, TierFeatures> = {
   free: {
     // Display features
-    showDetailedScores: false,
-    showPillarBreakdown: false,
-    showRecommendations: false,
-    showWebsiteProfile: false,
-    showComparisonMode: true,
+    showDetailedScores: true, // Show basic scores for free tier
+    showPillarBreakdown: true, // Show visual pillar breakdown for free tier
+    showRecommendations: false, // Hide detailed recommendations for free tier
+    showWebsiteProfile: true, // Show website profile for free tier
+    showComparisonMode: true, // Enable comparison for free tier
     showImplementationTime: false,
     showExamples: false,
     
     // Limits
-    maxAnalysesPerMonth: 5,
+    maxAnalysesPerMonth: Infinity,
     
     // UI features
     showEmotionalReveal: true, // Keep the nice animation even for free
@@ -81,7 +81,7 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showExamples: true,
     
     // Limits
-    maxAnalysesPerMonth: 100, // Effectively unlimited
+    maxAnalysesPerMonth: Infinity,
     
     // UI features
     showEmotionalReveal: true,

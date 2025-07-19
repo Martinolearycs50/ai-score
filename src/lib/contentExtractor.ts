@@ -852,69 +852,147 @@ export class ContentExtractor {
   }
   
   /**
-   * Detect the type of page based on URL patterns and DOM analysis
+   * Detect the type of page based on URL patterns, Schema.org markup, and DOM analysis
+   * Enhanced detection with focus on three main types: homepage, blog/article, product
    */
   private detectPageType(): PageType {
     try {
       // URL-based detection
       let path = '';
       let hostname = '';
+      let subdomain = '';
       if (this.pageUrl) {
         const url = new URL(this.pageUrl);
         path = url.pathname.toLowerCase();
         hostname = url.hostname.toLowerCase();
+        // Extract subdomain
+        const parts = hostname.split('.');
+        if (parts.length > 2) {
+          subdomain = parts[0];
+        }
       }
       
-      // Homepage detection - enhanced with more patterns and DOM checks
+      // 1. Homepage Detection (highest priority)
+      // Check URL patterns first
       if (path === '/' || path === '' || path === '/index' || path === '/index.html' || path === '/index.php' ||
-          path === '/home' || path === '/home.html' || path === '/default.html' || path === '/default.aspx') {
+          path === '/home' || path === '/homepage' || path === '/default.html' || path === '/default.aspx') {
         console.log(`[ContentExtractor] Detected homepage by URL pattern: ${this.pageUrl} (path: "${path}")`);
         return 'homepage';
       }
       
-      // Additional homepage detection through DOM analysis
-      if (path.length <= 1 || (path.length < 20 && !path.includes('/'))) {
-        // Check for homepage indicators in content
-        const hasHeroSection = this.$('.hero, .hero-section, .homepage-hero, .main-banner').length > 0;
-        const hasMultipleSections = this.$('section').length > 3;
-        const hasNavWithHome = this.$('nav a[href="/"], nav a[href="#home"]').length > 0;
-        const titleIsCompanyName = this.$('title').text().toLowerCase().includes(hostname.split('.')[0]);
-        
-        if (hasHeroSection || (hasMultipleSections && hasNavWithHome) || titleIsCompanyName) {
-          console.log(`[ContentExtractor] Detected homepage by DOM indicators: ${this.pageUrl}`);
-          return 'homepage';
-        }
+      // Check language variants (e.g., /en/, /en-us/, /fr/)
+      if (path.match(/^\/[a-z]{2}(-[a-z]{2})?\/$/i)) {
+        console.log(`[ContentExtractor] Detected homepage by language variant: ${this.pageUrl}`);
+        return 'homepage';
       }
       
-      // Check for article/blog patterns
-      if (this.hasArticleSignals(path)) {
-        return 'article';
+      // Check for Organization schema (strong homepage indicator)
+      const orgSchema = this.$('script[type="application/ld+json"]').toArray()
+        .some(script => {
+          const text = this.$(script).text();
+          return text.includes('"@type":"Organization"') || text.includes('"@type": "Organization"');
+        });
+      
+      // Organization schema with short path strongly indicates homepage
+      if (orgSchema && (path === '/' || path.length < 20 || path.split('/').filter(p => p).length <= 1)) {
+        console.log(`[ContentExtractor] Detected homepage by Organization schema: ${this.pageUrl}`);
+        return 'homepage';
       }
       
-      // Product page detection
-      if (path.includes('/product') || path.includes('/item') || path.includes('/p/') ||
-          this.$('.product-page, .product-detail, .product-info').length > 0 ||
-          this.$('[itemtype*="Product"]').length > 0) {
+      // 2. Blog/Article Detection
+      // Check URL patterns for blog/article
+      const blogPatterns = [
+        '/blog/', '/blogs/', '/post/', '/posts/', '/article/', '/articles/',
+        '/news/', '/insights/', '/resources/', '/stories/', '/updates/',
+        '/press/', '/media/', '/journal/', '/magazine/'
+      ];
+      
+      if (blogPatterns.some(pattern => path.includes(pattern))) {
+        console.log(`[ContentExtractor] Detected blog/article by URL pattern: ${this.pageUrl}`);
+        return 'blog';
+      }
+      
+      // Check for blog subdomain
+      if (subdomain && ['blog', 'news', 'insights', 'stories'].includes(subdomain)) {
+        console.log(`[ContentExtractor] Detected blog/article by subdomain: ${this.pageUrl}`);
+        return 'blog';
+      }
+      
+      // Check for date patterns in URL (YYYY/MM/DD or YYYY-MM-DD)
+      if (path.match(/\/\d{4}\/\d{1,2}\//) || path.match(/\/\d{4}-\d{2}-\d{2}/)) {
+        console.log(`[ContentExtractor] Detected blog/article by date pattern in URL: ${this.pageUrl}`);
+        return 'blog';
+      }
+      
+      // Check for Article or BlogPosting schema
+      const articleSchema = this.$('script[type="application/ld+json"]').toArray()
+        .some(script => {
+          const text = this.$(script).text();
+          return text.includes('"@type":"Article"') || text.includes('"@type":"BlogPosting"') ||
+                 text.includes('"@type":"NewsArticle"') || text.includes('"@type": "Article"');
+        });
+      
+      if (articleSchema) {
+        console.log(`[ContentExtractor] Detected blog/article by schema markup: ${this.pageUrl}`);
+        return 'blog';
+      }
+      
+      // Check for article-specific elements
+      const hasAuthor = this.$('[rel="author"], .author, .by-author, .post-author, .article-author').length > 0;
+      const hasPublishDate = this.$('[datetime], .publish-date, .post-date, .article-date, time').length > 0;
+      const hasArticleTag = this.$('article, .article, .post, .blog-post').length > 0;
+      
+      if ((hasAuthor && hasPublishDate) || (hasArticleTag && hasPublishDate)) {
+        console.log(`[ContentExtractor] Detected blog/article by content patterns: ${this.pageUrl}`);
+        return 'blog';
+      }
+      
+      // 3. Product Page Detection
+      // Check URL patterns
+      const productPatterns = [
+        '/product/', '/products/', '/item/', '/items/', '/p/',
+        '/shop/', '/store/', '/catalog/', '/catalogue/', '/merchandise/'
+      ];
+      
+      if (productPatterns.some(pattern => path.includes(pattern))) {
+        console.log(`[ContentExtractor] Detected product page by URL pattern: ${this.pageUrl}`);
         return 'product';
       }
       
-      // Category/listing page detection
-      if (path.includes('/category') || path.includes('/categories') || path.includes('/shop') ||
-          path.includes('/collection') || path.includes('/catalog') ||
-          this.$('.category-grid, .product-grid, .listing-grid').length > 0) {
-        return 'category';
+      // Platform-specific patterns
+      if (path.includes('/dp/') || // Amazon
+          path.includes('/products/') && hostname.includes('shopify') || // Shopify
+          path.includes('/p/') && path.split('/').length > 3) { // Generic product
+        console.log(`[ContentExtractor] Detected product page by platform pattern: ${this.pageUrl}`);
+        return 'product';
       }
       
-      // About page detection
-      if (path.includes('/about') || path.includes('/team') || path.includes('/company') ||
-          path.includes('/who-we-are') || path.includes('/our-story')) {
-        return 'about';
+      // Check for Product schema
+      const productSchema = this.$('script[type="application/ld+json"]').toArray()
+        .some(script => {
+          const text = this.$(script).text();
+          return text.includes('"@type":"Product"') || text.includes('"@type": "Product"');
+        });
+      
+      if (productSchema) {
+        console.log(`[ContentExtractor] Detected product page by schema markup: ${this.pageUrl}`);
+        return 'product';
       }
       
-      // Contact page detection
-      if (path.includes('/contact') || path.includes('/get-in-touch') || path.includes('/reach-us') ||
-          this.$('form[action*="contact"], form[action*="mail"]').length > 0) {
-        return 'contact';
+      // Check for price and add to cart elements
+      const hasPrice = this.$('[itemprop="price"], .price, .product-price, .cost').length > 0;
+      const hasAddToCart = this.$('button[class*="cart"], button[id*="cart"], .add-to-cart, #add-to-cart').length > 0;
+      const hasProductInfo = this.$('.product-info, .product-details, .product-description').length > 0;
+      
+      if (hasPrice && (hasAddToCart || hasProductInfo)) {
+        console.log(`[ContentExtractor] Detected product page by price/cart elements: ${this.pageUrl}`);
+        return 'product';
+      }
+      
+      // 4. Additional checks for other types
+      // Check for article/blog patterns if not already detected
+      if (this.hasArticleSignals(path)) {
+        return 'article';
       }
       
       // Documentation detection
@@ -924,20 +1002,25 @@ export class ContentExtractor {
         return 'documentation';
       }
       
-      // Search results page detection
-      if (path.includes('/search') || path.includes('/results') || 
-          this.pageUrl?.includes('q=') || this.pageUrl?.includes('query=') ||
-          this.$('.search-results, .results-list').length > 0) {
-        return 'search';
+      // 5. Fallback detection based on content patterns
+      // Check DOM for navigation-heavy structure (homepage indicator)
+      const navElements = this.$('nav, .navigation, .menu').length;
+      const linkElements = this.$('a').length;
+      const contentRatio = this.$('p, article, section').length / Math.max(linkElements, 1);
+      
+      if (navElements > 2 && contentRatio < 0.2) {
+        console.log(`[ContentExtractor] Detected homepage by navigation-heavy structure: ${this.pageUrl}`);
+        return 'homepage';
       }
       
-      // If none match, return general
-      console.log(`[ContentExtractor] No specific page type detected, defaulting to general: ${this.pageUrl}`);
-      return 'general';
+      // Default to 'blog' if uncertain (as per requirements)
+      console.log(`[ContentExtractor] Defaulting to blog for: ${this.pageUrl}`);
+      return 'blog';
       
     } catch (error) {
       console.warn('[ContentExtractor] detectPageType failed:', error);
-      return 'general';
+      // Default to 'blog' if uncertain
+      return 'blog';
     }
   }
   

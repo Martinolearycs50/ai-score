@@ -19,7 +19,8 @@ const CONTENT_TYPE_LABELS = {
 
 const PAGE_TYPE_INFO: Record<PageType, { icon: string; label: string; tip: string }> = {
   homepage: { icon: '🏠', label: 'Homepage', tip: 'Main entry point for your site' },
-  article: { icon: '📝', label: 'Article/Blog', tip: 'Content-focused page' },
+  article: { icon: '📝', label: 'Article', tip: 'Content-focused page' },
+  blog: { icon: '📝', label: 'Blog Post', tip: 'Blog or news content' },
   product: { icon: '🛍️', label: 'Product Page', tip: 'Individual product showcase' },
   category: { icon: '📂', label: 'Category Page', tip: 'Product or content listing' },
   about: { icon: 'ℹ️', label: 'About Page', tip: 'Company or personal information' },

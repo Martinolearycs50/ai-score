@@ -175,6 +175,9 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                   </svg>
                 </motion.div>
                 <p className="text-sm text-muted">Analyzing {websiteName}...</p>
+                {result.extractedContent?.pageType && (
+                  <p className="text-xs text-muted mt-1">Detected: {result.extractedContent.pageType}</p>
+                )}
               </div>
             </div>
           </motion.div>
@@ -265,9 +268,14 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                 {theme.title}
               </h2>
               <p className="text-lg text-muted mb-2">{theme.subtitle}</p>
-              <p className="text-sm text-muted mb-4">
+              <p className="text-sm text-muted mb-1">
                 {websiteName} • {result.websiteProfile?.domain || new URL(result.url).hostname}
               </p>
+              {result.extractedContent?.pageType && result.scoringResult.dynamicScoring && (
+                <p className="text-xs text-muted mb-4">
+                  {result.extractedContent.pageType.charAt(0).toUpperCase() + result.extractedContent.pageType.slice(1)} page • Dynamic scoring applied
+                </p>
+              )}
               
               {/* Potential Score Preview */}
               <motion.div

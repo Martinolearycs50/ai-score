@@ -1,0 +1,21 @@
+{
+  "name": "ai-search-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for AI Search Score progressive enhancement",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240129.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0",
+    "vitest": "^1.2.0",
+    "typescript": "^5.0.0"
+  },
+  "type": "module"
+}

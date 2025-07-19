@@ -11,6 +11,35 @@ interface PillarScoreDisplayV2Props {
   compact?: boolean;
 }
 
+// Pillar information for detailed display
+const PILLAR_INFO: Record<string, { name: string; icon: string; tip: string }> = {
+  RETRIEVAL: { 
+    name: 'Speed & Access', 
+    icon: '⚡', 
+    tip: 'How quickly AI crawlers can access and process your content'
+  },
+  FACT_DENSITY: { 
+    name: 'Information Richness', 
+    icon: '📊', 
+    tip: 'Statistics, data, examples, and structured information'
+  },
+  STRUCTURE: { 
+    name: 'Content Organization', 
+    icon: '🏗️', 
+    tip: 'Proper headings, semantic HTML, and structured data'
+  },
+  TRUST: { 
+    name: 'Credibility', 
+    icon: '🛡️', 
+    tip: 'Author info, citations, HTTPS, and trust signals'
+  },
+  RECENCY: { 
+    name: 'Freshness', 
+    icon: '🌱', 
+    tip: 'Updated content, recent dates, and current information'
+  }
+};
+
 // This is the new version using feature flags instead of tier prop
 export default function PillarScoreDisplayV2({ result, compact = false }: PillarScoreDisplayV2Props) {
   const [hoveredPillar, setHoveredPillar] = useState<string | null>(null);
@@ -131,7 +160,24 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
               </motion.div>
             </div>
           </div>
-          <div className="text-lg text-muted mb-8">out of 100</div>
+          <div className="text-lg text-muted mb-4">out of 100</div>
+          
+          {/* Dynamic Scoring Indicator */}
+          {result.scoringResult.dynamicScoring && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-6"
+            >
+              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+              </svg>
+              <span className="text-sm font-medium text-blue-900">
+                {result.scoringResult.dynamicScoring.pageType.charAt(0).toUpperCase() + result.scoringResult.dynamicScoring.pageType.slice(1)} page scoring
+              </span>
+            </motion.div>
+          )}
           
           {/* Simple Rating Summary */}
           <div className="mb-8">
@@ -266,6 +312,25 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
             ? "Strong foundation with room for improvement"
             : "Significant optimization opportunities available"}
         </motion.p>
+        
+        {/* Dynamic Scoring Indicator */}
+        {result.scoringResult.dynamicScoring && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2 }}
+            className="mt-4 text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
+              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+              </svg>
+              <span className="text-sm font-medium text-blue-900">
+                Dynamic scoring applied for {result.scoringResult.dynamicScoring.pageType} pages
+              </span>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Pillar Breakdown - only if feature is enabled */}
@@ -307,7 +372,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                         <h4 className="font-medium" style={{ color: 'var(--foreground)' }}>
                           {info.name}
                         </h4>
-                        <p className="text-sm text-muted">{info.description}</p>
+                        <p className="text-sm text-muted">{info.tip}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-medium mono" style={{ 
@@ -335,7 +400,7 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
                     {/* Tooltip on hover */}
                     {hoveredPillar === pillar.pillar && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-muted">{info.tooltip}</p>
+                        <p className="text-sm text-muted">{info.tip}</p>
                         
                         {/* Show failed checks */}
                         {Object.entries(pillar.checks).filter(([_, score]) => score === 0).length > 0 && (
@@ -414,42 +479,3 @@ export default function PillarScoreDisplayV2({ result, compact = false }: Pillar
     </div>
   );
 }
-
-// Pillar metadata (copied from original, should be imported from a shared file)
-const PILLAR_INFO = {
-  RETRIEVAL: {
-    name: 'Retrieval & Access',
-    icon: '⚡',
-    description: 'How fast AI can access your content',
-    tooltip: 'AI systems need quick access to your content. This measures page speed, accessibility, llms.txt presence, and whether content is behind paywalls.',
-    maxScore: 25,
-  },
-  FACT_DENSITY: {
-    name: 'Fact Density',
-    icon: '📊',
-    description: 'How much useful information per section',
-    tooltip: 'AI prioritizes content with facts, data, specific examples, and direct answers after headings. Generic content ranks lower.',
-    maxScore: 20,
-  },
-  STRUCTURE: {
-    name: 'Answer Architecture',
-    icon: '📋',
-    description: 'Most important for 2025 AI search!',
-    tooltip: '🔥 MOST IMPORTANT: Listicles get 32.5% of AI citations! Use numbered titles, lists, comparison tables, and semantic URLs for maximum AI visibility.',
-    maxScore: 30,
-  },
-  TRUST: {
-    name: 'Trust & Authority',
-    icon: '✓',
-    description: 'Credibility signals AI looks for',
-    tooltip: 'AI needs to verify credibility through author info, citations, and domain authority.',
-    maxScore: 15,
-  },
-  RECENCY: {
-    name: 'Freshness',
-    icon: '🔄',
-    description: 'How up-to-date your content is',
-    tooltip: 'Recent content is preferred for current topics. Shows last updated dates and content freshness.',
-    maxScore: 10,
-  },
-};

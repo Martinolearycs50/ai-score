@@ -1,0 +1,24 @@
+name = "ai-search-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Add KV namespace for caching results
+[[kv_namespaces]]
+binding = "CACHE"
+id = "ai_search_cache"
+preview_id = "ai_search_cache_preview"
+
+# Add rate limiting with Durable Objects
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RateLimiter"]

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { DEFAULT_HEADERS } from '../../utils/constants';
+import { fetchCrUXData, calculateCrUXScore } from '../chromeUxReport';
 
 interface RetrievalScores {
   ttfb: number;           // Time to first byte < 200ms (+5) - REDUCED
@@ -20,6 +21,12 @@ export interface CapturedDomain {
   mainContentSample?: string;
   hasPaywall?: boolean;
   mainContentRatio?: number;
+  cruxData?: {
+    hasData: boolean;
+    ttfb?: number;
+    lcp?: number;
+    ttfbRating?: string;
+  };
 }
 
 export let capturedDomain: CapturedDomain = {};
@@ -103,30 +110,64 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
     }
   }
 
-  // Time to First Byte (TTFB) - needs actual measurement
+  // Time to First Byte (TTFB) - Try CrUX data first, fallback to synthetic measurement
+  let ttfbMeasured = false;
+  
+  // Attempt to get real-world TTFB from Chrome UX Report
   try {
-    const startTime = Date.now();
-    const response = await axios.get(url, {
-      headers: DEFAULT_HEADERS,
-      timeout: 5000,
-      maxRedirects: 2,
-      validateStatus: (status) => status === 200,
-      responseType: 'stream',
-    });
-
-    // Measure time to first byte
-    await new Promise((resolve) => {
-      response.data.once('data', () => {
-        const ttfb = Date.now() - startTime;
-        scores.ttfb = ttfb < 200 ? 5 : 0; // Reduced from 10 to 5
-        capturedDomain.actualTtfb = ttfb; // Capture actual TTFB
-        response.data.destroy(); // Clean up stream
-        resolve(true);
-      });
-    });
+    const cruxData = await fetchCrUXData(url);
+    if (cruxData.hasData && cruxData.metrics?.ttfb) {
+      // Use CrUX TTFB data (p75 - what 75% of users experience)
+      const cruxTtfb = cruxData.metrics.ttfb;
+      
+      // Score based on CrUX rating
+      if (cruxData.metrics.ttfbRating === 'good') {
+        scores.ttfb = 5; // Full points for good rating
+      } else if (cruxData.metrics.ttfbRating === 'needs-improvement') {
+        scores.ttfb = 3; // Partial points
+      } else {
+        scores.ttfb = 0; // Poor rating
+      }
+      
+      capturedDomain.actualTtfb = cruxTtfb;
+      capturedDomain.cruxData = {
+        hasData: true,
+        ttfb: cruxTtfb,
+        lcp: cruxData.metrics.lcp,
+        ttfbRating: cruxData.metrics.ttfbRating,
+      };
+      ttfbMeasured = true;
+    }
   } catch (error) {
-    // If we can't measure TTFB, give partial credit if page loaded at all
-    scores.ttfb = 0;
+    console.log('[Retrieval] CrUX data not available, falling back to synthetic measurement');
+  }
+  
+  // Fallback to synthetic measurement if CrUX data not available
+  if (!ttfbMeasured) {
+    try {
+      const startTime = Date.now();
+      const response = await axios.get(url, {
+        headers: DEFAULT_HEADERS,
+        timeout: 5000,
+        maxRedirects: 2,
+        validateStatus: (status) => status === 200,
+        responseType: 'stream',
+      });
+
+      // Measure time to first byte
+      await new Promise((resolve) => {
+        response.data.once('data', () => {
+          const ttfb = Date.now() - startTime;
+          scores.ttfb = ttfb < 200 ? 5 : 0; // Reduced from 10 to 5
+          capturedDomain.actualTtfb = ttfb; // Capture actual TTFB
+          response.data.destroy(); // Clean up stream
+          resolve(true);
+        });
+      });
+    } catch (error) {
+      // If we can't measure TTFB, give partial credit if page loaded at all
+      scores.ttfb = 0;
+    }
   }
 
   // NEW for 2025: Check for llms.txt file (5 points)

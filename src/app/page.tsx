@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTier } from '@/hooks/useTier';
 import UrlForm from '@/components/UrlForm';
@@ -13,8 +14,13 @@ import ComparisonView from '@/components/ComparisonView';
 import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
 import EmotionalComparisonReveal from '@/components/EmotionalComparisonReveal';
 import WebsiteProfileCard from '@/components/WebsiteProfileCard';
+import ExitIntentPopup from '@/components/ExitIntentPopup';
+import ShareButtons from '@/components/ShareButtons';
+import EmailCaptureForm from '@/components/EmailCaptureForm';
+import ProUpgradeCTA from '@/components/ProUpgradeCTA';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import { recTemplates } from '@/lib/recommendations';
+import { performProgressiveAnalysis, convertQuickToFullFormat } from '@/lib/progressiveEnhancement';
 
 interface AnalysisStateNew {
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -32,6 +38,7 @@ function HomeContent() {
   const { features, tier } = useTier();
   const router = useRouter();
   const [comparisonMode, setComparisonMode] = useState(false);
+  const [showExitIntent, setShowExitIntent] = useState(false);
   const [analysisState, setAnalysisState] = useState<AnalysisStateNew>({
     status: 'idle',
     result: null,
@@ -42,6 +49,14 @@ function HomeContent() {
     results: [null, null],
     errors: [null, null]
   });
+
+  // Show exit intent on results page
+  useEffect(() => {
+    if (analysisState.status === 'success' && tier === 'free') {
+      // Only show for free tier users
+      setShowExitIntent(true);
+    }
+  }, [analysisState.status, tier]);
 
   const handleAnalyze = async (url: string) => {
     // Development logging
@@ -55,101 +70,138 @@ function HomeContent() {
       error: null
     });
 
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      console.log('[Debug] Request aborted due to timeout');
-    }, 15000); // 15 second timeout
+    // Check if Cloudflare Worker is available
+    const useProgressiveEnhancement = process.env.NEXT_PUBLIC_WORKER_URL && 
+      process.env.NEXT_PUBLIC_WORKER_URL !== 'https://ai-search-worker.your-subdomain.workers.dev';
 
-    try {
-      const requestBody = { url };
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Debug] Sending request to /api/analyze');
-        console.log('[Debug] Request body:', requestBody);
-      }
-
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal,
-      });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Debug] Response status:', response.status);
-        console.log('[Debug] Response ok:', response.ok);
-      }
-
-      // Clear timeout since request completed
-      clearTimeout(timeoutId);
-
-      const data = await response.json();
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Debug] Response data:', data);
-      }
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Analysis failed');
-      }
-
-      // API now returns the new format directly
-      const result = data.data as AnalysisResultNew;
-
-      setAnalysisState({
-        status: 'success',
-        result: result,
-        error: null
-      });
-
-      // For Pro users, redirect to dashboard after a short delay
-      if (tier === 'pro') {
-        setTimeout(() => {
-          // Store the analysis result in sessionStorage for the dashboard
-          sessionStorage.setItem('latestAnalysis', JSON.stringify(result));
-          router.push('/dashboard');
-        }, 2000); // Show success briefly then redirect
-      } else {
-        // For free users, smooth scroll to results after emotional reveal completes
-        setTimeout(() => {
-          document.getElementById('results')?.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
+    if (useProgressiveEnhancement) {
+      // Use progressive enhancement
+      await performProgressiveAnalysis(url, {
+        onQuickResult: (quickResult) => {
+          // Convert quick result to full format for display
+          const convertedResult = convertQuickToFullFormat(quickResult);
+          setAnalysisState({
+            status: 'success',
+            result: convertedResult as AnalysisResultNew,
+            error: null
           });
-        }, 4500); // Scroll after reveal stage (4s) plus small buffer
-      }
+        },
+        onFullResult: (fullResult) => {
+          // Update with full analysis
+          const result = fullResult.data as AnalysisResultNew;
+          setAnalysisState({
+            status: 'success',
+            result: result,
+            error: null
+          });
 
-    } catch (error) {
-      // Clear timeout on error
-      clearTimeout(timeoutId);
-
-      if (process.env.NODE_ENV === 'development') {
-        console.error('[Debug] Error in handleAnalyze:', error);
-        console.error('[Debug] Error type:', error instanceof Error ? error.constructor.name : typeof error);
-        console.error('[Debug] Error message:', error instanceof Error ? error.message : String(error));
-      }
-
-      let errorMessage = 'Analysis failed';
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = 'The analysis is taking longer than expected. Please try again or check if the website is accessible.';
-        } else if (error.message.includes('fetch')) {
-          errorMessage = 'Unable to connect to the analysis service. Please check your internet connection and try again.';
-        } else {
-          errorMessage = error.message;
+          // Handle Pro user redirect
+          if (tier === 'pro') {
+            setTimeout(() => {
+              sessionStorage.setItem('latestAnalysis', JSON.stringify(result));
+              router.push('/dashboard');
+            }, 2000);
+          } else {
+            // Smooth scroll to results
+            setTimeout(() => {
+              document.getElementById('results')?.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }, 4500);
+          }
+        },
+        onError: (error, phase) => {
+          if (phase === 'full' && analysisState.status === 'success') {
+            // If quick analysis succeeded but full failed, keep showing quick results
+            console.warn('Full analysis failed, keeping quick results:', error);
+            return;
+          }
+          
+          setAnalysisState({
+            status: 'error',
+            result: null,
+            error: error.message
+          });
         }
-      }
-
-      setAnalysisState({
-        status: 'error',
-        result: null,
-        error: errorMessage
       });
+    } else {
+      // Fallback to direct API call
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log('[Debug] Request aborted due to timeout');
+      }, 15000);
+
+      try {
+        const requestBody = { url };
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Debug] Sending request to /api/analyze');
+          console.log('[Debug] Request body:', requestBody);
+        }
+
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Analysis failed');
+        }
+
+        const result = data.data as AnalysisResultNew;
+
+        setAnalysisState({
+          status: 'success',
+          result: result,
+          error: null
+        });
+
+        // Handle Pro user redirect
+        if (tier === 'pro') {
+          setTimeout(() => {
+            sessionStorage.setItem('latestAnalysis', JSON.stringify(result));
+            router.push('/dashboard');
+          }, 2000);
+        } else {
+          setTimeout(() => {
+            document.getElementById('results')?.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }, 4500);
+        }
+
+      } catch (error) {
+        clearTimeout(timeoutId);
+
+        let errorMessage = 'Analysis failed';
+        
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            errorMessage = 'The analysis is taking longer than expected. Please try again or check if the website is accessible.';
+          } else if (error.message.includes('fetch')) {
+            errorMessage = 'Unable to connect to the analysis service. Please check your internet connection and try again.';
+          } else {
+            errorMessage = error.message;
+          }
+        }
+
+        setAnalysisState({
+          status: 'error',
+          result: null,
+          error: errorMessage
+        });
+      }
     }
   };
 
@@ -228,8 +280,27 @@ function HomeContent() {
     });
   };
 
+  const handleEmailSubmit = async (email: string) => {
+    // In a real app, this would send to your email service
+    console.log('Email submitted:', email);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // You could store this in localStorage to track conversions
+    localStorage.setItem('emailCaptured', 'true');
+  };
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      {/* Exit Intent Popup */}
+      {showExitIntent && (
+        <ExitIntentPopup
+          onClose={() => setShowExitIntent(false)}
+          onEmailSubmit={handleEmailSubmit}
+        />
+      )}
+
       {/* Main Content */}
       <main className="animate-fade-in">
         {analysisState.status === 'idle' && comparisonState.status === 'idle' && (
@@ -249,8 +320,8 @@ function HomeContent() {
                 onSubmit={handleAnalyze}
                 onCompare={handleCompare}
                 isLoading={false}
-                comparisonMode={comparisonMode && features.showComparisonMode}
-                onComparisonModeChange={(value) => features.showComparisonMode && setComparisonMode(value)}
+                comparisonMode={comparisonMode}
+                onComparisonModeChange={features.showComparisonMode ? setComparisonMode : undefined}
               />
             </div>
           </div>
@@ -321,8 +392,13 @@ function HomeContent() {
                   
                   <PillarScoreDisplayV2 result={analysisState.result} />
                   
+                  {/* Pro Upgrade CTA for Free Tier */}
+                  {tier === 'free' && (
+                    <ProUpgradeCTA variant="banner" />
+                  )}
+                  
                   {/* Enhanced Recommendations Section - Feature flag based */}
-                  {features.showRecommendations && (
+                  {features.showRecommendations ? (
                   <div className="space-y-8">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -394,6 +470,49 @@ function HomeContent() {
                       </div>
                     )}
                   </div>
+                  ) : tier === 'free' && (
+                    /* Simple CTA for free tier when recommendations are hidden */
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 text-center"
+                    >
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4">
+                        <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="#3B82F6" fillOpacity="0.2" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round"/>
+                      </svg>
+                      <h3 className="text-2xl font-medium mb-3" style={{ color: 'var(--foreground)' }}>
+                        Ready to maximize your AI visibility?
+                      </h3>
+                      <p className="text-lg text-muted mb-6">
+                        Get AI-powered recommendations, track progress, and compare with competitors
+                      </p>
+                      <Link
+                        href="/pricing"
+                        className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        Upgrade to Pro →
+                      </Link>
+                    </motion.div>
+                  )}
+
+                  {/* Email Capture Form - Only for free tier */}
+                  {tier === 'free' && (
+                    <EmailCaptureForm 
+                      variant="cta"
+                      onSubmit={handleEmailSubmit}
+                    />
+                  )}
+
+                  {/* Share Buttons */}
+                  <ShareButtons 
+                    score={analysisState.result.aiSearchScore}
+                    url={analysisState.result.url}
+                    title={analysisState.result.websiteProfile?.title}
+                  />
+
+                  {/* Final Pro CTA for Free Tier */}
+                  {tier === 'free' && (
+                    <ProUpgradeCTA variant="card" />
                   )}
                 </div>
               </EmotionalResultsReveal>

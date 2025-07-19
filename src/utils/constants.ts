@@ -10,6 +10,68 @@ export const PILLARS = {
   RECENCY: 10,      // Unchanged
 } as const;
 
+// Dynamic scoring weights by page type
+// These weights adjust the importance of each pillar based on the type of page
+export const DYNAMIC_SCORING_WEIGHTS = {
+  homepage: {
+    RETRIEVAL: 35,     // +10 from base (speed critical for first impressions)
+    FACT_DENSITY: 15,  // -5 from base (navigation more important than deep content)
+    STRUCTURE: 25,     // -5 from base (site architecture crucial)
+    TRUST: 20,         // +5 from base (brand signals vital)
+    RECENCY: 5         // -5 from base (less critical for homepages)
+  },
+  article: {
+    RETRIEVAL: 25,     // Base weight (standard importance)
+    FACT_DENSITY: 35,  // +15 from base (citations and data crucial)
+    STRUCTURE: 20,     // -10 from base (content quality over structure)
+    TRUST: 10,         // -5 from base (content matters more than brand)
+    RECENCY: 10        // Base weight (freshness matters for articles)
+  },
+  blog: {
+    RETRIEVAL: 25,     // Base weight
+    FACT_DENSITY: 35,  // +15 from base (data and examples important)
+    STRUCTURE: 20,     // -10 from base
+    TRUST: 10,         // -5 from base
+    RECENCY: 10        // Base weight (blog freshness important)
+  },
+  product: {
+    RETRIEVAL: 25,     // Base weight
+    FACT_DENSITY: 30,  // +10 from base (specifications and features)
+    STRUCTURE: 25,     // -5 from base (product schema critical)
+    TRUST: 15,         // Base weight (trust signals important)
+    RECENCY: 5         // -5 from base (products don't need frequent updates)
+  },
+  documentation: {
+    RETRIEVAL: 20,     // -5 from base (docs can be slower)
+    FACT_DENSITY: 25,  // +5 from base (technical accuracy)
+    STRUCTURE: 35,     // +5 from base (organization is key)
+    TRUST: 15,         // Base weight
+    RECENCY: 5         // -5 from base (stability over freshness)
+  },
+  // Default weights for other page types
+  default: {
+    RETRIEVAL: 25,
+    FACT_DENSITY: 20,
+    STRUCTURE: 30,
+    TRUST: 15,
+    RECENCY: 10
+  }
+} as const;
+
+// Map page types to weight configurations
+export const PAGE_TYPE_WEIGHT_MAP: Record<string, keyof typeof DYNAMIC_SCORING_WEIGHTS> = {
+  homepage: 'homepage',
+  article: 'article',
+  blog: 'blog',
+  product: 'product',
+  documentation: 'documentation',
+  category: 'default',
+  about: 'default',
+  contact: 'default',
+  search: 'default',
+  general: 'default'
+} as const;
+
 // Minimum thresholds for scoring
 export const THRESHOLDS = {
   content: {

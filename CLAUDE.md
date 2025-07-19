@@ -1,97 +1,203 @@
-# AI Search Analyzer - Claude Code Instructions
+CLAUDE.md - Technical Implementation Guide
+<!-- CLAUDE CODE: This file contains HOW to build. For WHAT to build, see CLAUDE_CONTEXT.md -->
+🚨 CRITICAL: Start Here
+Read CLAUDE_CONTEXT.md first - it has current project state and what needs building
+Review STYLE_GUIDE.md for all visual design and UI decisions
+Update CLAUDE_CONTEXT.md regularly as you work (see update instructions below)
+Never modify design constants without team approval
+🎨 Design System
+Note: For complete visual design specifications, animations, and voice/tone guidelines, see STYLE_GUIDE.md
 
-## CRITICAL: Read These First
-1. Check CLAUDE_CONTEXT.md for current project state
-2. Review STYLE_GUIDE.md before any UI changes
+Quick Reference Colors
+css
+--background: #FFFFFF  /* Pure white */
+--primary: #3B82F6    /* Blue */
+--text: #111827       /* Dark gray */
+Voice & Tone (Summary)
+✅ Encouraging: "Room to grow! 🌱"
+❌ Critical: "Poor performance"
+✅ Simple: "Your site loads quickly"
+❌ Technical: "TTFB metrics suboptimal"
+See STYLE_GUIDE.md for complete guidelines including:
 
-## Design Constants (NEVER CHANGE)
-- Background: ALWAYS white (#FFFFFF) - no dark themes
-- Primary: Blue (#3B82F6) 
-- Text: Dark gray (#111827)
-- Style: Clean, minimalist, encouraging
+Full color system with semantic colors
+Score-based color coding
+Typography specifications
+Animation timings and principles
+Component patterns
+🛠️ Development Workflow
+Starting Work
+bash
+# 1. Read current state
+cat CLAUDE_CONTEXT.md  # Understand what needs building
 
-## Voice & Tone Rules
-- Encouraging, not critical ("Room to grow! 🌱" not "Poor performance")
-- Simple, not technical (avoid jargon)
-- Personal, not corporate
-- Celebrate improvements
+# 2. Create checkpoint
+git add . && git commit -m "chore: checkpoint before [feature]"
 
-## Development Workflow
+# 3. Start dev server
+npm run dev
 
-### Before Starting ANY Feature
-1. Create a commit: `git add . && git commit -m "chore: checkpoint before [feature name]"`
-2. Start dev server: `npm run dev` (keep running in another terminal)
-3. Open browser to http://localhost:3000
-4. Read current state in CLAUDE_CONTEXT.md
+# 4. Open browser
+http://localhost:3000       # Free tier
+http://localhost:3000?tier=pro  # Pro tier (future)
 
-### While Building Features
-1. Test changes in browser as you go
-2. Check both ?tier=free and ?tier=pro views
-3. Verify mobile responsiveness at 375px width
-4. Use React DevTools to debug if needed
+# 5. Update CLAUDE_CONTEXT.md
+# - Set "Last Updated" to today
+# - Update "Now Working On" section
+While Coding
+<!-- CLAUDE CODE: Follow these patterns -->
+Component Structure
+tsx
+// ✅ Good - Consistent card pattern
+export default function FeatureName() {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      {/* Content */}
+    </div>
+  );
+}
 
-### Before Completing a Feature
-1. Write/update tests in __tests__ directory
-2. Run tests: `npm test`
-3. Verify no TypeScript errors: `npm run build`
-4. Check console for any errors/warnings
-5. Test the full user flow
-
-### Documentation Updates (REQUIRED)
-1. **CLAUDE_CONTEXT.md** - Add entry under "Recent Changes" with:
-   - Date (YYYY-MM-DD format)
-   - Version bump (e.g., v2.7.0)
-   - Clear description of what changed
-   - Any new limitations or known issues
-
-2. **CHANGELOG.md** - Add entry with:
-   - Version number
-   - Date
-   - Added/Changed/Fixed sections
-   - Breaking changes (if any)
-
-3. **README.md** - Update if:
-   - New features added
-   - Setup process changed
-   - Dependencies changed
-   - New environment variables added
-
-4. **Code Documentation**:
-   - Add JSDoc comments for new functions
-   - Update type definitions in types.ts
-   - Comment complex logic
-
-### Commit Standards
-- Make atomic commits (one feature/fix per commit)
-- Use conventional commits: feat:, fix:, chore:, docs:
-- Include all documentation updates in the commit
-- Commit before switching context with /compact
-- Never push directly to main without testing
-
-### Pre-Push Checklist
-- [ ] Dev server runs without errors
-- [ ] Feature works in browser (free & pro modes)
-- [ ] Tests pass (`npm test`)
-- [ ] Build succeeds (`npm run build`)
-- [ ] CLAUDE_CONTEXT.md updated
-- [ ] CHANGELOG.md updated
-- [ ] README.md updated (if needed)
-- [ ] No console errors
-- [ ] Mobile responsive
-
-### Version Numbering
-- Major (X.0.0): Breaking changes
-- Minor (x.X.0): New features
-- Patch (x.x.X): Bug fixes
-
-## Component Patterns
-```tsx
-// Card - always use this pattern
-<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-
-// Primary button - consistent styling
+// ❌ Bad - Inconsistent styling
+<div className="bg-gray-50 rounded-xl shadow-lg p-4">
+Button Patterns
+tsx
+// Primary CTA
 <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
 
-// Muted text
-<span className="text-gray-600">
+// Secondary
+<button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200">
+
+// Text button
+<button className="text-blue-600 hover:text-blue-700 underline">
+API Patterns
+typescript
+// ✅ Always validate URLs
+if (!isValidUrl(url)) {
+  return { error: "Invalid URL" };
+}
+
+// ✅ Generic error messages
+catch (error) {
+  console.error(error); // Log for debugging
+  return { error: "Unable to analyze website" };
+}
+
+// ✅ Rate limiting
+if (rateLimiter.isLimited(ip)) {
+  return { error: "Too many requests. Try again later." };
+}
+Testing Checklist
+<!-- CLAUDE CODE: Check these before marking feature complete -->
+ Works at 375px width (mobile)
+ No console errors
+ No TypeScript errors (npm run build)
+ Loading states show correctly
+ Error states handled gracefully
+ Free tier shows limited features (when applicable)
+📝 Documentation Updates
+<!-- CLAUDE CODE: Update these files when making changes -->
+1. CLAUDE_CONTEXT.md - Update Throughout Session
+At Session Start:
+Update "Last Updated" date
+Review "Current Sprint Focus"
+Check implementation progress
+While Working:
+Check off completed features in Implementation Progress
+Add issues to "Active Issues & Blockers" as found
+Update "Technical Status" with API integration details
+After Completing Features:
+Add entry to "Recent Changes Log" (newest at top)
+Update accuracy metrics if measured
+Move resolved issues to resolved section
+Before Session End:
+Update "Current Sprint Focus" with next priorities
+Note any blockers in "Blocked/Waiting"
+Final check that all progress is recorded
+2. CHANGELOG.md
+Add changes under [Unreleased] while working
+Follow Added/Changed/Fixed format
+Move to versioned section when releasing
+3. README.md - Only Update When:
+New user-facing features added
+Setup process changes
+Dependencies change
+Public API changes
+🏗️ Code Patterns
+File Structure
+typescript
+// 1. Imports (React first, then external, then local)
+import { useState } from 'react';
+import { ExternalLib } from 'external';
+import { localFunction } from '@/lib/local';
+
+// 2. Types/Interfaces
+interface Props {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+// 3. Component
+export default function ComponentName({ value, onChange }: Props) {
+  // 4. Hooks
+  const [state, setState] = useState('');
+  
+  // 5. Handlers
+  const handleClick = () => {
+    // logic
+  };
+  
+  // 6. Render
+  return <div>{/* JSX */}</div>;
+}
+Type Safety
+typescript
+// ✅ Always use strict types
+interface AnalysisResult {
+  score: number;
+  breakdown: Record<string, number>;
+}
+
+// ❌ Avoid any
+const result: any = getData();
+🚀 Deployment
+Pre-deployment Checklist
+ npm run build succeeds
+ No TypeScript errors
+ All tests pass
+ Documentation updated
+ Changelog updated
+Deployment Process
+bash
+# Automatic via GitHub
+git push origin main  # Deploys to Vercel
+🐛 Common Issues & Solutions
+<!-- CLAUDE CODE: Add solutions as you encounter issues -->
+Dev Server Issues
+bash
+# If styles not loading
+rm -rf .next && npm run dev
+
+# If port in use
+lsof -ti:3000 | xargs kill -9
+TypeScript Errors
+typescript
+// Missing types? Add to types.ts
+export interface NewType {
+  // definition
+}
+📋 Quick Reference
+Commands
+bash
+npm run dev      # Start dev server
+npm test         # Run tests
+npm run build    # Build for production
+npm run lint     # Check code quality
+File Locations
+/app              # Pages and API routes
+/components       # React components  
+/lib              # Business logic
+/utils            # Helper functions
+/public           # Static assets
+<!-- CLAUDE CODE: Add new patterns and learnings as you discover them -->
+Remember: This guide is for HOW to build. Check CLAUDE_CONTEXT.md for WHAT to build.
 

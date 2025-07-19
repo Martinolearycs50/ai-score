@@ -1,7 +1,20 @@
 // Types and interfaces for the AI Search Optimizer
 
 // Page type detection
-export type PageType = 'homepage' | 'article' | 'product' | 'category' | 'about' | 'contact' | 'documentation' | 'search' | 'general';
+export type PageType = 'homepage' | 'article' | 'product' | 'category' | 'about' | 'contact' | 'documentation' | 'search' | 'general' | 'blog';
+
+// Dynamic scoring configuration
+export interface DynamicScoringConfig {
+  pageType: PageType;
+  weights: {
+    RETRIEVAL: number;
+    FACT_DENSITY: number;
+    STRUCTURE: number;
+    TRUST: number;
+    RECENCY: number;
+  };
+  appliedWeights?: boolean; // Flag to indicate if dynamic weights were applied
+}
 
 // API Request
 export interface AnalysisRequest {

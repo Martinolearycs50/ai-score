@@ -1,448 +1,205 @@
-
 # CLAUDE_CONTEXT.md
 
-AI assistant context for AI Search Optimizer. This file contains stable architectural information + current state tracking.
+<!-- CLAUDE CODE: This file tracks project state. Update sections marked with comments -->
 
 ## 🎯 Project Overview
 
-**Product**: Web app that analyzes websites for AI search optimization (ChatGPT, Claude, Perplexity, Gemini)
-**Development**: 100% AI-driven using Claude Code Terminal in Cursor
-**Deployment**: Push to GitHub → Vercel auto-deploys
+**Product**: AI Search Score - Free website analyzer for AI/LLM visibility  
+**Purpose**: Help businesses understand if AI tools like ChatGPT, Claude, Perplexity, and Gemini will cite their content  
+**Business Model**: Free tier (current focus) → Pro tier at $29/month (future)  
+**Development**: 100% AI-driven using Claude Code Terminal in Cursor  
+**Deployment**: Push to GitHub → Vercel auto-deploys  
+**Last Updated**: 2025-01-19
 
-## ⚠️ Critical Design Truth
+## 📊 Current Product State
 
-**ACTUAL DESIGN**: Clean, minimalist white/blue theme
-- Background: White (#FFFFFF)  
-- Primary: Blue (#3B82F6)
-- Text: Dark gray (#111827)
+### What We're Building: Free Tier
+Automated webpage analysis that scores AI visibility across 5 pillars, with intelligent page type detection and actionable recommendations.
 
+### Scoring System (100 Points)
+1. **RETRIEVAL** - Speed & Access (page performance, robots.txt, sitemaps)
+2. **FACT_DENSITY** - Information Richness (statistics, entities, citations)
+3. **STRUCTURE** - Content Organization (headings, schema, FAQ sections)
+4. **TRUST** - Credibility Signals (HTTPS, author info, dates)
+5. **RECENCY** - Content Freshness (updates, current references)
 
-## 🏗️ Stable Architecture (Rarely Changes)
+### Dynamic Scoring by Page Type
+- **Homepage**: Prioritizes RETRIEVAL (35%) and STRUCTURE (25%)
+- **Blog/Article**: Prioritizes FACT_DENSITY (35%) and RETRIEVAL (25%)
+- **Product**: Balanced between FACT_DENSITY (30%) and RETRIEVAL/STRUCTURE (25% each)
 
-### Tech Stack
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
-- **State**: React hooks
-- **Deployment**: Vercel via GitHub
+## 🔄 User Experience Flow
 
-### Directory Structure
+### Free Tier Journey
+1. **Landing**: "Is Your Website Visible to AI Search?" with URL input
+2. **Analysis**: 30-second process with progress indicators and fun facts
+3. **Results**: Score breakdown, page type detection, all issues and recommendations
+4. **Conversion**: Locked features prompt Pro upgrade
+
+### Key Free Tier Features
+- ✅ Instant analysis with progressive enhancement
+- ✅ Page type auto-detection with manual override
+- ✅ Visual score breakdown across 5 pillars
+- ✅ All issues and recommendations shown
+- ✅ No signup required
+- ❌ No historical tracking
+- ❌ No competitor comparison
+- ❌ No AI-optimized recommendations
+
+## 📋 Implementation Progress
+
+<!-- CLAUDE CODE: Check off completed items as you build them -->
+
+### Free Tier Build Checklist
+
+#### Core Analysis
+- [x] Basic 5-pillar scoring system
+- [x] Page type detection (homepage/blog/product)
+- [x] Dynamic weight adjustment by page type
+- [x] Content extraction and parsing
+
+#### API Integrations
+- [x] Chrome UX Report API setup
+- [x] Cloudflare Worker deployment (created, needs deployment)
+- [x] Progressive enhancement flow
+- [x] Error handling for API failures
+
+#### User Interface
+- [x] Landing page with URL input
+- [x] Loading animation with fun facts
+- [x] Score display with visual breakdown
+- [x] Page type selector dropdown
+- [x] Recommendation cards
+
+#### Conversion Features
+- [x] Pro upgrade CTAs
+- [x] Exit intent popup
+- [x] Share buttons
+- [x] Email capture form
+
+## 🛠️ Technical Status
+
+<!-- CLAUDE CODE: Update as you implement -->
+
+### APIs & Services
 ```
-src/
-├── app/
-│   ├── page.tsx              # Homepage with comparison mode
-│   ├── layout.tsx            # Root layout
-│   └── api/analyze/route.ts  # Analysis endpoint
-│
-├── components/               # UI components
-│   ├── UrlForm.tsx          # URL input (single/comparison modes)
-│   ├── ComparisonView.tsx   # Side-by-side comparison display (enhanced)
-│   ├── ScoreDifference.tsx  # Visual score difference indicators
-│   ├── PillarScoreDisplay.tsx # Score display (normal/compact)
-│   ├── EmotionalResultsReveal.tsx # Animated score reveal
-│   ├── EmotionalComparisonReveal.tsx # VS battle animation
-│   ├── FriendlyRecommendationCard.tsx # Gamified recommendations
-│   ├── ScorePotentialPreview.tsx # Score improvement preview
-│   └── WebsiteProfileCard.tsx   # Displays website metadata
-│
-├── lib/
-│   ├── analyzer-new.ts      # Core AiSearchAnalyzer class
-│   ├── scorer-new.ts        # 5-pillar scoring logic
-│   ├── contentExtractor.ts  # Extracts and analyzes page content (enhanced with business detection)
-│   ├── dynamicRecommendations.ts # Generates content-aware recommendations
-│   ├── recommendations.ts   # Recommendation templates and logic
-│   ├── businessPersonas.ts  # Business type profiles and characteristics
-│   ├── narrativeEngine.ts   # Personalized story arc generation
-│   └── types.ts             # TypeScript definitions
-│
-└── utils/                   # Helpers
-```
+Chrome UX Report API:
+├── Status: [x] Complete
+├── API Key: [x] Not needed (free public API)
+└── Integration Notes: Fully integrated in src/lib/chromeUxReport.ts
 
-### Scoring System (100 points total)
-```
-1. RETRIEVAL (30 pts)
-   - Page speed, robots.txt, sitemaps, paywall detection
-   
-2. FACT_DENSITY (25 pts)
-   - Statistics, entities, citations, data quality
-   
-3. STRUCTURE (20 pts)
-   - Headings, semantic HTML, structured data
-   
-4. TRUST (15 pts)
-   - Author info, dates, credibility signals
-   
-5. RECENCY (10 pts)
-   - Last modified, content freshness
-```
-
-### API Contract
-```typescript
-// POST /api/analyze
-Request: { url: string }
-Response: {
-  success: boolean
-  data?: {
-    aiSearchScore: number
-    scoringResult: {
-      pillars: PillarResults
-      recommendations: Recommendation[]
-    }
-    websiteProfile?: WebsiteProfile
-    extractedContent?: ExtractedContent
-  }
-  error?: string
-}
-```
-
-## 📋 Current State (v2.9.4 - UI/UX Enhancements Complete)
-
-### MVP Features Completed
-- ✅ 5-Pillar AI Scoring System (RETRIEVAL, FACT_DENSITY, STRUCTURE, TRUST, RECENCY)
-- ✅ Dynamic content-aware recommendations
-- ✅ Page type detection (8 types supported)
-- ✅ Website comparison mode
-- ✅ Emotional UI with animations
-- ✅ Comprehensive error handling
-- ✅ Full test coverage
-- ✅ Production deployment on Vercel
-- ✅ Freemium tier system with pricing page
-- ✅ Business type detection and personas (Phase 1)
-- ✅ Personalized narrative engine
-- ✅ Stable development server with nodemon
-
-### Known Limitations
-| Issue | Impact | Workaround |
-|-------|--------|------------|
-| CORS errors | Some sites block analysis | Server-side fetching |
-| No persistence | Results lost on refresh | MVP scope limitation |
-| Rate limit | 10 req/hour per IP | In-memory only |
-| Single page | Analyzes one page at a time | By design for accuracy |
-
-## 🔧 Code Standards (Stable Patterns)
-
-### TypeScript
-```typescript
-// Always use strict types
-interface Props {
-  value: string;  // Required
-  optional?: number;  // Optional
-}
-
-// Explicit return types
-function calculate(x: number): number {
-  return x * 2;
-}
+Cloudflare Worker:
+├── Status: [x] Created (awaiting deployment)
+├── Deployment: [x] Local / [ ] Deployed
+└── Worker URL: Set NEXT_PUBLIC_WORKER_URL after deployment
 ```
 
-### Error Handling
-```typescript
-try {
-  // Attempt operation
-} catch (error) {
-  // User-friendly message
-  return { 
-    success: false, 
-    error: "Human readable explanation" 
-  };
-}
+### Accuracy Metrics
+```
+Current Performance:
+├── Client-side accuracy: ~75% (Target: ~70%) ✓
+├── API-enhanced accuracy: ~85% (Target: ~90%) 
+├── Analysis time: ~20s (Target: <30s) ✓
+└── Error rate: <3% (Target: <5%) ✓
 ```
 
-### Git Commits
-```
-feat: Add new feature
-fix: Fix bug
-docs: Update documentation
-style: Format code
-refactor: Restructure code
-```
+## 📝 Recent Changes Log
 
-## 📝 Current State Tracking
+<!-- CLAUDE CODE: Add new entries at top, keep format consistent -->
 
-### Recent Changes (Claude Code: Update This!)
-<!-- Add new entries at top with date -->
-- 2025-07-18: UI/UX improvements with professional design and enhanced user experience - v2.9.4
-  - Reduced vertical spacing from pt-24 to pt-12/pt-16 for better above-fold visibility
-  - Expanded container width from max-w-4xl to max-w-6xl for better desktop utilization
-  - Implemented visual meter/gauge for free tier score display using SVG circular progress
-  - Replaced all emoji icons with professional SVG alternatives throughout the application
-  - Refined comparison mode with sophisticated winner highlighting and gradient backgrounds
-  - Optimized animation timing from 13s to 8.5s total (1.5s suspense, 2.5s reveal, 4.5s details)
-  - Added subtle background colors (bg-gray-50/50) for better visual grouping
-  - Created vercel.json for production timeout configuration
-  - All changes focused on Silicon Valley-level professional UX design
-- 2025-07-18: Complete Phase 1 Pro tier enhancements with business recognition - v2.9.3
-  - Enhanced ContentExtractor with business type detection and competitor extraction
-  - Created businessPersonas.ts with 8 business type profiles (payment, ecommerce, blog, news, documentation, corporate, educational, other)
-  - Built narrativeEngine.ts for personalized story arc generation based on business type and score
-  - Fixed root layout 'use client' issue by creating ClientWrapper component
-  - Fixed Pro tier activation from pricing page - now properly redirects to dashboard with ?tier=pro
-  - Implemented nodemon for stable development server with auto-restart capability
-  - Added comprehensive error boundaries and better error handling
-  - Phase 1 of Pro tier differentiation is complete with personalization foundation in place
-- 2025-07-18: Optimized Pricing Page for Above-Fold Visibility - v2.9.2
-  - Compressed hero section padding (pt-24 pb-20 → pt-16 pb-6) saving ~48px
-  - Reduced title size (text-4xl → text-3xl) and margins for tighter layout
-  - Moved trust signals below pricing cards instead of between hero and cards
-  - Reduced pricing section padding (py-20 → py-8) saving ~48px  
-  - Added trust badges directly on Pro card footer
-  - Added subtle background gradient for visual flow
-  - Total vertical space saved: ~120px, ensuring pricing visible on standard laptops
-  - Professional Silicon Valley SaaS design approach
-- 2025-07-17: Fixed Pro Tier Access and Identified Enhancement Needs - v2.9.1
-  - Fixed Pro tier navigation from pricing page (now uses window.location.href)
-  - Added TierDebug component for development (shows current tier and features)
-  - Added comprehensive logging to TierContext and useTier hooks
-  - Created extensive tier system tests (src/__tests__/tierSystem.test.tsx)
-  - Fixed TierContext to properly read URL parameters on navigation
-  - Moved TierProvider to root layout for app-wide access
-  - Made Navigation tier-aware (hides "Upgrade to Pro" for pro users)
-  - Updated pricing page content (removed false claims, changed SEO to AI search)
-  - **IDENTIFIED ISSUES**:
-    - Pro tier needs more "wow factor" - currently too similar to free tier
-    - Comparison mode should be Pro-only (currently available in free tier)
-    - Need AI integrations (OpenAI/Anthropic) for intelligent insights
-    - Need better visual differentiation between tiers
-    - Monthly usage limits not enforced (5 for free, 30 for pro)
-- 2025-01-17: Implemented Sophisticated SaaS Pricing Page - v2.9.0
-  - Added 3-tier pricing structure: Free, Pro, and Consultation (custom pricing)
-  - Created dedicated pricing page at /pricing route with conversion-focused design
-  - Built pricing components: PricingCard, FeatureComparisonTable, TrustSignals, ValuePropositions, FAQAccordion
-  - Implemented behavioral economics principles: anchoring, social proof, loss aversion
-  - Added responsive design with smooth framer-motion animations
-  - Created global navigation header with pricing link
-  - Fixed TypeScript build errors in narrativeEngine.ts (pillarScores property)
-  - Updated tier configuration to include consultation tier
-  - No testimonials included as this is a new product
-- 2025-07-17: Re-enabled AI Battle Comparison for Free Tier - v2.8.0
-  - Enabled comparison mode for free tier users (showComparisonMode: true)
-  - Modified ComparisonView to respect tier limitations
-  - Free tier shows basic scores and winner announcement only
-  - Pro tier retains detailed pillar breakdowns and quick wins
-  - Added upgrade CTA to comparison view for free users
-  - Maintained existing battle theme with crown emoji and animations
-  - Feature creates viral potential with fun AI battle comparisons
-- 2025-07-17: Completed Tier Architecture Refactoring - v2.7.1
-  - Implemented feature flag architecture replacing scattered tier conditionals
-  - Created tierConfig.ts with centralized configuration (single source of truth)
-  - Created TierContext.tsx for React state management with URL parameter reading
-  - Created useTier.ts custom hook for type-safe feature access
-  - Migrated all components to use feature flags instead of tier prop passing
-  - Replaced PillarScoreDisplay with PillarScoreDisplayV2 (feature-based)
-  - Updated page.tsx to use feature flags for WebsiteProfile, Recommendations, and Comparison mode
-  - Removed old tier state management from HomeContent component
-  - Added comprehensive tests for tier configuration integrity
-  - This completes the architecture refactoring requested by the user
-- 2025-07-17: Implemented Freemium Model with Proper Tier Separation - v2.7.0
-  - Created performanceRatings.ts with type definitions and rating converter functions
-  - Added tier parameter support (?tier=free or ?tier=pro) to the application
-  - Free tier now shows ONLY: overall score, simple ratings, and upgrade CTA
-  - Free tier HIDES: WebsiteProfileCard, all recommendations, detailed breakdowns
-  - Pro tier retains full detailed analysis and recommendations
-  - Changed default tier to 'free' (was 'pro')
-  - Fixed styling issues: white background, proper button colors, clean cards
-  - Added comprehensive tests for the rating converter
-  - No changes to the analysis engine - purely display layer changes
-- 2025-07-17: MVP Release v2.5.0 - Complete AI Search Analyzer
-  - Fixed content extraction with proper text spacing and UI element filtering
-  - Fixed CSS styling issues (PostCSS configuration for Tailwind v4)
-  - Improved title extraction to remove embedded navigation text
-  - Added comprehensive MVP_DOCUMENTATION.md
-  - Updated all documentation to reflect completed features
-  - Cleaned up debug files and prepared for production release
-- 2025-07-17: Enhanced recommendations with page-type awareness - v2.6.0
-  - Added page-type context to DynamicRecommendationGenerator (prefix/suffix messages)
-  - Created pageTypeRecommendations.ts with priority scores and custom messages per page type
-  - Modified recommendation generation to filter irrelevant metrics by page type
-  - Added page-type priority multipliers for better recommendation sorting
-  - Added visual page type indicators (icons) to recommendation cards
-  - Recommendations now provide contextual advice based on whether it's a homepage, article, product page, etc.
-- 2025-07-17: Implemented page type detection - v2.5.0
-  - Added PageType type definition (homepage, article, product, category, about, contact, documentation, search, general)
-  - Created detectPageType() method in ContentExtractor with URL pattern and DOM analysis
-  - Integrated page type detection through analyzer-new.ts pipeline
-  - Updated WebsiteProfileCard to display page type with icons and clear messaging
-  - Updated homepage text: "AI Search Score" with subtitle "Want AI tools like ChatGPT to mention your site? This shows you how."
-  - Added clarification about single-page analysis throughout UI
-  - Fixed CSS button positioning issue (right-4, height 40px, font-size 0.875rem)
-- 2025-07-16 (evening): Implemented content-aware recommendations - v2.4.0
-  - Created ContentExtractor module to analyze page content and detect business type
-  - Built DynamicRecommendationGenerator for personalized recommendations
-  - Recommendations now use actual content from analyzed pages (before/after examples)
-  - Added comprehensive error handling for universal URL support
-  - Fixed TypeScript compatibility issues with Set operations
-  - Added extractedContent to API response structure
-  - Successfully tested with various websites (TAP Company, Stripe, GitHub, etc.)
-- 2025-07-16 (evening): Enhanced user experience with emotional results - v2.3.0
-  - Added EmotionalResultsReveal component with 4-stage animation flow
-  - Created FriendlyRecommendationCard with gamified experience
-  - Extended timing: reveal 6s, details 5s (was too fast to read)
-  - All scores now show encouraging messages and particle effects
-  - Fixed TypeScript build error preventing Vercel deployment
-- 2025-07-16 (evening): Enhanced comparison mode
-  - Added EmotionalComparisonReveal with VS battle theme
-  - Transformed ComparisonView with friendly messaging and emojis
-  - Added "Quick Wins" section for improvement tips
-  - Crown emoji celebration for winning site
-- 2025-07-16: Implemented 2025 AI search optimization enhancements
-  - Updated scoring weights: STRUCTURE now 30pts (most important!)
-  - Added listicleFormat check (listicles get 32.5% of AI citations)
-  - Added directAnswers, llmsTxtFile, semanticUrl checks
-  - Dynamic recommendations with actual page content examples
-  - Version 2.2.0 release
-- 2025-07-16: Added website comparison feature
-  - Compare two websites side-by-side with visual indicators
-  - New ComparisonView component for detailed comparison display
-  - ScoreDifference component shows score differences with arrows
-  - Responsive design: side-by-side on desktop, stacked on mobile
-  - Fixed pillar display issues in comparison view
-- 2025-07-15: Fixed local development server setup
-  - Resolved CSS import issues by switching to Next.js font optimization for Inter font
-  - Added development-only debug logging to frontend and API
-  - Created test tools and documentation for debugging
-  - Fixed Chrome extension interference issues
-- 2025-07-15: Updated scoring system to 5-pillar AI-first approach
-  - New pillars: RETRIEVAL, FACT_DENSITY, STRUCTURE, TRUST, RECENCY
-  - Changed from totalScore to aiSearchScore in API response
-- 2024-01-XX: Initial MVP launched
-- [Claude Code adds entries here when making significant changes]
+### 2025-01-19: Restored Visual Pillar Breakdown for Free Tier
+- **What**: Re-enabled visual pillar breakdown while keeping recommendations hidden
+- **Why**: User wanted to keep the high-level visual breakdown (progress bars and scores)
+- **Impact**: Free tier shows visual pillar breakdown but no detailed recommendations
 
-### Next Phase: Freemium/Paid Version
-<!-- This MVP is complete. Future development will focus on commercial features -->
-- The MVP is feature-complete and production-ready
-- All core functionality has been implemented and tested
-- Documentation is comprehensive
-- Ready for transition to freemium/paid model development
+### 2025-01-19: Simplified Free Tier Display
+- **What**: Removed detailed recommendations and simplified comparison view for free tier
+- **Why**: Free tier was showing too much detail, not following high-level results requirement
+- **Impact**: Free tier now shows only scores and basic comparison, with clear upgrade CTAs
 
-## 🚀 Working Instructions
+### 2025-01-19: Fixed Website Comparison for Free Tier
+- **What**: Enabled website comparison (battle mode) for free tier users
+- **Why**: Comparison feature was incorrectly restricted to Pro tier only
+- **Impact**: Free users can now compare two websites with VS animations and crown for winner
 
-### Starting a Session
-```
-"Read CLAUDE_CONTEXT.md first.
-Check recent commits for latest changes.
-Then let's work on [task]"
-```
+### 2025-01-19: Progressive Enhancement & Conversion Features
+- **What**: Implemented Cloudflare Worker, progressive enhancement, and all conversion features
+- **Why**: To improve initial load performance and increase free-to-pro conversion rates
+- **Impact**: Users now get instant results via Worker, multiple CTAs and email capture increase conversions
 
-### When Adding Features
-1. Follow existing patterns
-2. Keep changes small
-3. Test thoroughly
-4. Update "Recent Changes" if significant
-5. Update "Active TODOs" if relevant
+### 2025-01-19: Project Assessment & Planning
+- **What**: Comprehensive project state assessment and implementation planning
+- **Why**: To identify missing features and create actionable development plan
+- **Impact**: Identified ~85% completion, prioritized Cloudflare Worker and conversion features
 
-### Important Reminders
-- Design is clean/white (NOT dark)
-- All development through Claude Code
-- Push to main = production deploy
-- Keep user language non-technical
+### 2025-01-XX: [Feature/Change Name]
+- **What**: [Description of change]
+- **Why**: [Reason for change]
+- **Impact**: [Any effects on other parts]
 
-## 🔍 Quick Exploration Commands
+<!-- Previous entries below this line -->
 
-```bash
-# See what changed recently
-git log --oneline -10
+## 🐛 Active Issues & Blockers
 
-# Find existing patterns
-grep -r "pattern" .
+<!-- CLAUDE CODE: Add issues as found, move to resolved when fixed -->
 
-# Check current dependencies
-cat package.json
+### Current Issues
+- [ ] [Issue description] - Priority: High/Medium/Low
+- [ ] [Issue description] - Priority: High/Medium/Low
 
-# Run dev server
-npm run dev
-```
+### Resolved Issues
+- [x] [Issue description] - Fixed: [Date/Commit]
+
+## 🎯 Current Sprint Focus
+
+<!-- CLAUDE CODE: Update this section at start of each work session -->
+
+### Now Working On
+- ✅ All features completed and tested
+
+### Next Up
+- Deploy Cloudflare Worker to production
+- Monitor conversion rates from new features
+- A/B test different CTA placements
+- Gather user feedback on free tier experience
+
+### Blocked/Waiting
+- Cloudflare Worker deployment (needs production Cloudflare account setup)
+
+## ⚠️ Important Reminders
+
+<!-- CLAUDE CODE: Do not modify - these are stable requirements -->
+
+- **Design**: Clean white/blue theme (NOT dark mode)
+- **Accuracy**: Two-phase approach (instant → enhanced)
+- **No Auth**: Free tier requires no signup
+- **Pro Features**: Clearly marked with lock icons
+- **All Issues Shown**: Free tier shows complete analysis
+
+## 🚀 Future: Pro Tier ($29/month)
+
+<!-- CLAUDE CODE: Do not modify - for reference only -->
+
+**Not in current scope**. Pro tier will add:
+- AI-powered content optimization
+- Side-by-side before/after comparison
+- Detailed implementation guides
+- Export functionality
+- 30 monthly scans
+- Historical tracking
+
+**Current Focus**: Ship exceptional free tier experience first.
 
 ---
-**Maintenance**: Claude Code should update the "Current State Tracking" section when making significant changes. Stable architecture sections rarely need updates.
 
-🔒 Security Requirements
+<!-- CLAUDE CODE INSTRUCTIONS:
+1. Update "Last Updated" date at top of file
+2. Check off items in "Implementation Progress" as completed
+3. Add entries to "Recent Changes Log" (newest first)
+4. Update "Technical Status" with API details
+5. Track issues in "Active Issues & Blockers"
+6. Keep "Current Sprint Focus" updated with what you're working on
+7. DO NOT modify sections marked "Do not modify"
+-->
 
-Critical Security Rules
-
-Never expose API keys or secrets in frontend code
-Validate all URLs before fetching (prevent SSRF attacks)
-Sanitize error messages shown to users (no stack traces)
-Rate limit all API endpoints (currently 10 req/hour)
-Never trust user input - always validate and sanitize
-Use HTTPS only for external requests
-
-Current Security Measures
-
-✅ URL validation before analysis
-✅ Rate limiting on /api/analyze
-✅ No database = no SQL injection risk
-✅ No user accounts = no auth vulnerabilities
-✅ TypeScript = type safety
-
-Security Checklist for New Features
-
- Input validation on all user data
- Error messages don't leak system info
- No sensitive data in client-side code
- Dependencies are up-to-date
- CORS configured properly
- XSS prevention (React handles most)
-
-Specific Vulnerabilities to Avoid
-SSRF (Server-Side Request Forgery)
-typescript// BAD - allows internal network scanning
-const response = await fetch(userProvidedUrl);
-
-// GOOD - validate URL first
-function isValidUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    // Only allow http/https
-    if (!['http:', 'https:'].includes(parsed.protocol)) return false;
-    // Block localhost, private IPs, etc
-    if (isPrivateIP(parsed.hostname)) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
-Information Disclosure
-typescript// BAD - exposes internal errors
-catch (error) {
-  return { error: error.stack };  // Never do this!
-}
-
-// GOOD - generic user message
-catch (error) {
-  console.error(error);  // Log for debugging
-  return { error: "Unable to analyze this website" };
-}
-
-CopyPublish🔒 Security Requirements
-Critical Rules
-
-Never expose API keys in frontend
-Validate URLs before fetching (prevent SSRF)
-Sanitize error messages (no stack traces)
-Rate limit endpoints (10 req/hour)
-Validate all user input
-HTTPS only for external requests
-
-Current Measures
-✅ URL validation 
-✅ Rate limiting 
-✅ TypeScript safety
-✅ No database (no SQL injection) 
-✅ No auth (no auth vulnerabilities)
-
-For New Features
-
-Validate inputs
-Generic error messages
-No sensitive client-side data
-Keep dependencies updated
-
-Key Patterns
-typescript// URL validation
-if (!['http:', 'https:'].includes(parsed.protocol)) return false;
-
-// Error handling
-catch (error) {
-  console.error(error);  // Log privately
-  return { error: "Unable to analyze" };  // Generic message
-}
+**For technical implementation details, code patterns, and architecture decisions, see CLAUDE.md**

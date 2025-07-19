@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 import PillarScoreDisplay from './PillarScoreDisplay';
 import ScoreDifference from './ScoreDifference';
@@ -35,7 +36,7 @@ const PILLAR_INFO: Record<string, { name: string; tip: string }> = {
 };
 
 export default function ComparisonView({ results }: ComparisonViewProps) {
-  const { features } = useTier();
+  const { features, tier } = useTier();
   const [result1, result2] = results;
   
   // Calculate score differences
@@ -88,6 +89,20 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
            Math.abs(totalScoreDiff) > 20 ? "A significant gap that can be closed with targeted improvements" :
            "Small optimizations could change the rankings"}
         </p>
+        
+        {/* Different page type notice */}
+        {result1.extractedContent?.pageType && result2.extractedContent?.pageType && 
+         result1.extractedContent.pageType !== result2.extractedContent.pageType && (
+          <motion.p 
+            className="text-sm text-amber-600 mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Note: Comparing different page types ({result1.extractedContent.pageType} vs {result2.extractedContent.pageType}). 
+            Scoring weights are adjusted for each page type.
+          </motion.p>
+        )}
       </motion.div>
 
       {/* Side-by-side comparison */}
@@ -111,6 +126,11 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                 {result1.websiteProfile?.title || result1.pageTitle || new URL(result1.url).hostname}
               </h3>
               <p className="text-sm text-muted truncate">{new URL(result1.url).hostname}</p>
+              {result1.extractedContent?.pageType && (
+                <p className="text-xs text-muted mt-1">
+                  {result1.extractedContent.pageType.charAt(0).toUpperCase() + result1.extractedContent.pageType.slice(1)} page
+                </p>
+              )}
             </div>
             {totalScoreDiff > 0 && (
               <div className="flex items-center gap-2">
@@ -123,7 +143,8 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
             )}
           </div>
           
-          <div className="relative">
+          {/* Pillar breakdown for comparison */}
+          <div className="mt-4">
             <PillarScoreDisplay result={result1} compact />
           </div>
         </motion.div>
@@ -147,6 +168,11 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
                 {result2.websiteProfile?.title || result2.pageTitle || new URL(result2.url).hostname}
               </h3>
               <p className="text-sm text-muted truncate">{new URL(result2.url).hostname}</p>
+              {result2.extractedContent?.pageType && (
+                <p className="text-xs text-muted mt-1">
+                  {result2.extractedContent.pageType.charAt(0).toUpperCase() + result2.extractedContent.pageType.slice(1)} page
+                </p>
+              )}
             </div>
             {totalScoreDiff < 0 && (
               <div className="flex items-center gap-2">
@@ -159,14 +185,15 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
             )}
           </div>
           
-          <div className="relative">
+          {/* Pillar breakdown for comparison */}
+          <div className="mt-4">
             <PillarScoreDisplay result={result2} compact />
           </div>
         </motion.div>
       </div>
 
       {/* Detailed pillar comparison - only for pro users */}
-      {features.showPillarBreakdown && (
+      {tier === 'pro' && features.showPillarBreakdown && (
       <motion.div 
         className="mt-12"
         initial={{ opacity: 0 }}
@@ -298,6 +325,7 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
       </motion.div>
       )}
 
+
       {/* Upgrade CTA for free tier users */}
       {features.showUpgradeCTA && (
         <motion.div 
@@ -316,12 +344,12 @@ export default function ComparisonView({ results }: ComparisonViewProps) {
           <p className="text-lg text-muted mb-6">
             Unlock detailed pillar breakdowns, strategic recommendations, and quick wins to dominate the AI search game!
           </p>
-          <button 
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            onClick={() => window.location.href = '/pricing'}
+          <Link 
+            href="/pricing"
+            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             Upgrade to Pro →
-          </button>
+          </Link>
         </motion.div>
       )}
     </div>
