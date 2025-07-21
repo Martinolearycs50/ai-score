@@ -45,3 +45,6 @@ dev-start.log
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backup files
+*.backup
