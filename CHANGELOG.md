@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Enhanced conversion optimization with multiple touchpoints
 - Improved user experience with instant preliminary results
+- Updated homepage headline to "Is Your Website Visible to AI Search?" for clearer value proposition
+- Reduced Pro tier pricing from $39/month to $29/month for better accessibility
+- Increased rate limit from 10 to 50 requests per hour per IP for improved user experience
+- Complete design system overhaul with new professional color palette:
+  - Deep Indigo (#2D2A7F) for brand identity
+  - Electric Blue (#3F8CFF) for primary CTAs
+  - Cool Gray (#F4F6FA) background for better visual hierarchy
+  - Updated success (Mint Green), warning (Amber), and error (Red) states
+- Updated logo throughout application with new AI Search Score branding
 
 ### Fixed
 - Complete rewrite of main content detection algorithm

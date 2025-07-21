@@ -2,7 +2,6 @@
  * E2E test for AI Search analysis flow
  * Tests the complete user journey from URL input to results display
  */
-
 import { AiSearchAnalyzer } from '@/lib/analyzer-new';
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
 
@@ -142,9 +141,9 @@ describe('AI Search Analysis E2E Flow', () => {
       // Assertions
       expect(result.aiSearchScore).toBeLessThan(50); // Should score low
       expect(result.scoringResult.recommendations.length).toBeGreaterThan(10); // Many recommendations
-      
+
       // Check for specific issues
-      const recommendationMetrics = result.scoringResult.recommendations.map(r => r.metric);
+      const recommendationMetrics = result.scoringResult.recommendations.map((r) => r.metric);
       expect(recommendationMetrics).toContain('paywall'); // Should detect paywall
       expect(recommendationMetrics).toContain('uniqueStats'); // Should detect lack of facts
       expect(recommendationMetrics).toContain('structuredData'); // Should detect missing schema
@@ -212,7 +211,7 @@ describe('AI Search Analysis E2E Flow', () => {
       const recommendations = result.scoringResult.recommendations;
 
       // Check recommendation structure
-      recommendations.forEach(rec => {
+      recommendations.forEach((rec) => {
         expect(rec.why).toBeTruthy();
         expect(rec.why.length).toBeLessThanOrEqual(100); // Concise why
         expect(rec.fix).toBeTruthy();

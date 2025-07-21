@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+
+import Button from '@/components/ui/Button';
 import { validateAndNormalizeUrl } from '@/utils/validators';
 
 interface UrlFormProps {
@@ -12,13 +14,13 @@ interface UrlFormProps {
   onComparisonModeChange?: (mode: boolean) => void;
 }
 
-export default function UrlForm({ 
-  onSubmit, 
+export default function UrlForm({
+  onSubmit,
   onCompare,
-  isLoading, 
+  isLoading,
   disabled = false,
   comparisonMode = false,
-  onComparisonModeChange
+  onComparisonModeChange,
 }: UrlFormProps) {
   const [url, setUrl] = useState('');
   const [url2, setUrl2] = useState('');
@@ -28,7 +30,7 @@ export default function UrlForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isLoading || disabled) {
       return;
     }
@@ -40,24 +42,24 @@ export default function UrlForm({
 
       const trimmedUrl1 = url.trim();
       const trimmedUrl2 = url2.trim();
-      
+
       const validation1 = validateAndNormalizeUrl(trimmedUrl1);
       const validation2 = validateAndNormalizeUrl(trimmedUrl2);
-      
+
       let hasError = false;
-      
+
       if (!validation1.isValid) {
         setError(validation1.error || 'Please enter a valid URL');
         hasError = true;
       }
-      
+
       if (!validation2.isValid) {
         setError2(validation2.error || 'Please enter a valid URL');
         hasError = true;
       }
-      
+
       if (hasError || !onCompare) return;
-      
+
       // Clear fields and submit
       setUrl('');
       setUrl2('');
@@ -68,7 +70,7 @@ export default function UrlForm({
 
       const trimmedUrl = url.trim();
       const validation = validateAndNormalizeUrl(trimmedUrl);
-      
+
       if (!validation.isValid) {
         setError(validation.error || 'Please enter a valid URL');
         return;
@@ -82,7 +84,7 @@ export default function UrlForm({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUrl(value);
-    
+
     if (error) {
       setError('');
     }
@@ -91,7 +93,7 @@ export default function UrlForm({
   const handleInputChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUrl2(value);
-    
+
     if (error2) {
       setError2('');
     }
@@ -108,11 +110,11 @@ export default function UrlForm({
     <div className="w-full">
       {/* Comparison mode toggle */}
       {onComparisonModeChange && (
-        <div className="flex justify-center mb-6">
+        <div className="mb-6 flex justify-center">
           <button
             type="button"
             onClick={() => onComparisonModeChange(!comparisonMode)}
-            className="text-sm text-muted hover:text-foreground transition-colors"
+            className="text-muted hover:text-foreground text-sm transition-colors"
           >
             {comparisonMode ? 'Single Analysis' : 'Compare Websites'} →
           </button>
@@ -131,9 +133,9 @@ export default function UrlForm({
               placeholder="Enter first website URL"
               disabled={isLoading || disabled}
               className="search-input"
-              style={{ 
+              style={{
                 color: 'var(--foreground)',
-                opacity: isLoading || disabled ? 0.5 : 1
+                opacity: isLoading || disabled ? 0.5 : 1,
               }}
               autoComplete="url"
               autoFocus
@@ -154,9 +156,9 @@ export default function UrlForm({
               placeholder="Enter second website URL"
               disabled={isLoading || disabled}
               className="search-input"
-              style={{ 
+              style={{
                 color: 'var(--foreground)',
-                opacity: isLoading || disabled ? 0.5 : 1
+                opacity: isLoading || disabled ? 0.5 : 1,
               }}
               autoComplete="url"
             />
@@ -167,26 +169,17 @@ export default function UrlForm({
             )}
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={isLoading || disabled || !url.trim() || !url2.trim()}
-            className="btn-primary w-full"
-            style={{
-              opacity: !url.trim() || !url2.trim() || isLoading || disabled ? 0.5 : 1,
-              cursor: !url.trim() || !url2.trim() || isLoading || disabled ? 'not-allowed' : 'pointer'
-            }}
+            variant="accent"
+            size="lg"
+            fullWidth
+            isLoading={isLoading}
           >
-            {isLoading ? (
-              <div className="animate-dots flex items-center justify-center gap-1">
-                <span>•</span>
-                <span>•</span>
-                <span>•</span>
-              </div>
-            ) : (
-              'Compare'
-            )}
-          </button>
+            Compare
+          </Button>
         </div>
       ) : (
         /* Single mode UI */
@@ -199,35 +192,25 @@ export default function UrlForm({
             placeholder="Enter website URL"
             disabled={isLoading || disabled}
             className="search-input pr-36"
-            style={{ 
+            style={{
               color: 'var(--foreground)',
-              opacity: isLoading || disabled ? 0.5 : 1
+              opacity: isLoading || disabled ? 0.5 : 1,
             }}
             autoComplete="url"
             autoFocus
           />
-          
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isLoading || disabled || !url.trim()}
-            className="btn-primary absolute right-4 top-1/2 -translate-y-1/2"
-            style={{
-              opacity: !url.trim() || isLoading || disabled ? 0.5 : 1,
-              cursor: !url.trim() || isLoading || disabled ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {isLoading ? (
-              <div className="animate-dots flex items-center gap-1">
-                <span>•</span>
-                <span>•</span>
-                <span>•</span>
-              </div>
-            ) : (
-              'Analyze'
-            )}
-          </button>
-
+          <div className="absolute top-1/2 right-4 -translate-y-1/2">
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading || disabled || !url.trim()}
+              variant="accent"
+              size="md"
+              isLoading={isLoading}
+            >
+              Analyze
+            </Button>
+          </div>
           {error && (
             <p className="mt-4 text-center text-sm" style={{ color: 'var(--error)' }}>
               {error}

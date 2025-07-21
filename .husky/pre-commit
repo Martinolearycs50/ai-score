@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+echo "🔍 Checking code formatting..."
+
+# Run lint-staged for formatting
+npm run format:staged
+
+if [ $? -ne 0 ]; then
+  echo "❌ Formatting check failed!"
+  exit 1
+fi
+
+echo "🧪 Running quick tests..."
+npm test -- --passWithNoTests --silent
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed!"
+  exit 1
+fi
+
+echo "✅ Pre-commit checks passed!"

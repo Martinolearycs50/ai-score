@@ -1,5 +1,5 @@
-import { DynamicRecommendationGenerator } from '../dynamicRecommendations';
 import type { ExtractedContent } from '../contentExtractor';
+import { DynamicRecommendationGenerator } from '../dynamicRecommendations';
 import type { RecommendationTemplate } from '../types';
 
 describe('DynamicRecommendationGenerator - Page Type Context', () => {
@@ -44,16 +44,18 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('homepage');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('structuredData', baseTemplate);
-      
+
       expect(result.why).toContain('As your homepage,');
-      expect(result.why).toContain('This helps AI understand your entire site\'s purpose and structure.');
+      expect(result.why).toContain(
+        "This helps AI understand your entire site's purpose and structure."
+      );
     });
 
     it('should add homepage-specific fix instructions', () => {
       const content = createMockContent('homepage');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('uniqueStats', baseTemplate);
-      
+
       expect(result.fix).toContain('For homepages, include company metrics');
       expect(result.fix).toContain('serving 10,000+ customers');
     });
@@ -64,7 +66,7 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('article');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('lastModified', baseTemplate);
-      
+
       expect(result.why).toContain('For blog content,');
       expect(result.why).toContain('This increases chances of being cited as a source by AI.');
     });
@@ -73,7 +75,7 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('article');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('uniqueStats', baseTemplate);
-      
+
       expect(result.fix).toContain('Include research data, survey results, or case study metrics');
     });
   });
@@ -83,7 +85,7 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('product');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('structuredData', baseTemplate);
-      
+
       expect(result.why).toContain('On product pages,');
       expect(result.why).toContain('This helps AI recommend your products in shopping queries.');
     });
@@ -92,8 +94,10 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('product');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('uniqueStats', baseTemplate);
-      
-      expect(result.fix).toContain('For products, add specifications like dimensions, weight, materials');
+
+      expect(result.fix).toContain(
+        'For products, add specifications like dimensions, weight, materials'
+      );
     });
   });
 
@@ -102,16 +106,18 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('documentation');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('directAnswers', baseTemplate);
-      
+
       expect(result.why).toContain('In documentation,');
-      expect(result.why).toContain('This makes your docs the go-to reference for AI coding assistance.');
+      expect(result.why).toContain(
+        'This makes your docs the go-to reference for AI coding assistance.'
+      );
     });
 
     it('should add documentation-specific fix instructions', () => {
       const content = createMockContent('documentation');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('structuredData', baseTemplate);
-      
+
       expect(result.fix).toContain('Use TechArticle or HowTo schema for technical content');
     });
   });
@@ -121,11 +127,11 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
       const content = createMockContent('general');
       const generator = new DynamicRecommendationGenerator(content);
       const result = generator.generateRecommendation('structuredData', baseTemplate);
-      
+
       // Should not have page-specific prefix
       expect(result.why).not.toContain('As your homepage,');
       expect(result.why).not.toContain('For blog content,');
-      
+
       // Should have generic suffix
       expect(result.why).toContain('This improves overall AI comprehension of your content.');
     });
@@ -135,7 +141,7 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
     it('should preserve existing template content while adding context', () => {
       const content = createMockContent('homepage');
       const generator = new DynamicRecommendationGenerator(content);
-      
+
       const customTemplate: RecommendationTemplate = {
         why: 'Critical for search visibility.',
         fix: 'Implement immediately.',
@@ -145,16 +151,18 @@ describe('DynamicRecommendationGenerator - Page Type Context', () => {
           after: '<main>New code</main>',
         },
       };
-      
+
       const result = generator.generateRecommendation('mainContent', customTemplate);
-      
+
       // Should contain both original and context
       expect(result.why).toContain('Critical for search visibility.');
       expect(result.why).toContain('As your homepage,');
-      
+
       expect(result.fix).toContain('Implement immediately.');
-      expect(result.fix).toContain('Ensure your value proposition and key services are inside <main> tags.');
-      
+      expect(result.fix).toContain(
+        'Ensure your value proposition and key services are inside <main> tags.'
+      );
+
       // Should preserve gain and example
       expect(result.gain).toBe(15);
       expect(result.example).toBeDefined();

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+const CHARACTERS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
 
 interface UseAnimatedTextOptions {
   duration?: number;
@@ -15,11 +16,7 @@ export function useAnimatedText(
   isActive: boolean,
   options: UseAnimatedTextOptions = {}
 ) {
-  const {
-    duration = 1000,
-    scrambleDuration = 500,
-    scrambleSpeed = 50,
-  } = options;
+  const { duration = 1000, scrambleDuration = 500, scrambleSpeed = 50 } = options;
 
   const [displayText, setDisplayText] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);

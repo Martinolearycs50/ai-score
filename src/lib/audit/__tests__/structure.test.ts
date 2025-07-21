@@ -1,11 +1,11 @@
 import { run } from '../structure';
-import { WELL_OPTIMIZED_HTML, POORLY_OPTIMIZED_HTML } from './fixtures';
+import { POORLY_OPTIMIZED_HTML, WELL_OPTIMIZED_HTML } from './fixtures';
 
 describe('Structure Audit Module', () => {
   describe('Well-optimized content', () => {
     it('should score well for properly structured content', async () => {
       const scores = await run(WELL_OPTIMIZED_HTML);
-      
+
       expect(scores.headingFrequency).toBe(5); // Good heading frequency
       expect(scores.headingDepth).toBe(5); // Proper depth (H1-H3)
       expect(scores.structuredData).toBe(5); // Has FAQPage schema
@@ -25,7 +25,7 @@ describe('Structure Audit Module', () => {
         </main></body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingFrequency).toBe(5);
     });
 
@@ -37,7 +37,7 @@ describe('Structure Audit Module', () => {
         </main></body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingFrequency).toBe(0);
     });
 
@@ -48,7 +48,7 @@ describe('Structure Audit Module', () => {
         </main></body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingFrequency).toBe(0);
     });
   });
@@ -63,13 +63,13 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingDepth).toBe(5);
     });
 
     it('should score poorly with deep heading hierarchy', async () => {
       const scores = await run(POORLY_OPTIMIZED_HTML);
-      
+
       expect(scores.headingDepth).toBe(0); // Has H1, H4, H5, H6 (4 levels)
     });
 
@@ -81,7 +81,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingDepth).toBe(5); // Only 1 level
     });
   });
@@ -100,7 +100,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(5);
     });
 
@@ -117,7 +117,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(5);
     });
 
@@ -134,7 +134,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(5);
     });
 
@@ -159,7 +159,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(5);
     });
 
@@ -172,7 +172,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(0);
     });
 
@@ -189,7 +189,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.structuredData).toBe(0);
     });
   });
@@ -205,7 +205,7 @@ describe('Structure Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.rssFeed).toBe(5);
     });
 
@@ -219,7 +219,7 @@ describe('Structure Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.rssFeed).toBe(5);
     });
 
@@ -230,7 +230,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.rssFeed).toBe(5);
     });
 
@@ -241,7 +241,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.rssFeed).toBe(5);
     });
   });
@@ -250,7 +250,7 @@ describe('Structure Audit Module', () => {
     it('should handle empty content', async () => {
       const html = '<html><body></body></html>';
       const scores = await run(html);
-      
+
       expect(scores.headingFrequency).toBe(0);
       expect(scores.headingDepth).toBe(0);
       expect(scores.structuredData).toBe(0);
@@ -266,7 +266,7 @@ describe('Structure Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.headingFrequency).toBe(5);
     });
   });

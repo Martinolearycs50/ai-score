@@ -6,14 +6,14 @@ describe('Recency Audit Module', () => {
     it('should score well for fresh content (< 90 days)', async () => {
       const html = '<html><body>Content</body></html>';
       const scores = await run(html, FRESH_HEADERS);
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
     it('should score poorly for stale content (> 90 days)', async () => {
       const html = '<html><body>Content</body></html>';
       const scores = await run(html, STALE_HEADERS);
-      
+
       expect(scores.lastModified).toBe(0);
     });
 
@@ -28,7 +28,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
@@ -43,7 +43,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
@@ -61,7 +61,7 @@ describe('Recency Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
@@ -73,16 +73,16 @@ describe('Recency Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
     it('should detect dates in text content', async () => {
       const recentDate = new Date();
-      const dateStr = recentDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const dateStr = recentDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       });
       const html = `
         <html><body>
@@ -90,7 +90,7 @@ describe('Recency Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
@@ -100,7 +100,7 @@ describe('Recency Audit Module', () => {
         '12/15/2024',
         '15.12.2024',
         'December 15, 2024',
-        '15 December 2024'
+        '15 December 2024',
       ];
 
       for (const dateFormat of testCases) {
@@ -110,7 +110,7 @@ describe('Recency Audit Module', () => {
           </body></html>
         `;
         const scores = await run(html, {});
-        
+
         // Recent dates should score well
         expect(scores.lastModified).toBe(5);
       }
@@ -129,7 +129,7 @@ describe('Recency Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(0);
     });
   });
@@ -145,7 +145,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(5);
     });
 
@@ -159,7 +159,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(5);
     });
 
@@ -173,7 +173,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(0);
     });
 
@@ -187,7 +187,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(0);
     });
 
@@ -201,7 +201,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(0);
     });
 
@@ -215,7 +215,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(0);
     });
 
@@ -229,7 +229,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, {});
-      
+
       expect(scores.stableCanonical).toBe(0);
     });
   });
@@ -238,7 +238,7 @@ describe('Recency Audit Module', () => {
     it('should handle empty content', async () => {
       const html = '<html><body></body></html>';
       const scores = await run(html, {});
-      
+
       expect(scores.lastModified).toBe(0);
       expect(scores.stableCanonical).toBe(0);
     });
@@ -249,7 +249,7 @@ describe('Recency Audit Module', () => {
         'Last-Modified': new Date().toISOString(),
       };
       const scores = await run(html, headers);
-      
+
       expect(scores.lastModified).toBe(5);
     });
 
@@ -264,7 +264,7 @@ describe('Recency Audit Module', () => {
         </html>
       `;
       const scores = await run(html, FRESH_HEADERS);
-      
+
       expect(scores.lastModified).toBe(5); // Should use fresh header
     });
   });

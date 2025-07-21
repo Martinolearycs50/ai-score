@@ -3,33 +3,37 @@
  * Fetches real-world performance data from Google's Chrome User Experience Report
  * Requires API key (free tier: 1,000 requests/day)
  */
-
 import axios from 'axios';
+
+import { config } from '@/config';
 import { logChromeUxFetch } from '@/utils/apiUsageVerification';
 
-// CrUX API endpoint and configuration
+// CrUX API endpoint
 const CRUX_API_URL = 'https://chromeuxreport.googleapis.com/v1/records:queryRecord';
-const CRUX_API_KEY = process.env.CHROME_UX_API_KEY;
 
 // Core Web Vitals thresholds
 export const WEB_VITALS_THRESHOLDS = {
-  LCP: { // Largest Contentful Paint
-    good: 2500,      // < 2.5s
+  LCP: {
+    // Largest Contentful Paint
+    good: 2500, // < 2.5s
     needsImprovement: 4000, // 2.5s - 4s
     // poor: > 4s
   },
-  FID: { // First Input Delay
-    good: 100,       // < 100ms
-    needsImprovement: 300,  // 100ms - 300ms
+  FID: {
+    // First Input Delay
+    good: 100, // < 100ms
+    needsImprovement: 300, // 100ms - 300ms
     // poor: > 300ms
   },
-  CLS: { // Cumulative Layout Shift
-    good: 0.1,       // < 0.1
+  CLS: {
+    // Cumulative Layout Shift
+    good: 0.1, // < 0.1
     needsImprovement: 0.25, // 0.1 - 0.25
     // poor: > 0.25
   },
-  TTFB: { // Time to First Byte
-    good: 800,       // < 0.8s
+  TTFB: {
+    // Time to First Byte
+    good: 800, // < 0.8s
     needsImprovement: 1800, // 0.8s - 1.8s
     // poor: > 1.8s
   },
@@ -72,11 +76,11 @@ export interface CrUXResult {
   url: string;
   hasData: boolean;
   metrics?: {
-    lcp?: number;        // Largest Contentful Paint (ms)
-    fid?: number;        // First Input Delay (ms)
-    cls?: number;        // Cumulative Layout Shift (score)
-    ttfb?: number;       // Time to First Byte (ms)
-    fcp?: number;        // First Contentful Paint (ms)
+    lcp?: number; // Largest Contentful Paint (ms)
+    fid?: number; // First Input Delay (ms)
+    cls?: number; // Cumulative Layout Shift (score)
+    ttfb?: number; // Time to First Byte (ms)
+    fcp?: number; // First Contentful Paint (ms)
     lcpRating?: 'good' | 'needs-improvement' | 'poor';
     fidRating?: 'good' | 'needs-improvement' | 'poor';
     clsRating?: 'good' | 'needs-improvement' | 'poor';
@@ -85,19 +89,18 @@ export interface CrUXResult {
   error?: string;
 }
 
-// Simple in-memory cache (24 hour TTL)
+// Simple in-memory cache
 const cache = new Map<string, { data: CrUXResult; timestamp: number }>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Fetches Core Web Vitals data from Chrome UX Report API
  */
 export async function fetchCrUXData(url: string): Promise<CrUXResult> {
   console.log(`🔍 [CrUX API] Fetching data for: ${url}`);
-  
+
   try {
     // Check if API key is configured
-    if (!CRUX_API_KEY) {
+    if (!config.api.chromeUx.enabled) {
       console.log('❌ [CrUX API] No API key configured, returning no data');
       return {
         url,
@@ -108,13 +111,13 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
 
     // Check cache first
     const cached = cache.get(url);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached && Date.now() - cached.timestamp < config.cache.chromeUxTtl) {
       console.log('📦 [CrUX API] Returning cached data');
       return cached.data;
     }
 
     // Make API request with authentication
-    const apiUrl = `${CRUX_API_URL}?key=${CRUX_API_KEY}`;
+    const apiUrl = `${CRUX_API_URL}?key=${config.api.chromeUx.apiKey}`;
     const response = await axios.post<CrUXResponse>(
       apiUrl,
       {
@@ -122,7 +125,7 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
         formFactor: 'PHONE', // Mobile-first approach
       },
       {
-        timeout: 5000,
+        timeout: config.timeouts.ttfbCheck,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -152,14 +155,14 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
       ttfb: result.metrics?.ttfb,
       ttfbRating: result.metrics?.ttfbRating,
       lcp: result.metrics?.lcp,
-      lcpRating: result.metrics?.lcpRating
+      lcpRating: result.metrics?.lcpRating,
     });
 
     // Log successful fetch for verification
     logChromeUxFetch(true, {
       url,
       ttfb: result.metrics?.ttfb,
-      rating: result.metrics?.ttfbRating
+      rating: result.metrics?.ttfbRating,
     });
 
     // Cache the result
@@ -175,10 +178,9 @@ export async function fetchCrUXData(url: string): Promise<CrUXResult> {
         hasData: false,
         error: 'No Chrome UX Report data available for this URL',
       };
-      
+
       // Cache negative results too
       cache.set(url, { data: result, timestamp: Date.now() });
-      
       return result;
     }
 
@@ -244,31 +246,31 @@ export function calculateCrUXScore(metrics: CrUXResult['metrics'], maxPoints: nu
 
   // TTFB is most important for AI crawlers
   if (metrics.ttfbRating) {
-    const ttfbScore = metrics.ttfbRating === 'good' ? 1 : 
-                      metrics.ttfbRating === 'needs-improvement' ? 0.5 : 0;
+    const ttfbScore =
+      metrics.ttfbRating === 'good' ? 1 : metrics.ttfbRating === 'needs-improvement' ? 0.5 : 0;
     score += ttfbScore * 0.4; // 40% weight
     factors += 0.4;
   }
 
   // LCP is second most important
   if (metrics.lcpRating) {
-    const lcpScore = metrics.lcpRating === 'good' ? 1 : 
-                     metrics.lcpRating === 'needs-improvement' ? 0.5 : 0;
+    const lcpScore =
+      metrics.lcpRating === 'good' ? 1 : metrics.lcpRating === 'needs-improvement' ? 0.5 : 0;
     score += lcpScore * 0.3; // 30% weight
     factors += 0.3;
   }
 
   // FID and CLS are less important for AI crawlers
   if (metrics.fidRating) {
-    const fidScore = metrics.fidRating === 'good' ? 1 : 
-                     metrics.fidRating === 'needs-improvement' ? 0.5 : 0;
+    const fidScore =
+      metrics.fidRating === 'good' ? 1 : metrics.fidRating === 'needs-improvement' ? 0.5 : 0;
     score += fidScore * 0.15; // 15% weight
     factors += 0.15;
   }
 
   if (metrics.clsRating) {
-    const clsScore = metrics.clsRating === 'good' ? 1 : 
-                     metrics.clsRating === 'needs-improvement' ? 0.5 : 0;
+    const clsScore =
+      metrics.clsRating === 'good' ? 1 : metrics.clsRating === 'needs-improvement' ? 0.5 : 0;
     score += clsScore * 0.15; // 15% weight
     factors += 0.15;
   }

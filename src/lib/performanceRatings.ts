@@ -13,9 +13,9 @@ export type PerformanceRating = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Critic
  */
 export function getPerformanceRating(earned: number, max: number): PerformanceRating {
   if (max === 0) return 'Critical'; // Handle edge case
-  
+
   const percentage = (earned / max) * 100;
-  
+
   if (percentage >= 80) return 'Excellent';
   if (percentage >= 60) return 'Good';
   if (percentage >= 40) return 'Fair';
@@ -31,15 +31,15 @@ export function getPerformanceRating(earned: number, max: number): PerformanceRa
 export function getRatingColor(rating: PerformanceRating): string {
   switch (rating) {
     case 'Excellent':
-      return 'text-green-600';
+      return 'success-text';
     case 'Good':
-      return 'text-blue-600';
+      return 'accent-text';
     case 'Fair':
-      return 'text-yellow-600';
+      return 'warning-text';
     case 'Poor':
-      return 'text-orange-600';
+      return 'warning-text';
     case 'Critical':
-      return 'text-red-600';
+      return 'error-text';
   }
 }
 
@@ -71,5 +71,5 @@ export const PILLAR_DISPLAY_NAMES = {
   FACT_DENSITY: 'Information Richness',
   STRUCTURE: 'Content Organization',
   TRUST: 'Credibility',
-  RECENCY: 'Freshness'
+  RECENCY: 'Freshness',
 } as const;

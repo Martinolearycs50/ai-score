@@ -1,7 +1,10 @@
 'use client';
 
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+
+import Card from '@/components/ui/Card';
+import { cssVars } from '@/lib/design-system/colors';
 
 interface MetricCardProps {
   title: string;
@@ -13,70 +16,73 @@ interface MetricCardProps {
   color?: 'blue' | 'green' | 'orange' | 'purple';
 }
 
-export default function MetricCard({ 
-  title, 
-  value, 
-  subtitle, 
-  change, 
-  trend, 
+export default function MetricCard({
+  title,
+  value,
+  subtitle,
+  change,
+  trend,
   icon,
-  color = 'blue' 
+  color = 'blue',
 }: MetricCardProps) {
-  const colorStyles = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-200',
-    green: 'bg-green-50 text-green-600 border-green-200',
-    orange: 'bg-orange-50 text-orange-600 border-orange-200',
-    purple: 'bg-purple-50 text-purple-600 border-purple-200'
+  const colorMap = {
+    blue: cssVars.accent,
+    green: cssVars.success,
+    orange: cssVars.warning,
+    purple: cssVars.primary,
   };
 
-  const iconBgStyles = {
-    blue: 'bg-blue-100',
-    green: 'bg-green-100',
-    orange: 'bg-orange-100',
-    purple: 'bg-purple-100'
-  };
+  const iconBgOpacity = 0.1;
+  const selectedColor = colorMap[color];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <div className="mt-2 flex items-baseline">
-            <p className="text-3xl font-semibold text-gray-900">{value}</p>
-            {subtitle && (
-              <p className="ml-2 text-sm text-gray-500">{subtitle}</p>
+    <Card>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium" style={{ color: cssVars.muted }}>
+              {title}
+            </p>
+            <div className="mt-2 flex items-baseline">
+              <p className="text-3xl font-semibold" style={{ color: cssVars.foreground }}>
+                {value}
+              </p>
+              {subtitle && (
+                <p className="ml-2 text-sm" style={{ color: cssVars.muted }}>
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            {(change !== undefined || trend) && (
+              <div className="mt-2 flex items-center text-sm">
+                {trend === 'up' ? (
+                  <ArrowUpIcon className="mr-1 h-4 w-4" style={{ color: cssVars.success }} />
+                ) : trend === 'down' ? (
+                  <ArrowDownIcon className="mr-1 h-4 w-4" style={{ color: cssVars.error }} />
+                ) : null}
+                {change !== undefined && (
+                  <span style={{ color: change >= 0 ? cssVars.success : cssVars.error }}>
+                    {change >= 0 ? '+' : ''}
+                    {change}%
+                  </span>
+                )}
+              </div>
             )}
           </div>
-          
-          {(change !== undefined || trend) && (
-            <div className="mt-2 flex items-center text-sm">
-              {trend === 'up' ? (
-                <ArrowUpIcon className="w-4 h-4 text-green-500 mr-1" />
-              ) : trend === 'down' ? (
-                <ArrowDownIcon className="w-4 h-4 text-red-500 mr-1" />
-              ) : null}
-              
-              {change !== undefined && (
-                <span className={change >= 0 ? 'text-green-600' : 'text-red-600'}>
-                  {change >= 0 ? '+' : ''}{change}%
-                </span>
-              )}
+          {icon && (
+            <div
+              className="rounded-lg p-3"
+              style={{
+                backgroundColor: `${selectedColor}${Math.round(iconBgOpacity * 255)
+                  .toString(16)
+                  .padStart(2, '0')}`,
+              }}
+            >
+              <div style={{ color: selectedColor }}>{icon}</div>
             </div>
           )}
         </div>
-        
-        {icon && (
-          <div className={`p-3 rounded-lg ${iconBgStyles[color]}`}>
-            <div className={colorStyles[color].split(' ')[1]}>
-              {icon}
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
+      </motion.div>
+    </Card>
   );
 }

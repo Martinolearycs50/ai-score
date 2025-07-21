@@ -1,7 +1,8 @@
-import type { PillarResults, PillarBreakdown, PillarScores, PageType } from './types';
+import { DYNAMIC_SCORING_WEIGHTS, PAGE_TYPE_WEIGHT_MAP, PILLARS } from '@/utils/constants';
+
 import type { ExtractedContent } from './contentExtractor';
-import { PILLARS, DYNAMIC_SCORING_WEIGHTS, PAGE_TYPE_WEIGHT_MAP } from '@/utils/constants';
 import { generateRecommendations } from './recommendations';
+import type { PageType, PillarBreakdown, PillarResults, PillarScores } from './types';
 
 export interface ScoringResult {
   total: number;
@@ -32,7 +33,11 @@ export interface ScoringResult {
  * Score pillar results according to the new AI Search scoring model
  * Now supports dynamic scoring based on page type
  */
-export function score(pillarResults: PillarResults, extractedContent?: ExtractedContent, enableDynamicScoring: boolean = true): ScoringResult {
+export function score(
+  pillarResults: PillarResults,
+  extractedContent?: ExtractedContent,
+  enableDynamicScoring: boolean = true
+): ScoringResult {
   // Calculate raw scores first
   const breakdown: PillarBreakdown[] = Object.entries(pillarResults).map(([pillar, checks]) => {
     const earned = Object.values(checks as Record<string, number>).reduce((a, b) => a + b, 0);
@@ -83,10 +88,10 @@ export function score(pillarResults: PillarResults, extractedContent?: Extracted
       const rawScore = rawPillarScores[key];
       const maxScore = PILLARS[key];
       const weight = weights[key];
-      
+
       // Calculate percentage of max score achieved
       const percentageAchieved = rawScore / maxScore;
-      
+
       // Apply weight to get new max score, then calculate weighted score
       const weightedMaxScore = weight;
       weightedScores[key] = Math.round(percentageAchieved * weightedMaxScore);
@@ -110,7 +115,7 @@ export function score(pillarResults: PillarResults, extractedContent?: Extracted
       appliedWeights: true,
       weights,
       rawScores: rawPillarScores,
-      weightedScores: weightedScores
+      weightedScores: weightedScores,
     };
   }
 
@@ -118,7 +123,7 @@ export function score(pillarResults: PillarResults, extractedContent?: Extracted
   const recommendations = generateRecommendations(
     pillarResults as unknown as Record<string, Record<string, number>>,
     extractedContent
-  ).map(rec => ({
+  ).map((rec) => ({
     metric: rec.metric,
     why: rec.template.why,
     fix: rec.template.fix,

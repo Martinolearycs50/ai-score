@@ -2,16 +2,15 @@
  * Score Impact Verification Tests
  * These tests prove that Chrome UX API data actually affects the final scores
  */
-
-import { run as runRetrieval, capturedDomain } from '../audit/retrieval';
-import { fetchCrUXData, clearCache } from '../chromeUxReport';
+import { capturedDomain, run as runRetrieval } from '../audit/retrieval';
+import { clearCache, fetchCrUXData } from '../chromeUxReport';
 import { scoreAnalysis } from '../scorer-new';
 import type { AuditResult } from '../types';
 
 // Mock the Chrome UX module to control when it's used
 jest.mock('../chromeUxReport', () => ({
   ...jest.requireActual('../chromeUxReport'),
-  fetchCrUXData: jest.fn()
+  fetchCrUXData: jest.fn(),
 }));
 
 const mockedFetchCrUXData = fetchCrUXData as jest.MockedFunction<typeof fetchCrUXData>;
@@ -46,16 +45,16 @@ describe('Chrome UX API Score Impact', () => {
           ttfb: 400, // Good TTFB
           ttfbRating: 'good',
           lcp: 1500,
-          lcpRating: 'good'
-        }
+          lcpRating: 'good',
+        },
       });
 
       const scoresWithGoodCrux = await runRetrieval(testHtml, testUrl);
-      
+
       console.log('✅ Scores with GOOD CrUX data:', {
         ttfb: scoresWithGoodCrux.ttfb,
         capturedTtfb: capturedDomain.actualTtfb,
-        rating: capturedDomain.cruxData?.ttfbRating
+        rating: capturedDomain.cruxData?.ttfbRating,
       });
 
       expect(scoresWithGoodCrux.ttfb).toBe(5); // Full points for good rating
@@ -70,16 +69,16 @@ describe('Chrome UX API Score Impact', () => {
         hasData: true,
         metrics: {
           ttfb: 3500, // Poor TTFB
-          ttfbRating: 'poor'
-        }
+          ttfbRating: 'poor',
+        },
       });
 
       const scoresWithPoorCrux = await runRetrieval(testHtml, testUrl);
-      
+
       console.log('❌ Scores with POOR CrUX data:', {
         ttfb: scoresWithPoorCrux.ttfb,
         capturedTtfb: capturedDomain.actualTtfb,
-        rating: capturedDomain.cruxData?.ttfbRating
+        rating: capturedDomain.cruxData?.ttfbRating,
       });
 
       expect(scoresWithPoorCrux.ttfb).toBeLessThanOrEqual(1); // Low points for poor rating
@@ -92,7 +91,7 @@ describe('Chrome UX API Score Impact', () => {
       mockedFetchCrUXData.mockResolvedValueOnce({
         url: testUrl,
         hasData: false,
-        error: 'No Chrome UX Report data available for this URL'
+        error: 'No Chrome UX Report data available for this URL',
       });
 
       // Also mock axios for synthetic measurement
@@ -105,18 +104,18 @@ describe('Chrome UX API Score Impact', () => {
                 setTimeout(() => callback(), 150); // Simulate 150ms TTFB
               }
             },
-            destroy: jest.fn()
+            destroy: jest.fn(),
           };
           resolve({ data: stream });
         });
       });
 
       const scoresWithoutCrux = await runRetrieval(testHtml, testUrl);
-      
+
       console.log('🔄 Scores with SYNTHETIC fallback:', {
         ttfb: scoresWithoutCrux.ttfb,
         capturedTtfb: capturedDomain.actualTtfb,
-        hasCruxData: capturedDomain.cruxData?.hasData
+        hasCruxData: capturedDomain.cruxData?.hasData,
       });
 
       expect(scoresWithoutCrux.ttfb).toBe(5); // 150ms < 200ms = 5 points
@@ -132,14 +131,14 @@ describe('Chrome UX API Score Impact', () => {
           FACT_DENSITY: { raw: 20, weighted: 20 },
           STRUCTURE: { raw: 25, weighted: 25 },
           TRUST: { raw: 15, weighted: 15 },
-          RECENCY: { raw: 10, weighted: 10 }
+          RECENCY: { raw: 10, weighted: 10 },
         },
         breakdown: {
           RETRIEVAL: { ttfb: 2, paywall: 5, mainContent: 5, htmlSize: 3, llmsTxtFile: 0 },
           FACT_DENSITY: {},
           STRUCTURE: {},
           TRUST: {},
-          RECENCY: {}
+          RECENCY: {},
         },
         pageType: 'homepage',
         dynamicWeights: {
@@ -147,20 +146,20 @@ describe('Chrome UX API Score Impact', () => {
           FACT_DENSITY: 0.15,
           STRUCTURE: 0.25,
           TRUST: 0.15,
-          RECENCY: 0.10
-        }
+          RECENCY: 0.1,
+        },
       };
 
       // Score without enhancement
       const baseScoring = scoreAnalysis(mockAuditResult, {
         title: 'Test Site',
         url: 'https://example.com',
-        wordCount: 500
+        wordCount: 500,
       });
 
       console.log('📊 Base score (without enhancement):', {
         total: baseScoring.totalScore,
-        retrieval: baseScoring.pillarScores.RETRIEVAL
+        retrieval: baseScoring.pillarScores.RETRIEVAL,
       });
 
       // Simulate enhanced RETRIEVAL score
@@ -168,29 +167,31 @@ describe('Chrome UX API Score Impact', () => {
         ...mockAuditResult,
         scores: {
           ...mockAuditResult.scores,
-          RETRIEVAL: { raw: 20, weighted: 20 } // +5 from CrUX
+          RETRIEVAL: { raw: 20, weighted: 20 }, // +5 from CrUX
         },
         breakdown: {
           ...mockAuditResult.breakdown,
-          RETRIEVAL: { ...mockAuditResult.breakdown.RETRIEVAL, ttfb: 5 } // Enhanced TTFB
-        }
+          RETRIEVAL: { ...mockAuditResult.breakdown.RETRIEVAL, ttfb: 5 }, // Enhanced TTFB
+        },
       };
 
       const enhancedScoring = scoreAnalysis(enhancedAuditResult, {
         title: 'Test Site',
         url: 'https://example.com',
-        wordCount: 500
+        wordCount: 500,
       });
 
       console.log('📊 Enhanced score (with CrUX):', {
         total: enhancedScoring.totalScore,
         retrieval: enhancedScoring.pillarScores.RETRIEVAL,
-        improvement: enhancedScoring.totalScore - baseScoring.totalScore
+        improvement: enhancedScoring.totalScore - baseScoring.totalScore,
       });
 
       // Verify enhancement improves score
       expect(enhancedScoring.totalScore).toBeGreaterThan(baseScoring.totalScore);
-      expect(enhancedScoring.pillarScores.RETRIEVAL).toBeGreaterThan(baseScoring.pillarScores.RETRIEVAL);
+      expect(enhancedScoring.pillarScores.RETRIEVAL).toBeGreaterThan(
+        baseScoring.pillarScores.RETRIEVAL
+      );
     });
   });
 
@@ -207,8 +208,8 @@ describe('Chrome UX API Score Impact', () => {
           ttfb: 600,
           ttfbRating: 'good',
           lcp: 2000,
-          lcpRating: 'good'
-        }
+          lcpRating: 'good',
+        },
       });
 
       await runRetrieval(testHtml, testUrl);
@@ -222,7 +223,7 @@ describe('Chrome UX API Score Impact', () => {
       console.log('📊 Data source tracking:', {
         dataSource: capturedDomain.cruxData?.hasData ? 'chrome-ux' : 'synthetic',
         ttfbValue: capturedDomain.actualTtfb,
-        ttfbRating: capturedDomain.cruxData?.ttfbRating
+        ttfbRating: capturedDomain.cruxData?.ttfbRating,
       });
     });
 
@@ -234,18 +235,18 @@ describe('Chrome UX API Score Impact', () => {
       mockedFetchCrUXData.mockResolvedValueOnce({
         url: testUrl,
         hasData: false,
-        error: 'No data available'
+        error: 'No data available',
       });
 
       await runRetrieval(testHtml, testUrl);
 
       // Verify synthetic fallback is tracked
       expect(capturedDomain.cruxData?.hasData).toBeFalsy();
-      
+
       console.log('🔄 Synthetic fallback tracking:', {
         dataSource: 'synthetic',
         ttfbValue: capturedDomain.actualTtfb,
-        hasCruxData: false
+        hasCruxData: false,
       });
     });
   });
@@ -256,7 +257,7 @@ describe('Chrome UX API Score Impact', () => {
       { ttfb: 1000, rating: 'needs-improvement', expectedScore: 3 },
       { ttfb: 1500, rating: 'needs-improvement', expectedScore: 2 },
       { ttfb: 2500, rating: 'poor', expectedScore: 1 },
-      { ttfb: 4000, rating: 'poor', expectedScore: 0 }
+      { ttfb: 4000, rating: 'poor', expectedScore: 0 },
     ];
 
     testCases.forEach(({ ttfb, rating, expectedScore }) => {
@@ -269,14 +270,14 @@ describe('Chrome UX API Score Impact', () => {
           hasData: true,
           metrics: {
             ttfb,
-            ttfbRating: rating as any
-          }
+            ttfbRating: rating as any,
+          },
         });
 
         const scores = await runRetrieval(testHtml, testUrl);
-        
+
         console.log(`⏱️  TTFB ${ttfb}ms (${rating}) → Score: ${scores.ttfb}`);
-        
+
         expect(scores.ttfb).toBe(expectedScore);
       });
     });
@@ -293,7 +294,7 @@ export async function analyzeWithoutCrux(html: string, url: string) {
   mockedFetchCrUXData.mockResolvedValueOnce({
     url,
     hasData: false,
-    error: 'No data available'
+    error: 'No data available',
   });
   return await runRetrieval(html, url);
 }

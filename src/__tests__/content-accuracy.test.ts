@@ -1,18 +1,18 @@
 /**
  * Content Accuracy Tests
- * 
+ *
  * These tests verify that the content displayed on the results page is ACCURATE
  * and matches the actual analysis performed. Not just that it looks good, but
  * that the information is correct.
  */
-
-import { describe, test, expect, beforeAll } from '@jest/globals';
-import { AiSearchAnalyzer } from '@/lib/analyzer-new';
-import { run as runRetrieval, capturedDomain } from '@/lib/audit/retrieval';
-import { run as runFactDensity, capturedHeadings } from '@/lib/audit/factDensity';
-import { run as runStructure, capturedContent } from '@/lib/audit/structure';
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+
+import { AiSearchAnalyzer } from '@/lib/analyzer-new';
+import { capturedHeadings, run as runFactDensity } from '@/lib/audit/factDensity';
+import { capturedDomain, run as runRetrieval } from '@/lib/audit/retrieval';
+import { capturedContent, run as runStructure } from '@/lib/audit/structure';
 
 // Test URLs with known expected values
 const TEST_URLS = {
@@ -23,7 +23,7 @@ const TEST_URLS = {
       ttfbRange: { min: 0, max: 500 }, // Expected to be fast
       hasStructuredData: false, // Minimal site
       headingCount: 1, // Just H1
-    }
+    },
   },
   newsArticle: {
     url: 'https://www.nytimes.com',
@@ -34,7 +34,7 @@ const TEST_URLS = {
       schemaTypes: ['NewsArticle', 'Organization'],
       hasAuthor: true,
       headingHierarchy: true,
-    }
+    },
   },
   documentation: {
     url: 'https://docs.python.org',
@@ -44,8 +44,8 @@ const TEST_URLS = {
       contentType: 'documentation',
       hasCodeExamples: true,
       hasTableOfContents: true,
-    }
-  }
+    },
+  },
 };
 
 describe('Content Accuracy Tests', () => {
@@ -58,21 +58,21 @@ describe('Content Accuracy Tests', () => {
         hasData: true,
         metrics: {
           ttfb: 342,
-          ttfbRating: 'good'
-        }
+          ttfbRating: 'good',
+        },
       };
 
       // Analyze a URL
       const result = await analyzer.analyzeUrl(TEST_URLS.highPerformance.url);
-      
+
       // Check if Chrome UX data was used
-      if (result.dataSources?.find(ds => ds.type === 'chrome-ux')) {
-        const cruxSource = result.dataSources.find(ds => ds.type === 'chrome-ux');
-        
+      if (result.dataSources?.find((ds) => ds.type === 'chrome-ux')) {
+        const cruxSource = result.dataSources.find((ds) => ds.type === 'chrome-ux');
+
         // Verify exact TTFB value is stored
         expect(cruxSource?.details?.ttfb).toBeDefined();
         expect(typeof cruxSource?.details?.ttfb).toBe('number');
-        
+
         // Verify it affects the score correctly
         const ttfbValue = cruxSource?.details?.ttfb;
         if (ttfbValue && ttfbValue < 800) {
@@ -83,9 +83,9 @@ describe('Content Accuracy Tests', () => {
 
     test('should display synthetic TTFB when Chrome UX unavailable', async () => {
       const result = await analyzer.analyzeUrl('https://small-local-site.example');
-      
+
       // Should have synthetic data source
-      const syntheticSource = result.dataSources?.find(ds => ds.type === 'synthetic');
+      const syntheticSource = result.dataSources?.find((ds) => ds.type === 'synthetic');
       expect(syntheticSource).toBeDefined();
       expect(syntheticSource?.metric).toBe('ttfb');
       expect(syntheticSource?.details?.ttfb).toBeDefined();
@@ -109,16 +109,16 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const factDensityScores = await runFactDensity(html);
-      
+
       // The module should have found these statistics:
       // - 45%, $2.3 million, 10,000, 50, 3x, 850ms, 200ms, 76%
       // - Dates: 2024, 2025, January 2020, 2020
       // - Names: John Smith, Sarah Johnson, Mike Chen
-      
+
       // Total: 8 stats + 4 dates + 3 names = 15 facts
       // Word count ≈ 50 words
       // Facts per 500 words = (15/50) * 500 = 150
-      
+
       // Score should be max (5) since it's way over threshold
       expect(factDensityScores.uniqueStats).toBe(5);
     });
@@ -137,7 +137,7 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const factDensityScores = await runFactDensity(html);
-      
+
       // Should only count "100" once, not three times
       // With deduplication logic
       expect(factDensityScores.uniqueStats).toBeLessThan(5);
@@ -158,10 +158,10 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const structureScores = await runStructure(htmlBadHierarchy, 'https://example.com');
-      
+
       // Should detect hierarchy issues
       expect(structureScores.headingDepth).toBe(0); // Poor hierarchy
-      
+
       // Check captured content
       expect(capturedContent.headingIssues).toContain('H3 without H2');
     });
@@ -181,7 +181,7 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const structureScores = await runStructure(html, 'https://example.com');
-      
+
       // 900 words, 3 headings = 1 heading per 300 words
       // Should get partial score
       expect(structureScores.headingFrequency).toBeGreaterThan(0);
@@ -214,19 +214,19 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const structureScores = await runStructure(htmlWithSchema, 'https://example.com');
-      
+
       // Should detect Article schema
       expect(structureScores.structuredData).toBeGreaterThan(0);
-      
+
       // Check captured schema types
       expect(capturedContent.schemaTypes).toContain('Article');
     });
 
-    test('should not report schemas that don't exist', async () => {
+    test("should not report schemas that don't exist", async () => {
       const htmlNoSchema = '<html><body><h1>No Schema Here</h1></body></html>';
-      
+
       const structureScores = await runStructure(htmlNoSchema, 'https://example.com');
-      
+
       expect(structureScores.structuredData).toBe(0);
       expect(capturedContent.schemaTypes).toHaveLength(0);
     });
@@ -250,11 +250,11 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const factDensityScores = await runFactDensity(htmlWithDirectAnswers);
-      
+
       // First and third headings have direct answers, second doesn't
       // 2 out of 3 = 66.7% ≈ 4 points
       expect(factDensityScores.directAnswers).toBe(4);
-      
+
       // Check captured headings
       expect(capturedHeadings).toHaveLength(1); // Only captures headings WITHOUT direct answers
       expect(capturedHeadings[0]?.heading).toContain('How does it work?');
@@ -264,11 +264,11 @@ describe('Content Accuracy Tests', () => {
   describe('Data Consistency Verification', () => {
     test('scores should match displayed breakdowns', async () => {
       const result = await analyzer.analyzeUrl(TEST_URLS.highPerformance.url);
-      
+
       // Total score should equal sum of pillar scores
       const pillarSum = Object.values(result.scoringResult.pillarScores).reduce((a, b) => a + b, 0);
       expect(result.aiSearchScore).toBe(pillarSum);
-      
+
       // Each pillar score should equal sum of its checks
       for (const [pillar, checks] of Object.entries(result.breakdown || {})) {
         const checkSum = Object.values(checks as Record<string, number>).reduce((a, b) => a + b, 0);
@@ -278,13 +278,13 @@ describe('Content Accuracy Tests', () => {
 
     test('percentages should add up correctly', async () => {
       const result = await analyzer.analyzeUrl(TEST_URLS.highPerformance.url);
-      
+
       // For each pillar, verify percentage calculation
-      result.scoringResult.breakdown.forEach(pillar => {
+      result.scoringResult.breakdown.forEach((pillar) => {
         const percentage = (pillar.earned / pillar.max) * 100;
         expect(percentage).toBeGreaterThanOrEqual(0);
         expect(percentage).toBeLessThanOrEqual(100);
-        
+
         // Verify earned never exceeds max
         expect(pillar.earned).toBeLessThanOrEqual(pillar.max);
       });
@@ -295,9 +295,9 @@ describe('Content Accuracy Tests', () => {
     test('should not show sitemap found when there is none', async () => {
       // Test with a URL that likely has no sitemap
       const minimalHtml = '<html><body><h1>Minimal Site</h1></body></html>';
-      
+
       const retrievalScores = await runRetrieval(minimalHtml, 'https://minimal.example');
-      
+
       // Assuming no sitemap detection in current implementation
       // This test documents expected behavior
     });
@@ -319,7 +319,7 @@ describe('Content Accuracy Tests', () => {
       `;
 
       const factDensityScores = await runFactDensity(htmlWithNav);
-      
+
       // Should only count "3 products", not navigation numbers
       // This verifies the extractor focuses on main content
     });
@@ -327,7 +327,7 @@ describe('Content Accuracy Tests', () => {
     test('should not report fast loading when TTFB is slow', async () => {
       // If we have slow TTFB data
       const slowTtfb = 2500; // 2.5 seconds
-      
+
       // Score should reflect poor performance
       if (slowTtfb > 2000) {
         expect(0).toBe(0); // Very poor score
@@ -353,12 +353,12 @@ export class ContentVerifier {
   verify(metric: string, claimed: any, actual: any) {
     const matches = JSON.stringify(claimed) === JSON.stringify(actual);
     this.claims.push({ metric, claimed, actual, matches });
-    
+
     if (!matches) {
       console.warn(`❌ Content mismatch for ${metric}:`, {
         claimed,
         actual,
-        diff: this.getDiff(claimed, actual)
+        diff: this.getDiff(claimed, actual),
       });
     }
   }
@@ -376,14 +376,16 @@ export class ContentVerifier {
     const report = [
       '=== CONTENT ACCURACY REPORT ===',
       `Total checks: ${this.claims.length}`,
-      `Accurate: ${this.claims.filter(c => c.matches).length}`,
-      `Inaccurate: ${this.claims.filter(c => !c.matches).length}`,
+      `Accurate: ${this.claims.filter((c) => c.matches).length}`,
+      `Inaccurate: ${this.claims.filter((c) => !c.matches).length}`,
       '',
-      'CLAIMED vs ACTUAL:'
+      'CLAIMED vs ACTUAL:',
     ];
 
-    this.claims.forEach(claim => {
-      report.push(`- ${claim.metric}: ${claim.claimed} | Actual: ${claim.actual} ${claim.matches ? '✓' : '✗'}`);
+    this.claims.forEach((claim) => {
+      report.push(
+        `- ${claim.metric}: ${claim.claimed} | Actual: ${claim.actual} ${claim.matches ? '✓' : '✗'}`
+      );
     });
 
     return report.join('\n');
@@ -391,7 +393,7 @@ export class ContentVerifier {
 
   getAccuracyPercentage(): number {
     if (this.claims.length === 0) return 100;
-    return (this.claims.filter(c => c.matches).length / this.claims.length) * 100;
+    return (this.claims.filter((c) => c.matches).length / this.claims.length) * 100;
   }
 }
 
@@ -400,28 +402,31 @@ describe('Content Verification Report', () => {
   test('should generate accuracy report for known URL', async () => {
     const analyzer = new AiSearchAnalyzer();
     const verifier = new ContentVerifier();
-    
+
     const result = await analyzer.analyzeUrl('https://www.example.com');
-    
+
     // Verify TTFB display
-    if (result.dataSources?.find(ds => ds.metric === 'ttfb')) {
-      const ttfbSource = result.dataSources.find(ds => ds.metric === 'ttfb');
+    if (result.dataSources?.find((ds) => ds.metric === 'ttfb')) {
+      const ttfbSource = result.dataSources.find((ds) => ds.metric === 'ttfb');
       const displayedTtfb = ttfbSource?.details?.ttfb;
       const actualTtfb = capturedDomain.actualTtfb;
-      
+
       verifier.verify('TTFB milliseconds', displayedTtfb, actualTtfb);
     }
-    
+
     // Verify heading count
     const displayedHeadingScore = result.breakdown?.STRUCTURE.headingFrequency;
-    const actualHeadingScore = capturedContent.headingCount ? 
-      (capturedContent.headingCount >= 5 ? 5 : capturedContent.headingCount) : 0;
-    
+    const actualHeadingScore = capturedContent.headingCount
+      ? capturedContent.headingCount >= 5
+        ? 5
+        : capturedContent.headingCount
+      : 0;
+
     verifier.verify('Heading frequency score', displayedHeadingScore, actualHeadingScore);
-    
+
     // Generate report
     console.log(verifier.getReport());
-    
+
     // Assert high accuracy
     expect(verifier.getAccuracyPercentage()).toBeGreaterThan(90);
   });

@@ -1,3 +1,5 @@
+import { ContentExtractor } from '../contentExtractor';
+
 /**
  * Tests for ContentExtractor business attribute enhancements
  * Separate file to avoid conflicts with existing tests
@@ -12,7 +14,7 @@ jest.mock('cheerio', () => {
       const $ = actualCheerio.load(html);
       // Ensure remove() works on selections
       const originalFind = $.prototype.find;
-      $.prototype.find = function(...args: any[]) {
+      $.prototype.find = function (...args: any[]) {
         const result = originalFind.apply(this, args);
         if (!result.remove) {
           result.remove = () => result;
@@ -20,11 +22,9 @@ jest.mock('cheerio', () => {
         return result;
       };
       return $;
-    }
+    },
   };
 });
-
-import { ContentExtractor } from '../contentExtractor';
 
 describe('ContentExtractor Business Attributes', () => {
   describe('Business Attributes Extraction', () => {
@@ -37,13 +37,13 @@ describe('ContentExtractor Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.industry).toBe('software development');
     });
-    
+
     it('should extract target audience information', () => {
       const html = `
         <html>
@@ -53,13 +53,13 @@ describe('ContentExtractor Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.targetAudience).toContain('enterprises');
     });
-    
+
     it('should extract company metadata', () => {
       const html = `
         <html>
@@ -71,16 +71,16 @@ describe('ContentExtractor Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.yearFounded).toBe('2015');
       expect(result.businessAttributes.location).toContain('San Francisco');
       expect(result.businessAttributes.teamSize).toBe('150+');
     });
   });
-  
+
   describe('Competitor Mentions', () => {
     it('should detect competitor mentions with context', () => {
       const html = `
@@ -92,18 +92,18 @@ describe('ContentExtractor Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.competitorMentions.length).toBeGreaterThan(0);
-      
-      const salesforceMention = result.competitorMentions.find(m => m.name === 'Salesforce');
+
+      const salesforceMention = result.competitorMentions.find((m) => m.name === 'Salesforce');
       expect(salesforceMention).toBeDefined();
       expect(salesforceMention?.sentiment).toBe('positive');
       expect(salesforceMention?.context).toContain('unlimited customization');
     });
-    
+
     it('should detect sentiment correctly', () => {
       const html = `
         <html>
@@ -113,33 +113,33 @@ describe('ContentExtractor Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
-      const googleMention = result.competitorMentions.find(m => m.name === 'Google Analytics');
+
+      const googleMention = result.competitorMentions.find((m) => m.name === 'Google Analytics');
       expect(googleMention?.sentiment).toBe('positive');
     });
   });
-  
+
   describe('Edge Cases', () => {
     it('should handle missing attributes gracefully', () => {
       const html = `<html><body><p>Simple website content.</p></body></html>`;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.industry).toBeNull();
       expect(result.businessAttributes.yearFounded).toBeNull();
       expect(result.competitorMentions).toEqual([]);
     });
-    
+
     it('should not crash on malformed HTML', () => {
       const html = `<h1>Broken <p>HTML`;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result).toBeDefined();
       expect(result.businessType).toBeDefined();
     });

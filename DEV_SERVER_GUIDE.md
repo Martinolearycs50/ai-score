@@ -17,33 +17,37 @@ npm run dev:restart  # Stop everything and restart
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start server with automatic port detection and health checks |
-| `npm run dev:stop` | Stop all development servers |
-| `npm run dev:restart` | Stop and restart the server |
-| `npm run dev:status` | Check server status (PM2) |
-| `npm run dev:logs` | View server logs (PM2) |
-| `npm run dev:simple` | Basic Next.js dev (fallback) |
+| Command               | Description                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| `npm run dev`         | Start server with automatic port detection and health checks |
+| `npm run dev:stop`    | Stop all development servers                                 |
+| `npm run dev:restart` | Stop and restart the server                                  |
+| `npm run dev:status`  | Check server status (PM2)                                    |
+| `npm run dev:logs`    | View server logs (PM2)                                       |
+| `npm run dev:simple`  | Basic Next.js dev (fallback)                                 |
 
 ## Features
 
 ### 1. **Automatic Port Detection**
+
 - Tries port 3000 first
 - Falls back to 3001, 3002, 8080, 8081
 - Cleans up blocked ports automatically
 
 ### 2. **Health Checks**
+
 - Waits for server to be truly ready
 - Shows clear success/error messages
 - Automatic retry on failure
 
 ### 3. **Process Management**
+
 - Kills zombie processes
 - Clears Next.js cache on start
 - Graceful shutdown on CTRL+C
 
 ### 4. **Network Diagnostics**
+
 - Shows both localhost and network URLs
 - Detects common issues
 - Provides clear troubleshooting steps
@@ -53,6 +57,7 @@ npm run dev:restart  # Stop everything and restart
 ### Connection Refused Errors
 
 1. **Run diagnostics:**
+
    ```bash
    node scripts/diagnose.js
    ```

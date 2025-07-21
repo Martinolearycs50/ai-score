@@ -3,8 +3,7 @@
  * These tests make real API calls when CHROME_UX_API_KEY is available
  * Otherwise they are skipped
  */
-
-import { fetchCrUXData, clearCache } from '../chromeUxReport';
+import { clearCache, fetchCrUXData } from '../chromeUxReport';
 
 // Only run integration tests if API key is available
 const shouldRunIntegrationTests = !!process.env.CHROME_UX_API_KEY;
@@ -26,17 +25,17 @@ describe('Chrome UX Report API Integration', () => {
       const popularSites = [
         'https://www.google.com',
         'https://www.wikipedia.org',
-        'https://www.github.com'
+        'https://www.github.com',
       ];
 
       for (const url of popularSites) {
         const result = await fetchCrUXData(url);
-        
+
         expect(result.hasData).toBe(true);
         expect(result.metrics).toBeDefined();
         expect(result.metrics?.ttfb).toBeGreaterThan(0);
         expect(result.metrics?.ttfbRating).toMatch(/^(good|needs-improvement|poor)$/);
-        
+
         // Verify all metrics if available
         if (result.metrics?.lcp) {
           expect(result.metrics.lcp).toBeGreaterThan(0);
@@ -48,7 +47,7 @@ describe('Chrome UX Report API Integration', () => {
     it('should handle sites not in CrUX dataset gracefully', async () => {
       const obscureUrl = 'https://this-site-definitely-does-not-exist-12345.com';
       const result = await fetchCrUXData(obscureUrl);
-      
+
       expect(result.hasData).toBe(false);
       expect(result.error).toBeDefined();
       expect(result.metrics).toBeUndefined();
@@ -56,19 +55,19 @@ describe('Chrome UX Report API Integration', () => {
 
     it('should cache responses for 24 hours', async () => {
       const url = 'https://www.google.com';
-      
+
       // First call
       const start1 = Date.now();
       const result1 = await fetchCrUXData(url);
       const duration1 = Date.now() - start1;
-      
+
       expect(result1.hasData).toBe(true);
-      
+
       // Second call should be from cache (much faster)
       const start2 = Date.now();
       const result2 = await fetchCrUXData(url);
       const duration2 = Date.now() - start2;
-      
+
       expect(result2).toEqual(result1);
       expect(duration2).toBeLessThan(duration1 / 10); // Cache should be at least 10x faster
     });
@@ -76,7 +75,7 @@ describe('Chrome UX Report API Integration', () => {
     it('should return consistent ratings based on thresholds', async () => {
       const url = 'https://www.google.com';
       const result = await fetchCrUXData(url);
-      
+
       if (result.hasData && result.metrics) {
         // Verify TTFB rating matches value
         if (result.metrics.ttfb) {
@@ -88,7 +87,7 @@ describe('Chrome UX Report API Integration', () => {
             expect(result.metrics.ttfbRating).toBe('poor');
           }
         }
-        
+
         // Verify LCP rating matches value
         if (result.metrics.lcp) {
           if (result.metrics.lcp < 2500) {
@@ -108,12 +107,12 @@ describe('Chrome UX Report API Integration', () => {
       // Temporarily break the API URL to simulate network error
       const originalEnv = process.env.CHROME_UX_API_KEY;
       process.env.CHROME_UX_API_KEY = 'invalid-key-to-cause-error';
-      
+
       const result = await fetchCrUXData('https://www.google.com');
-      
+
       expect(result.hasData).toBe(false);
       expect(result.error).toBeDefined();
-      
+
       // Restore original key
       process.env.CHROME_UX_API_KEY = originalEnv;
     });
@@ -124,7 +123,7 @@ describe('Chrome UX Report API Integration', () => {
       const start = Date.now();
       const result = await fetchCrUXData('https://www.google.com');
       const duration = Date.now() - start;
-      
+
       expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
       expect(result).toBeDefined();
     });
@@ -134,15 +133,15 @@ describe('Chrome UX Report API Integration', () => {
         'https://www.google.com',
         'https://www.wikipedia.org',
         'https://www.github.com',
-        'https://www.stackoverflow.com'
+        'https://www.stackoverflow.com',
       ];
-      
+
       const start = Date.now();
-      const results = await Promise.all(urls.map(url => fetchCrUXData(url)));
+      const results = await Promise.all(urls.map((url) => fetchCrUXData(url)));
       const duration = Date.now() - start;
-      
+
       expect(results).toHaveLength(4);
-      expect(results.filter(r => r.hasData).length).toBeGreaterThan(0);
+      expect(results.filter((r) => r.hasData).length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(10000); // Should complete all within 10 seconds
     });
   });
@@ -164,9 +163,9 @@ describe('Enhance Score API Integration', () => {
           paywall: 5,
           mainContent: 5,
           htmlSize: 3,
-          llmsTxtFile: 0
-        }
-      }
+          llmsTxtFile: 0,
+        },
+      },
     };
 
     const response = await fetch('http://localhost:3000/api/enhance-score', {
@@ -176,7 +175,7 @@ describe('Enhance Score API Integration', () => {
       },
       body: JSON.stringify({
         url: 'https://www.google.com',
-        initialScores: mockInitialScores
+        initialScores: mockInitialScores,
       }),
     });
 
@@ -184,7 +183,7 @@ describe('Enhance Score API Integration', () => {
     // In a real test environment, you'd mock the fetch or use a test server
     if (response.ok) {
       const data = await response.json();
-      
+
       if (data.enhanced) {
         expect(data.retrieval.score).toBeGreaterThanOrEqual(mockInitialScores.retrieval.score);
         expect(data.dataSource).toBe('real-world');

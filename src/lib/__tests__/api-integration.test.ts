@@ -37,7 +37,7 @@ describe('API Analyze Endpoint Integration', () => {
   it('should connect to API endpoint', async () => {
     const result = await testAnalyzeAPI('https://example.com');
     console.log('API Test - Basic connectivity:', result);
-    
+
     // If status is 0, server is not running
     expect(result.status).not.toBe(0);
   });
@@ -46,7 +46,7 @@ describe('API Analyze Endpoint Integration', () => {
   it('should analyze valid URL successfully', async () => {
     const result = await testAnalyzeAPI('https://example.com');
     console.log('API Test - Valid URL result:', result);
-    
+
     if (result.ok) {
       expect(result.data.success).toBe(true);
       expect(result.data.data).toBeDefined();
@@ -59,7 +59,7 @@ describe('API Analyze Endpoint Integration', () => {
   it('should reject invalid URL', async () => {
     const result = await testAnalyzeAPI('not-a-valid-url');
     console.log('API Test - Invalid URL result:', result);
-    
+
     expect(result.ok).toBe(false);
     expect(result.data.success).toBe(false);
     expect(result.data.error).toBeDefined();
@@ -69,7 +69,7 @@ describe('API Analyze Endpoint Integration', () => {
   it('should reject empty URL', async () => {
     const result = await testAnalyzeAPI('');
     console.log('API Test - Empty URL result:', result);
-    
+
     expect(result.ok).toBe(false);
     expect(result.data.success).toBe(false);
     expect(result.data.error).toContain('required');
@@ -79,7 +79,7 @@ describe('API Analyze Endpoint Integration', () => {
   it('should reject localhost URLs', async () => {
     const result = await testAnalyzeAPI('http://localhost:8080');
     console.log('API Test - Localhost URL result:', result);
-    
+
     expect(result.ok).toBe(false);
     expect(result.data.success).toBe(false);
     expect(result.data.error).toContain('Local/internal URLs are not allowed');
@@ -89,7 +89,7 @@ describe('API Analyze Endpoint Integration', () => {
 // Manual test runner (can be run with: node -r ts-node/register this-file.ts)
 if (require.main === module) {
   console.log('Running manual API tests...\n');
-  
+
   async function runManualTests() {
     const testUrls = [
       'https://example.com',
@@ -102,7 +102,7 @@ if (require.main === module) {
     for (const url of testUrls) {
       console.log(`\nTesting URL: "${url}"`);
       console.log('-'.repeat(50));
-      
+
       try {
         const response = await fetch('http://localhost:3000/api/analyze', {
           method: 'POST',

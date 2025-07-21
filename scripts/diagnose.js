@@ -40,15 +40,17 @@ testServer.on('error', (err) => {
 testServer.listen(0, '127.0.0.1', () => {
   const { port } = testServer.address();
   console.log(`   ✓ Test server created on port ${port}`);
-  
+
   // Test connection
-  http.get(`http://127.0.0.1:${port}`, (res) => {
-    console.log('   ✓ Successfully connected to test server');
-    testServer.close();
-  }).on('error', (err) => {
-    console.log('   ✗ Cannot connect to test server:', err.message);
-    testServer.close();
-  });
+  http
+    .get(`http://127.0.0.1:${port}`, (res) => {
+      console.log('   ✓ Successfully connected to test server');
+      testServer.close();
+    })
+    .on('error', (err) => {
+      console.log('   ✗ Cannot connect to test server:', err.message);
+      testServer.close();
+    });
 });
 
 // Check firewall status
@@ -58,7 +60,9 @@ try {
     const pfctl = execSync('sudo pfctl -s info 2>&1', { encoding: 'utf8' });
     if (pfctl.includes('Status: Enabled')) {
       console.log('   ⚠️  macOS firewall is enabled');
-      console.log('   You may need to allow Node.js in System Preferences > Security & Privacy > Firewall');
+      console.log(
+        '   You may need to allow Node.js in System Preferences > Security & Privacy > Firewall'
+      );
     } else {
       console.log('   ✓ macOS firewall is not blocking');
     }
@@ -83,12 +87,13 @@ function checkPort(port) {
   });
 }
 
-Promise.all(portsToCheck.map(port => 
-  checkPort(port).then(available => 
-    console.log(`   Port ${port}: ${available ? '✓ Available' : '✗ In use'}`)
+Promise.all(
+  portsToCheck.map((port) =>
+    checkPort(port).then((available) =>
+      console.log(`   Port ${port}: ${available ? '✓ Available' : '✗ In use'}`)
+    )
   )
-)).then(() => {
-  
+).then(() => {
   // Check Next.js installation
   console.log('\n6. Next.js Installation:');
   try {
@@ -98,12 +103,12 @@ Promise.all(portsToCheck.map(port =>
   } catch (e) {
     console.log('   ✗ Next.js not found');
   }
-  
+
   // Check for proxy settings
   console.log('\n7. Proxy Settings:');
   const proxyVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
   let hasProxy = false;
-  proxyVars.forEach(varName => {
+  proxyVars.forEach((varName) => {
     if (process.env[varName]) {
       console.log(`   ⚠️  ${varName} is set:`, process.env[varName]);
       hasProxy = true;
@@ -112,7 +117,7 @@ Promise.all(portsToCheck.map(port =>
   if (!hasProxy) {
     console.log('   ✓ No proxy configured');
   }
-  
+
   // Final recommendations
   console.log('\n📋 Recommendations:');
   console.log('   1. Run: npm run dev:stop   (to kill any stuck processes)');

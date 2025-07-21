@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface LoadingStage {
   id: string;
@@ -79,7 +79,6 @@ export function useLoadingProgress(isActive: boolean) {
     if (!isActive || isComplete) return;
 
     const now = Date.now();
-    
     if (!startTimeRef.current) {
       startTimeRef.current = now;
       stageStartTimeRef.current = now;
@@ -87,20 +86,20 @@ export function useLoadingProgress(isActive: boolean) {
 
     const stageElapsed = now - (stageStartTimeRef.current || now);
     const stageProgress = Math.min(stageElapsed / currentStage.duration, 1);
-    
+
     // Calculate progress within current stage
     const stageRange = currentStage.maxProgress - currentStage.minProgress;
-    const currentProgress = currentStage.minProgress + (stageRange * stageProgress);
-    
+    const currentProgress = currentStage.minProgress + stageRange * stageProgress;
+
     // Add some variance to make it feel more natural
     const variance = Math.sin(now * 0.001) * 0.5;
     const adjustedProgress = Math.min(currentProgress + variance, currentStage.maxProgress);
-    
+
     setProgress(adjustedProgress);
 
     // Move to next stage
     if (stageProgress >= 1 && currentStageIndex < LOADING_STAGES.length - 1) {
-      setCurrentStageIndex(prev => prev + 1);
+      setCurrentStageIndex((prev) => prev + 1);
       stageStartTimeRef.current = now;
     } else if (stageProgress >= 1 && currentStageIndex === LOADING_STAGES.length - 1) {
       setProgress(100);

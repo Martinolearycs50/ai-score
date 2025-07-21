@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+
 import { ContentExtractor } from '@/lib/contentExtractor';
 
 describe('Page Type Detection', () => {
@@ -12,7 +13,7 @@ describe('Page Type Detection', () => {
       const html = '<html><body><h1>Welcome</h1></body></html>';
       const extractor = createExtractor(html, 'https://example.com/');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('homepage');
     });
 
@@ -24,7 +25,7 @@ describe('Page Type Detection', () => {
         'https://example.com/homepage',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><h1>Welcome</h1></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -39,7 +40,7 @@ describe('Page Type Detection', () => {
         'https://example.com/fr/',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><h1>Welcome</h1></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -60,7 +61,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/about');
       const result = extractor.extract();
-      
+
       // Should be homepage due to Organization schema and short path
       expect(result.pageType).toBe('homepage');
     });
@@ -76,7 +77,7 @@ describe('Page Type Detection', () => {
         'https://example.com/insights/report',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><article>Content</article></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -91,7 +92,7 @@ describe('Page Type Detection', () => {
         'https://insights.example.com/report',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><article>Content</article></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -105,7 +106,7 @@ describe('Page Type Detection', () => {
         'https://example.com/2024-12-15-article',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><article>Content</article></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -126,7 +127,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/content');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('blog');
     });
 
@@ -144,7 +145,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/content');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('blog');
     });
   });
@@ -159,7 +160,7 @@ describe('Page Type Detection', () => {
         'https://example.com/p/12345',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><div class="product">Product</div></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -169,11 +170,11 @@ describe('Page Type Detection', () => {
 
     it('should detect platform-specific patterns', () => {
       const html = '<html><body><div class="product">Product</div></body></html>';
-      
+
       // Amazon pattern
       const amazonExtractor = createExtractor(html, 'https://example.com/dp/B001234567');
       expect(amazonExtractor.extract().pageType).toBe('product');
-      
+
       // Shopify pattern
       const shopifyExtractor = createExtractor(html, 'https://store.shopify.com/products/item');
       expect(shopifyExtractor.extract().pageType).toBe('product');
@@ -192,7 +193,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/item');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('product');
     });
 
@@ -210,7 +211,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/item');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('product');
     });
   });
@@ -223,7 +224,7 @@ describe('Page Type Detection', () => {
         'https://example.com/manual/setup',
       ];
 
-      urls.forEach(url => {
+      urls.forEach((url) => {
         const html = '<html><body><div class="docs-content">Documentation</div></body></html>';
         const extractor = createExtractor(html, url);
         const result = extractor.extract();
@@ -253,7 +254,7 @@ describe('Page Type Detection', () => {
       `;
       const extractor = createExtractor(html, 'https://example.com/main');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('homepage');
     });
   });
@@ -263,7 +264,7 @@ describe('Page Type Detection', () => {
       const html = '<html><body><div>Some content</div></body></html>';
       const extractor = createExtractor(html, 'https://example.com/unknown-page');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('blog');
     });
 
@@ -272,7 +273,7 @@ describe('Page Type Detection', () => {
       // Invalid URL to trigger error
       const extractor = createExtractor(html, 'not-a-valid-url');
       const result = extractor.extract();
-      
+
       expect(result.pageType).toBe('blog');
     });
   });

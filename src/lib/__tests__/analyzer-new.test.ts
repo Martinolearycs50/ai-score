@@ -1,6 +1,11 @@
-import { AiSearchAnalyzer } from '../analyzer-new';
 import axios from 'axios';
-import { WELL_OPTIMIZED_HTML, POORLY_OPTIMIZED_HTML, FRESH_HEADERS } from '../audit/__tests__/fixtures';
+
+import { AiSearchAnalyzer } from '../analyzer-new';
+import {
+  FRESH_HEADERS,
+  POORLY_OPTIMIZED_HTML,
+  WELL_OPTIMIZED_HTML,
+} from '../audit/__tests__/fixtures';
 
 // Mock axios
 jest.mock('axios');
@@ -187,7 +192,9 @@ describe('AI Search Analyzer Integration', () => {
         }),
       } as any);
 
-      await expect(analyzer.analyzeUrl('https://example.com')).rejects.toThrow('Server returned 500');
+      await expect(analyzer.analyzeUrl('https://example.com')).rejects.toThrow(
+        'Server returned 500'
+      );
     });
 
     it('should handle timeout errors', async () => {
@@ -225,7 +232,10 @@ describe('AI Search Analyzer Integration', () => {
       expect(factDensity.run).toHaveBeenCalledWith(WELL_OPTIMIZED_HTML);
       expect(structure.run).toHaveBeenCalledWith(WELL_OPTIMIZED_HTML);
       expect(trust.run).toHaveBeenCalledWith(WELL_OPTIMIZED_HTML);
-      expect(recency.run).toHaveBeenCalledWith(WELL_OPTIMIZED_HTML, expect.objectContaining(FRESH_HEADERS));
+      expect(recency.run).toHaveBeenCalledWith(
+        WELL_OPTIMIZED_HTML,
+        expect.objectContaining(FRESH_HEADERS)
+      );
     });
 
     it('should handle audit module errors gracefully', async () => {

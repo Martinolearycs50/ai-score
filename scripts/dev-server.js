@@ -12,7 +12,7 @@ const CONFIG = {
   host: '0.0.0.0',
   maxRetries: 3,
   healthCheckInterval: 1000,
-  healthCheckTimeout: 30000
+  healthCheckTimeout: 30000,
 };
 
 // Colors for console output
@@ -22,7 +22,7 @@ const colors = {
   green: '\x1b[32m',
   yellow: '\x1b[33m',
   red: '\x1b[31m',
-  blue: '\x1b[34m'
+  blue: '\x1b[34m',
 };
 
 // Utility functions
@@ -31,7 +31,7 @@ const log = {
   success: (msg) => console.log(`${colors.green}✓${colors.reset} ${msg}`),
   warn: (msg) => console.log(`${colors.yellow}⚠${colors.reset}  ${msg}`),
   error: (msg) => console.log(`${colors.red}✗${colors.reset} ${msg}`),
-  divider: () => console.log('━'.repeat(60))
+  divider: () => console.log('━'.repeat(60)),
 };
 
 // Check if port is available
@@ -50,14 +50,14 @@ async function isPortAvailable(port) {
 // Find available port
 async function findAvailablePort() {
   const ports = [CONFIG.primaryPort, ...CONFIG.fallbackPorts];
-  
+
   for (const port of ports) {
     if (await isPortAvailable(port)) {
       return port;
     }
     log.warn(`Port ${port} is in use`);
   }
-  
+
   throw new Error('No available ports found');
 }
 
@@ -77,7 +77,7 @@ function killProcessOnPort(port) {
 // Health check
 async function waitForServer(port, host) {
   const startTime = Date.now();
-  
+
   return new Promise((resolve, reject) => {
     const check = () => {
       const options = {
@@ -85,9 +85,9 @@ async function waitForServer(port, host) {
         port: port,
         path: '/',
         method: 'GET',
-        timeout: 5000
+        timeout: 5000,
       };
-      
+
       const req = http.request(options, (res) => {
         if (res.statusCode === 200 || res.statusCode === 404) {
           resolve(true);
@@ -95,7 +95,7 @@ async function waitForServer(port, host) {
           setTimeout(check, CONFIG.healthCheckInterval);
         }
       });
-      
+
       req.on('error', () => {
         if (Date.now() - startTime > CONFIG.healthCheckTimeout) {
           reject(new Error('Server health check timeout'));
@@ -103,10 +103,10 @@ async function waitForServer(port, host) {
           setTimeout(check, CONFIG.healthCheckInterval);
         }
       });
-      
+
       req.end();
     };
-    
+
     check();
   });
 }
@@ -114,12 +114,12 @@ async function waitForServer(port, host) {
 // Clean up function
 function cleanup() {
   log.info('Cleaning up...');
-  
+
   // Kill any running Next.js processes
   try {
     execSync('pkill -f "next dev"', { stdio: 'ignore' });
   } catch (e) {}
-  
+
   // Clear Next.js cache
   const nextDir = path.join(__dirname, '..', '.next');
   if (fs.existsSync(nextDir)) {
@@ -133,10 +133,10 @@ async function startDevServer() {
   log.divider();
   log.info('🚀 Starting AI Search Analyzer Development Server');
   log.divider();
-  
+
   // Clean up first
   cleanup();
-  
+
   // Find available port
   let port;
   try {
@@ -144,31 +144,31 @@ async function startDevServer() {
     log.success(`Using port ${port}`);
   } catch (error) {
     log.error('No available ports found');
-    
+
     // Try to kill processes and retry
     log.info('Attempting to free up ports...');
     for (const p of [CONFIG.primaryPort, ...CONFIG.fallbackPorts]) {
       killProcessOnPort(p);
     }
-    
+
     port = await findAvailablePort();
   }
-  
+
   // Set environment variables
   process.env.PORT = port;
   process.env.HOST = CONFIG.host;
-  
+
   // Start the server
   log.info('Starting Next.js development server...');
-  
+
   const nextProcess = spawn('npx', ['next', 'dev', '-H', CONFIG.host, '-p', port], {
     stdio: 'inherit',
     env: {
       ...process.env,
-      FORCE_COLOR: '1'
-    }
+      FORCE_COLOR: '1',
+    },
   });
-  
+
   // Handle process exit
   nextProcess.on('exit', (code) => {
     if (code !== 0) {
@@ -176,13 +176,13 @@ async function startDevServer() {
       process.exit(code);
     }
   });
-  
+
   // Wait for server to be ready
   log.info('Waiting for server to be ready...');
-  
+
   try {
     await waitForServer(port, CONFIG.host);
-    
+
     log.divider();
     log.success('🎉 Development server is ready!');
     log.divider();

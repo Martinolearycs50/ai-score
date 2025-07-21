@@ -1,17 +1,17 @@
-import { 
-  getTierFeatures, 
-  hasFeature, 
-  getAvailableTiers,
-  isValidTier,
+import {
+  DEFAULT_TIER,
   TIER_CONFIG,
-  DEFAULT_TIER 
+  getAvailableTiers,
+  getTierFeatures,
+  hasFeature,
+  isValidTier,
 } from '../tierConfig';
 
 describe('Tier Configuration', () => {
   describe('getTierFeatures', () => {
     it('returns correct features for free tier', () => {
       const features = getTierFeatures('free');
-      
+
       expect(features.showDetailedScores).toBe(false);
       expect(features.showRecommendations).toBe(false);
       expect(features.showWebsiteProfile).toBe(false);
@@ -21,7 +21,7 @@ describe('Tier Configuration', () => {
 
     it('returns correct features for pro tier', () => {
       const features = getTierFeatures('pro');
-      
+
       expect(features.showDetailedScores).toBe(true);
       expect(features.showRecommendations).toBe(true);
       expect(features.showWebsiteProfile).toBe(true);
@@ -65,8 +65,8 @@ describe('Tier Configuration', () => {
     it('all tiers have the same feature keys', () => {
       const tiers = getAvailableTiers();
       const firstTierKeys = Object.keys(TIER_CONFIG[tiers[0]]).sort();
-      
-      tiers.forEach(tier => {
+
+      tiers.forEach((tier) => {
         const tierKeys = Object.keys(TIER_CONFIG[tier]).sort();
         expect(tierKeys).toEqual(firstTierKeys);
       });
@@ -87,7 +87,7 @@ describe('Tier Configuration', () => {
     it('pro tier has all features that free tier has', () => {
       const freeFeatures = getTierFeatures('free');
       const proFeatures = getTierFeatures('pro');
-      
+
       Object.entries(freeFeatures).forEach(([key, value]) => {
         if (key === 'showUpgradeCTA') return; // Skip upgrade CTA
         if (typeof value === 'boolean' && value === true) {
@@ -102,7 +102,7 @@ describe('Tier Configuration', () => {
     it('pro tier has higher analysis limit than free tier', () => {
       const freeLimit = getTierFeatures('free').maxAnalysesPerMonth;
       const proLimit = getTierFeatures('pro').maxAnalysesPerMonth;
-      
+
       expect(proLimit).toBeGreaterThan(freeLimit);
     });
   });

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
 import type { AnalysisResultNew } from '@/lib/analyzer-new';
+import { cssVars, getThemeByScore } from '@/lib/design-system/colors';
 
 interface EmotionalResultsRevealProps {
   result: AnalysisResultNew;
@@ -11,35 +14,37 @@ interface EmotionalResultsRevealProps {
 
 // Emotional themes based on score ranges
 const getEmotionalTheme = (score: number) => {
+  const theme = getThemeByScore(score);
+
   if (score >= 80) {
     return {
-      title: "Outstanding AI Optimization! 🏆",
-      subtitle: "Your content is primed for AI search success",
+      title: 'Outstanding AI Optimization! 🏆',
+      subtitle: 'Your content is primed for AI search success',
       encouragement: "You're in the top tier of AI-optimized content!",
-      color: '#10B981', // Green
-      bgGradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+      color: theme.color,
+      bgGradient: theme.gradient,
       emotion: 'celebration',
       particles: true,
       potentialGain: 20,
     };
   } else if (score >= 60) {
     return {
-      title: "Strong Foundation Detected! ✨",
-      subtitle: "Your content shows great potential",
+      title: 'Strong Foundation Detected! ✨',
+      subtitle: 'Your content shows great potential',
       encouragement: "You're just a few tweaks away from excellence!",
-      color: '#3B82F6', // Blue
-      bgGradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+      color: theme.color,
+      bgGradient: theme.gradient,
       emotion: 'positive',
       particles: true,
       potentialGain: 30,
     };
   } else if (score >= 40) {
     return {
-      title: "Your AI Journey Starts Here!",
-      subtitle: "Exciting optimization opportunities await",
-      encouragement: "Sites like yours often see 40-60 point improvements!",
-      color: '#F59E0B', // Amber
-      bgGradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+      title: 'Your AI Journey Starts Here!',
+      subtitle: 'Exciting optimization opportunities await',
+      encouragement: 'Sites like yours often see 40-60 point improvements!',
+      color: theme.color,
+      bgGradient: theme.gradient,
       emotion: 'encouraging',
       particles: true,
       potentialGain: 45,
@@ -47,10 +52,10 @@ const getEmotionalTheme = (score: number) => {
   } else {
     return {
       title: "Let's Transform Your AI Visibility! 🌟",
-      subtitle: "Every expert started here - your potential is unlimited",
+      subtitle: 'Every expert started here - your potential is unlimited',
       encouragement: "We've seen sites go from 20 to 80+ with our recommendations!",
-      color: '#8B5CF6', // Purple
-      bgGradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+      color: theme.color,
+      bgGradient: theme.gradient,
       emotion: 'supportive',
       particles: true,
       potentialGain: 60,
@@ -67,13 +72,13 @@ const AnimatedCounter = ({ target, duration = 2 }: { target: number; duration?: 
     const timer = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
       const progress = Math.min(elapsedTime / (duration * 1000), 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const currentCount = Math.round(target * easeOutQuart);
-      
+
       setCount(currentCount);
-      
+
       if (progress >= 1) {
         clearInterval(timer);
       }
@@ -88,11 +93,11 @@ const AnimatedCounter = ({ target, duration = 2 }: { target: number; duration?: 
 // Particle effect for high scores
 const ParticleEffect = () => {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-2 h-2 rounded-full"
+          className="absolute h-2 w-2 rounded-full"
           style={{
             background: 'var(--accent)',
             left: `${Math.random() * 100}%`,
@@ -116,17 +121,57 @@ const ParticleEffect = () => {
   );
 };
 
+// Function to play completion sound using Web Audio API
+const playCompletionSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Create oscillators for a pleasant chime sound
+    const playNote = (frequency: number, startTime: number, duration: number) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+
+      // Envelope for smooth sound
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+
+    const now = audioContext.currentTime;
+    // Play a pleasant two-note chime (C5 and G5)
+    playNote(523.25, now, 0.3); // C5
+    playNote(783.99, now + 0.15, 0.3); // G5
+  } catch (error) {
+    // Silently fail if audio is not supported or blocked
+    console.log('Audio playback not available');
+  }
+};
+
 export default function EmotionalResultsReveal({ result, children }: EmotionalResultsRevealProps) {
   const [stage, setStage] = useState<'suspense' | 'reveal' | 'details' | 'complete'>('suspense');
   const theme = getEmotionalTheme(result.aiSearchScore);
-  const websiteName = result.websiteProfile?.title || result.pageTitle || new URL(result.url).hostname;
+  const websiteName =
+    result.websiteProfile?.title || result.pageTitle || new URL(result.url).hostname;
 
   useEffect(() => {
     // Progression through stages with optimized timing
     const timers = [
-      setTimeout(() => setStage('reveal'), 1500),    // 1.5s wait before reveal
-      setTimeout(() => setStage('details'), 4000),   // 2.5s to read reveal content
-      setTimeout(() => setStage('complete'), 8500),  // 4.5s to read details
+      setTimeout(() => {
+        setStage('reveal');
+        // Play sound when revealing the score
+        playCompletionSound();
+      }, 1500), // 1.5s wait before reveal
+      setTimeout(() => setStage('details'), 4000), // 2.5s to read reveal content
+      setTimeout(() => setStage('complete'), 8500), // 4.5s to read details
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -151,10 +196,15 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
             transition={{
               duration: 2,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           >
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 blur-xl mx-auto" />
+            <div
+              className="mx-auto h-32 w-32 rounded-full opacity-20 blur-xl"
+              style={{
+                background: `linear-gradient(135deg, ${cssVars.accent} 0%, ${cssVars.primary} 100%)`,
+              }}
+            />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <motion.div
@@ -165,18 +215,31 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                   transition={{
                     duration: 2,
                     repeat: Infinity,
-                    ease: "linear",
+                    ease: 'linear',
                   }}
                 >
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" className="text-blue-600"/>
-                    <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-blue-600"/>
-                    <circle cx="11" cy="11" r="3" fill="currentColor" className="text-blue-400 opacity-50"/>
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="11" cy="11" r="8" stroke={cssVars.accent} strokeWidth="2" />
+                    <path
+                      d="M21 21L16.65 16.65"
+                      stroke={cssVars.accent}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="11" cy="11" r="3" fill={cssVars.accent} fillOpacity="0.5" />
                   </svg>
                 </motion.div>
-                <p className="text-sm text-muted">Analyzing {websiteName}...</p>
+                <p className="text-muted text-sm">Analyzing {websiteName}...</p>
                 {result.extractedContent?.pageType && (
-                  <p className="text-xs text-muted mt-1">Detected: {result.extractedContent.pageType}</p>
+                  <p className="text-muted mt-1 text-xs">
+                    Detected: {result.extractedContent.pageType}
+                  </p>
                 )}
               </div>
             </div>
@@ -197,7 +260,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{
-              type: "spring",
+              type: 'spring',
               stiffness: 200,
               damping: 20,
             }}
@@ -205,12 +268,12 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           >
             {/* Score Circle */}
             <motion.div
-              className="relative inline-flex items-center justify-center mb-8"
+              className="relative mb-8 inline-flex items-center justify-center"
               initial={{ rotate: -180 }}
               animate={{ rotate: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: 'easeOut' }}
             >
-              <svg className="w-64 h-64 transform -rotate-90">
+              <svg className="h-64 w-64 -rotate-90 transform">
                 <circle
                   cx="128"
                   cy="128"
@@ -229,7 +292,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                   strokeDasharray={`${(result.aiSearchScore / 100) * 753} 753`}
                   initial={{ strokeDashoffset: 753 }}
                   animate={{ strokeDashoffset: 0 }}
-                  transition={{ duration: 2, ease: "easeOut" }}
+                  transition={{ duration: 2, ease: 'easeOut' }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -240,7 +303,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                   animate={{ scale: 1 }}
                   transition={{
                     delay: 0.5,
-                    type: "spring",
+                    type: 'spring',
                     stiffness: 300,
                     damping: 20,
                   }}
@@ -248,7 +311,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
                   <AnimatedCounter target={result.aiSearchScore} />
                 </motion.div>
                 <motion.div
-                  className="text-lg text-muted"
+                  className="text-muted text-lg"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1 }}
@@ -264,35 +327,37 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.5 }}
             >
-              <h2 className="text-3xl font-medium mb-2" style={{ color: theme.color }}>
+              <h2 className="mb-2 text-3xl font-medium" style={{ color: theme.color }}>
                 {theme.title}
               </h2>
-              <p className="text-lg text-muted mb-2">{theme.subtitle}</p>
-              <p className="text-sm text-muted mb-1">
+              <p className="text-muted mb-2 text-lg">{theme.subtitle}</p>
+              <p className="text-muted mb-1 text-sm">
                 {websiteName} • {result.websiteProfile?.domain || new URL(result.url).hostname}
               </p>
               {result.extractedContent?.pageType && result.scoringResult.dynamicScoring && (
-                <p className="text-xs text-muted mb-4">
-                  {result.extractedContent.pageType.charAt(0).toUpperCase() + result.extractedContent.pageType.slice(1)} page • Dynamic scoring applied
+                <p className="text-muted mb-4 text-xs">
+                  {result.extractedContent.pageType.charAt(0).toUpperCase() +
+                    result.extractedContent.pageType.slice(1)}{' '}
+                  page • Dynamic scoring applied
                 </p>
               )}
-              
+
               {/* Potential Score Preview */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 2.5, type: "spring" }}
-                className="inline-flex items-center gap-3 mt-4 px-6 py-3 rounded-full"
-                style={{ 
+                transition={{ delay: 2.5, type: 'spring' }}
+                className="mt-4 inline-flex items-center gap-3 rounded-full px-6 py-3"
+                style={{
                   background: `${theme.color}20`,
-                  border: `2px solid ${theme.color}40`
+                  border: `2px solid ${theme.color}40`,
                 }}
               >
                 <span className="text-sm font-medium" style={{ color: theme.color }}>
                   Potential Score: {result.aiSearchScore + theme.potentialGain}
                 </span>
                 <motion.span
-                  className="text-xs font-bold px-2 py-1 rounded"
+                  className="rounded px-2 py-1 text-xs font-bold"
                   style={{ background: theme.color, color: 'white' }}
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
@@ -317,13 +382,13 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
           className="py-12 md:py-16"
         >
           <motion.div
-            className="text-center max-w-2xl mx-auto px-6"
+            className="mx-auto max-w-2xl px-6 text-center"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
           >
             <motion.div
-              className="inline-flex items-center justify-center w-32 h-32 rounded-full mb-6"
+              className="mb-6 inline-flex h-32 w-32 items-center justify-center rounded-full"
               style={{ background: theme.bgGradient }}
               animate={{
                 scale: [1, 1.1, 1],
@@ -332,34 +397,93 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
             >
               {theme.emotion === 'celebration' ? (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z"
+                    fill="white"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               ) : theme.emotion === 'positive' ? (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C11.45 2 11 2.45 11 3V7C11 7.55 11.45 8 12 8C12.55 8 13 7.55 13 7V3C13 2.45 12.55 2 12 2Z" fill="white"/>
-                  <path d="M18.36 5.64L15.54 8.46C15.15 8.85 15.15 9.49 15.54 9.88C15.93 10.27 16.57 10.27 16.96 9.88L19.78 7.06C20.17 6.67 20.17 6.03 19.78 5.64C19.39 5.25 18.75 5.25 18.36 5.64Z" fill="white"/>
-                  <path d="M5.64 5.64C5.25 6.03 5.25 6.67 5.64 7.06L8.46 9.88C8.85 10.27 9.49 10.27 9.88 9.88C10.27 9.49 10.27 8.85 9.88 8.46L7.06 5.64C6.67 5.25 6.03 5.25 5.64 5.64Z" fill="white"/>
-                  <circle cx="12" cy="16" r="5" fill="white"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2C11.45 2 11 2.45 11 3V7C11 7.55 11.45 8 12 8C12.55 8 13 7.55 13 7V3C13 2.45 12.55 2 12 2Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M18.36 5.64L15.54 8.46C15.15 8.85 15.15 9.49 15.54 9.88C15.93 10.27 16.57 10.27 16.96 9.88L19.78 7.06C20.17 6.67 20.17 6.03 19.78 5.64C19.39 5.25 18.75 5.25 18.36 5.64Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M5.64 5.64C5.25 6.03 5.25 6.67 5.64 7.06L8.46 9.88C8.85 10.27 9.49 10.27 9.88 9.88C10.27 9.49 10.27 8.85 9.88 8.46L7.06 5.64C6.67 5.25 6.03 5.25 5.64 5.64Z"
+                    fill="white"
+                  />
+                  <circle cx="12" cy="16" r="5" fill="white" />
                 </svg>
               ) : theme.emotion === 'encouraging' ? (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13 10H20L11 23V14H4L13 1V10Z" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13 10H20L11 23V14H4L13 1V10Z"
+                    fill="white"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               ) : (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1" fill="none" opacity="0.3"/>
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 17L17 7M17 7H7M17 7V17"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="white"
+                    strokeWidth="1"
+                    fill="none"
+                    opacity="0.3"
+                  />
                 </svg>
               )}
             </motion.div>
-            
+
             <motion.h3
-              className="text-2xl font-medium mb-3"
+              className="mb-3 text-2xl font-medium"
               style={{ color: theme.color }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -367,16 +491,16 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
             >
               {theme.encouragement}
             </motion.h3>
-            
+
             <motion.p
-              className="text-lg text-muted mb-6"
+              className="text-muted mb-6 text-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
             >
               Analyzing your optimization opportunities...
             </motion.p>
-            
+
             {/* Progress dots */}
             <motion.div
               className="flex justify-center gap-2"
@@ -387,7 +511,7 @@ export default function EmotionalResultsReveal({ result, children }: EmotionalRe
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-2 h-2 rounded-full"
+                  className="h-2 w-2 rounded-full"
                   style={{ background: theme.color }}
                   animate={{
                     scale: [1, 1.5, 1],

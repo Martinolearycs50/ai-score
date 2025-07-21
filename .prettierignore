@@ -1,0 +1,68 @@
+# Build outputs
+.next/
+.vercel/
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Cache and logs
+.npm
+.yarn/
+yarn-error.log*
+.eslintcache
+*.log
+
+# Environment and config
+.env*
+!.env.example
+
+# Generated files
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+__snapshots__/
+.nyc_output/
+
+# Specific files that should not be formatted
+CHANGELOG.md
+LICENSE
+*.min.js
+*.min.css
+
+# Workers (if they have different formatting needs)
+workers/
+
+# Git files
+.git/
+.gitignore
+
+# Package locks (formatting would break them)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Documentation that should preserve original formatting
+*.md.bak
+README.*.md

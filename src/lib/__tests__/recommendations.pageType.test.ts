@@ -1,17 +1,17 @@
-import { generateRecommendations } from '../recommendations';
 import type { ExtractedContent } from '../contentExtractor';
+import { generateRecommendations } from '../recommendations';
 import type { PillarResults } from '../types';
 
 describe('generateRecommendations - Page Type Integration', () => {
   const createMockPillarResults = (): PillarResults => ({
     RETRIEVAL: {
-      ttfb: 5,  // Failed (max 10)
+      ttfb: 5, // Failed (max 10)
       paywall: 5,
-      mainContent: 0,  // Failed (max 5)
+      mainContent: 0, // Failed (max 5)
       htmlSize: 10,
     },
     FACT_DENSITY: {
-      uniqueStats: 0,  // Failed (max 10)
+      uniqueStats: 0, // Failed (max 10)
       dataMarkup: 5,
       citations: 10,
       deduplication: 10,
@@ -19,16 +19,16 @@ describe('generateRecommendations - Page Type Integration', () => {
     STRUCTURE: {
       headingFrequency: 10,
       headingDepth: 5,
-      structuredData: 0,  // Failed (max 5)
-      rssFeed: 0,  // Failed (max 5)
+      structuredData: 0, // Failed (max 5)
+      rssFeed: 0, // Failed (max 5)
     },
     TRUST: {
-      authorBio: 0,  // Failed (max 5)
+      authorBio: 0, // Failed (max 5)
       napConsistency: 5,
       license: 5,
     },
     RECENCY: {
-      lastModified: 0,  // Failed (max 5)
+      lastModified: 0, // Failed (max 5)
       stableCanonical: 5,
     },
   });
@@ -70,14 +70,16 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should prioritize homepage-specific metrics', () => {
       const content = createMockContent('homepage');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       // Find structuredData recommendation (homepage priority #1)
-      const structuredDataRec = recommendations.find(r => r.metric === 'structuredData');
+      const structuredDataRec = recommendations.find((r) => r.metric === 'structuredData');
       expect(structuredDataRec).toBeDefined();
-      
+
       // Should have custom homepage message
-      expect(structuredDataRec?.template.why).toContain('Organization schema is essential for homepages');
-      
+      expect(structuredDataRec?.template.why).toContain(
+        'Organization schema is essential for homepages'
+      );
+
       // Should have higher priority due to multiplier
       expect(structuredDataRec?.priority).toBeGreaterThan(structuredDataRec?.template.gain || 0);
     });
@@ -85,10 +87,11 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should sort homepage recommendations by adjusted priority', () => {
       const content = createMockContent('homepage');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       // Check that recommendations are sorted by priority
       for (let i = 1; i < recommendations.length; i++) {
-        const prevPriority = recommendations[i - 1].priority || recommendations[i - 1].template.gain;
+        const prevPriority =
+          recommendations[i - 1].priority || recommendations[i - 1].template.gain;
         const currPriority = recommendations[i].priority || recommendations[i].template.gain;
         expect(prevPriority).toBeGreaterThanOrEqual(currPriority);
       }
@@ -99,14 +102,14 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should prioritize freshness for articles', () => {
       const content = createMockContent('article');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       // Find lastModified recommendation (article priority #1)
-      const lastModifiedRec = recommendations.find(r => r.metric === 'lastModified');
+      const lastModifiedRec = recommendations.find((r) => r.metric === 'lastModified');
       expect(lastModifiedRec).toBeDefined();
-      
+
       // Should have custom article message
       expect(lastModifiedRec?.template.why).toContain('AI prioritizes recent content');
-      
+
       // Should have multiplier of 1.5 for top priority
       const expectedPriority = (lastModifiedRec?.template.gain || 0) * 1.5;
       expect(lastModifiedRec?.priority).toBe(expectedPriority);
@@ -115,8 +118,8 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should include author bio as high priority for articles', () => {
       const content = createMockContent('article');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
-      const authorBioRec = recommendations.find(r => r.metric === 'authorBio');
+
+      const authorBioRec = recommendations.find((r) => r.metric === 'authorBio');
       expect(authorBioRec).toBeDefined();
       expect(authorBioRec?.template.why).toContain('Articles need clear author attribution');
     });
@@ -126,16 +129,16 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should filter out irrelevant metrics for search pages', () => {
       const content = createMockContent('search');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       // Should not include listicleFormat or authorBio
-      const listicleRec = recommendations.find(r => r.metric === 'listicleFormat');
-      const authorRec = recommendations.find(r => r.metric === 'authorBio');
-      
+      const listicleRec = recommendations.find((r) => r.metric === 'listicleFormat');
+      const authorRec = recommendations.find((r) => r.metric === 'authorBio');
+
       expect(listicleRec).toBeUndefined();
       expect(authorRec).toBeUndefined();
-      
+
       // Should still include relevant metrics
-      const mainContentRec = recommendations.find(r => r.metric === 'mainContent');
+      const mainContentRec = recommendations.find((r) => r.metric === 'mainContent');
       expect(mainContentRec).toBeDefined();
     });
   });
@@ -144,10 +147,10 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should emphasize specifications for product pages', () => {
       const content = createMockContent('product');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
-      const uniqueStatsRec = recommendations.find(r => r.metric === 'uniqueStats');
+
+      const uniqueStatsRec = recommendations.find((r) => r.metric === 'uniqueStats');
       expect(uniqueStatsRec).toBeDefined();
-      
+
       // Should have product-specific fix instructions
       expect(uniqueStatsRec?.template.fix).toContain('dimensions, weight, materials');
     });
@@ -157,7 +160,7 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should generate personalized examples based on actual content', () => {
       const content = createMockContent('homepage');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       // Should use actual content in recommendations
       const rec = recommendations[0];
       if (rec.template.example) {
@@ -172,11 +175,11 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should calculate correct priorities with multipliers', () => {
       const content = createMockContent('documentation');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
-      recommendations.forEach(rec => {
+
+      recommendations.forEach((rec) => {
         expect(rec.priority).toBeDefined();
         expect(rec.priority).toBeGreaterThan(0);
-        
+
         // Priority should be gain * multiplier
         expect(rec.priority).toBeLessThanOrEqual(rec.template.gain * 1.5);
       });
@@ -187,10 +190,10 @@ describe('generateRecommendations - Page Type Integration', () => {
     it('should return complete recommendation objects', () => {
       const content = createMockContent('homepage');
       const recommendations = generateRecommendations(createMockPillarResults(), content);
-      
+
       expect(recommendations.length).toBeGreaterThan(0);
-      
-      recommendations.forEach(rec => {
+
+      recommendations.forEach((rec) => {
         expect(rec.metric).toBeDefined();
         expect(rec.template).toBeDefined();
         expect(rec.template.why).toBeDefined();

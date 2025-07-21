@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { fetchCrUXData } from '@/lib/chromeUxReport';
-import { capturedDomain } from '@/lib/audit/retrieval';
 
 interface EnhanceScoreRequest {
   url: string;
@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
     const { url, initialScores } = body;
 
     if (!url || !initialScores) {
-      return NextResponse.json(
-        { error: 'Missing required parameters' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
     // Fetch real-world CrUX data
@@ -43,7 +40,7 @@ export async function POST(request: NextRequest) {
         enhanced: false,
         retrieval: initialScores.retrieval,
         dataSource: 'synthetic',
-        message: cruxData.error || 'No real-world data available for this URL'
+        message: cruxData.error || 'No real-world data available for this URL',
       });
     }
 
@@ -69,10 +66,13 @@ export async function POST(request: NextRequest) {
     // Calculate new total score
     const enhancedBreakdown = {
       ...initialScores.retrieval.breakdown,
-      ttfb: enhancedTtfbScore
+      ttfb: enhancedTtfbScore,
     };
 
-    const enhancedTotalScore = Object.values(enhancedBreakdown).reduce((sum, score) => sum + score, 0);
+    const enhancedTotalScore = Object.values(enhancedBreakdown).reduce(
+      (sum, score) => sum + score,
+      0
+    );
 
     // Return enhanced scores with metadata
     return NextResponse.json({
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         score: enhancedTotalScore,
         breakdown: enhancedBreakdown,
         previousScore: initialScores.retrieval.score,
-        improvement: enhancedTotalScore - initialScores.retrieval.score
+        improvement: enhancedTotalScore - initialScores.retrieval.score,
       },
       dataSource: 'real-world',
       cruxMetrics: {
@@ -92,17 +92,16 @@ export async function POST(request: NextRequest) {
         cls: cruxData.metrics.cls,
         clsRating: cruxData.metrics.clsRating,
         fid: cruxData.metrics.fid,
-        fidRating: cruxData.metrics.fidRating
+        fidRating: cruxData.metrics.fidRating,
       },
-      message: 'Score enhanced with real-world Chrome user data'
+      message: 'Score enhanced with real-world Chrome user data',
     });
-
   } catch (error) {
     console.error('[Enhance Score API] Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to enhance score',
-        enhanced: false
+        enhanced: false,
       },
       { status: 500 }
     );

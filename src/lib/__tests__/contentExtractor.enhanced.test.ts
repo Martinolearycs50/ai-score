@@ -12,13 +12,13 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.industry).toBe('software development');
     });
-    
+
     it('should extract target audience', () => {
       const html = `
         <html>
@@ -29,13 +29,15 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
-      expect(result.businessAttributes.targetAudience).toBe('enterprises who need real-time data insights');
+
+      expect(result.businessAttributes.targetAudience).toBe(
+        'enterprises who need real-time data insights'
+      );
     });
-    
+
     it('should extract main product and service', () => {
       const html = `
         <html>
@@ -46,14 +48,14 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.mainProduct).toBe('CloudSync Pro');
       expect(result.businessAttributes.mainService).toBe('automated cloud backup');
     });
-    
+
     it('should extract unique value proposition', () => {
       const html = `
         <html>
@@ -64,13 +66,13 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.uniqueValue).toContain('guarantee same-day delivery');
     });
-    
+
     it('should extract company metadata', () => {
       const html = `
         <html>
@@ -82,15 +84,17 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.yearFounded).toBe('2015');
-      expect(result.businessAttributes.location).toBe('San Francisco with offices in New York and London');
+      expect(result.businessAttributes.location).toBe(
+        'San Francisco with offices in New York and London'
+      );
       expect(result.businessAttributes.teamSize).toBe('150+');
     });
-    
+
     it('should handle missing business attributes gracefully', () => {
       const html = `
         <html>
@@ -100,17 +104,17 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.businessAttributes.industry).toBeNull();
       expect(result.businessAttributes.targetAudience).toBeNull();
       expect(result.businessAttributes.mainProduct).toBeNull();
       expect(result.businessAttributes.yearFounded).toBeNull();
     });
   });
-  
+
   describe('Competitor Intelligence Extraction', () => {
     it('should detect direct competitor mentions', () => {
       const html = `
@@ -122,15 +126,15 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.competitorMentions).toHaveLength(2);
       expect(result.competitorMentions[0].name).toBe('Salesforce');
       expect(result.competitorMentions[1].name).toBe('HubSpot');
     });
-    
+
     it('should detect competitor sentiment', () => {
       const html = `
         <html>
@@ -142,19 +146,19 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
-      const googleMention = result.competitorMentions.find(m => m.name === 'Google Analytics');
-      const mixpanelMention = result.competitorMentions.find(m => m.name === 'Mixpanel');
-      const adobeMention = result.competitorMentions.find(m => m.name === 'Adobe Analytics');
-      
+
+      const googleMention = result.competitorMentions.find((m) => m.name === 'Google Analytics');
+      const mixpanelMention = result.competitorMentions.find((m) => m.name === 'Mixpanel');
+      const adobeMention = result.competitorMentions.find((m) => m.name === 'Adobe Analytics');
+
       expect(googleMention?.sentiment).toBe('positive'); // "better than"
       expect(mixpanelMention?.sentiment).toBe('positive'); // "superior"
       expect(adobeMention?.sentiment).toBe('neutral'); // just mentioned
     });
-    
+
     it('should include context for competitor mentions', () => {
       const html = `
         <html>
@@ -164,15 +168,15 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
-      const jenkinsMention = result.competitorMentions.find(m => m.name === 'Jenkins');
+
+      const jenkinsMention = result.competitorMentions.find((m) => m.name === 'Jenkins');
       expect(jenkinsMention?.context).toContain('3x faster');
       expect(jenkinsMention?.context).toContain('no configuration');
     });
-    
+
     it('should handle no competitor mentions', () => {
       const html = `
         <html>
@@ -182,13 +186,13 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result.competitorMentions).toEqual([]);
     });
-    
+
     it('should filter out false positive competitor mentions', () => {
       const html = `
         <html>
@@ -199,51 +203,51 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       // Should not pick up "ever" or "last year" as competitors
-      expect(result.competitorMentions.every(m => m.name !== 'ever')).toBe(true);
-      expect(result.competitorMentions.every(m => m.name !== 'last year')).toBe(true);
+      expect(result.competitorMentions.every((m) => m.name !== 'ever')).toBe(true);
+      expect(result.competitorMentions.every((m) => m.name !== 'last year')).toBe(true);
     });
   });
-  
+
   describe('Edge Cases and Error Handling', () => {
     it('should handle malformed HTML gracefully', () => {
       const html = `<h1>Broken <p>HTML</h1> content here`;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result).toBeDefined();
       expect(result.businessType).toBe('other');
       expect(result.businessAttributes.industry).toBeNull();
     });
-    
+
     it('should handle empty HTML', () => {
       const html = '';
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result).toBeDefined();
       expect(result.primaryTopic).toBe('general content');
       expect(result.competitorMentions).toEqual([]);
     });
-    
+
     it('should handle very large content without crashing', () => {
       // Generate large HTML content
       const largeContent = 'Lorem ipsum '.repeat(20000);
       const html = `<html><body><p>${largeContent}</p></body></html>`;
-      
+
       const extractor = new ContentExtractor(html);
       const result = extractor.extract();
-      
+
       expect(result).toBeDefined();
       expect(result.wordCount).toBeLessThanOrEqual(100000); // Should be truncated
     });
-    
+
     it('should extract attributes from complex real-world HTML', () => {
       const html = `
         <html>
@@ -268,10 +272,10 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
           </body>
         </html>
       `;
-      
+
       const extractor = new ContentExtractor(html, 'https://techstart.com');
       const result = extractor.extract();
-      
+
       expect(result.businessType).toBe('corporate');
       expect(result.businessAttributes.industry).toBe('AI consulting firm');
       expect(result.businessAttributes.yearFounded).toBe('2018');
@@ -279,8 +283,8 @@ describe('ContentExtractor - Enhanced Business Attributes', () => {
       expect(result.businessAttributes.teamSize).toBe('75');
       expect(result.businessAttributes.targetAudience).toContain('mid-market companies');
       expect(result.competitorMentions).toHaveLength(2);
-      expect(result.competitorMentions.map(m => m.name)).toContain('IBM Watson');
-      expect(result.competitorMentions.map(m => m.name)).toContain('Google Cloud AI');
+      expect(result.competitorMentions.map((m) => m.name)).toContain('IBM Watson');
+      expect(result.competitorMentions.map((m) => m.name)).toContain('Google Cloud AI');
     });
   });
 });

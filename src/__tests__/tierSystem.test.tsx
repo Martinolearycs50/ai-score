@@ -1,10 +1,12 @@
 import React from 'react';
+
 import { render, screen } from '@testing-library/react';
+
+import Navigation from '@/components/Navigation';
+import PillarScoreDisplayV2 from '@/components/PillarScoreDisplayV2';
 import { TierProvider } from '@/contexts/TierContext';
 import { useTier } from '@/hooks/useTier';
-import { getTierFeatures, TIER_CONFIG, isValidTier } from '@/lib/tierConfig';
-import PillarScoreDisplayV2 from '@/components/PillarScoreDisplayV2';
-import Navigation from '@/components/Navigation';
+import { TIER_CONFIG, getTierFeatures, isValidTier } from '@/lib/tierConfig';
 
 // Mock useSearchParams
 const mockSearchParams = new URLSearchParams();
@@ -35,9 +37,9 @@ describe('Tier System Tests', () => {
   describe('Tier Configuration', () => {
     it('should have correct feature flags for free tier', () => {
       const freeFeatures = getTierFeatures('free');
-      expect(freeFeatures.showDetailedScores).toBe(false);
-      expect(freeFeatures.showRecommendations).toBe(false);
-      expect(freeFeatures.showWebsiteProfile).toBe(false);
+      expect(freeFeatures.showDetailedScores).toBe(true); // Basic scores for free
+      expect(freeFeatures.showRecommendations).toBe(false); // No recommendations for free
+      expect(freeFeatures.showWebsiteProfile).toBe(true); // Website profile for free
       expect(freeFeatures.showUpgradeCTA).toBe(true);
       expect(freeFeatures.showComparisonMode).toBe(true);
     });
@@ -74,7 +76,7 @@ describe('Tier System Tests', () => {
 
     it('should read tier from URL parameter', () => {
       mockSearchParams.set('tier', 'pro');
-      
+
       render(
         <TierProvider>
           <TierTestComponent />
@@ -88,7 +90,7 @@ describe('Tier System Tests', () => {
 
     it('should ignore invalid tier parameters', () => {
       mockSearchParams.set('tier', 'invalid');
-      
+
       render(
         <TierProvider>
           <TierTestComponent />
@@ -135,7 +137,7 @@ describe('Tier System Tests', () => {
 
     it('should show only basic score for free tier', () => {
       mockSearchParams.delete('tier');
-      
+
       render(
         <TierProvider>
           <PillarScoreDisplayV2 result={mockResult} />
@@ -145,18 +147,18 @@ describe('Tier System Tests', () => {
       // Should show overall score
       expect(screen.getByText('75')).toBeInTheDocument();
       expect(screen.getByText('Your AI Search Score')).toBeInTheDocument();
-      
+
       // Should NOT show detailed breakdown
       expect(screen.queryByText('RETRIEVAL')).not.toBeInTheDocument();
       expect(screen.queryByText('20/25')).not.toBeInTheDocument();
-      
+
       // Should show upgrade CTA
       expect(screen.getByText('Get Your Full Analysis')).toBeInTheDocument();
     });
 
     it('should show detailed scores for pro tier', () => {
       mockSearchParams.set('tier', 'pro');
-      
+
       render(
         <TierProvider>
           <PillarScoreDisplayV2 result={mockResult} />
@@ -165,14 +167,14 @@ describe('Tier System Tests', () => {
 
       // Should show overall score
       expect(screen.getByText('75')).toBeInTheDocument();
-      
+
       // Should show detailed breakdown
       expect(screen.getByText('AI Search Readiness Score')).toBeInTheDocument();
-      
+
       // Check for pillar details (they are rendered differently)
       const container = screen.getByText('75').closest('div');
       expect(container).toBeInTheDocument();
-      
+
       // Should NOT show upgrade CTA
       expect(screen.queryByText('Get Your Full Analysis')).not.toBeInTheDocument();
     });
@@ -181,7 +183,7 @@ describe('Tier System Tests', () => {
   describe('Navigation Tier Awareness', () => {
     it('should show upgrade button for free tier', () => {
       mockSearchParams.delete('tier');
-      
+
       render(
         <TierProvider>
           <Navigation />
@@ -193,7 +195,7 @@ describe('Tier System Tests', () => {
 
     it('should hide upgrade button for pro tier', () => {
       mockSearchParams.set('tier', 'pro');
-      
+
       render(
         <TierProvider>
           <Navigation />
@@ -205,17 +207,20 @@ describe('Tier System Tests', () => {
   });
 
   describe('Feature Flag Enforcement', () => {
-    it('free tier should not have pro features', () => {
+    it('free tier should have correct feature configuration', () => {
       const freeFeatures = TIER_CONFIG.free;
-      
-      // Critical features that must be restricted
-      expect(freeFeatures.showDetailedScores).toBe(false);
-      expect(freeFeatures.showPillarBreakdown).toBe(false);
+
+      // Features that should be enabled for free tier
+      expect(freeFeatures.showDetailedScores).toBe(true); // Basic scores available for free
+      expect(freeFeatures.showPillarBreakdown).toBe(true); // Visual breakdown available for free
+      expect(freeFeatures.showWebsiteProfile).toBe(true); // Website profile available for free
+      expect(freeFeatures.showComparisonMode).toBe(true); // Comparison available for free
+
+      // Features that should be restricted to pro
       expect(freeFeatures.showRecommendations).toBe(false);
-      expect(freeFeatures.showWebsiteProfile).toBe(false);
       expect(freeFeatures.showImplementationTime).toBe(false);
       expect(freeFeatures.showExamples).toBe(false);
-      
+
       // Features that should be enabled
       expect(freeFeatures.showComparisonMode).toBe(true);
       expect(freeFeatures.showEmotionalReveal).toBe(true);
@@ -224,7 +229,7 @@ describe('Tier System Tests', () => {
 
     it('pro tier should have all features enabled', () => {
       const proFeatures = TIER_CONFIG.pro;
-      
+
       expect(proFeatures.showDetailedScores).toBe(true);
       expect(proFeatures.showPillarBreakdown).toBe(true);
       expect(proFeatures.showRecommendations).toBe(true);

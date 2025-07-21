@@ -1,13 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import React, { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
+
 import { useSearchParams } from 'next/navigation';
-import { 
-  TierType, 
-  TierFeatures, 
-  getTierFeatures, 
-  DEFAULT_TIER, 
-  isValidTier 
+
+import {
+  DEFAULT_TIER,
+  TierFeatures,
+  TierType,
+  getTierFeatures,
+  isValidTier,
 } from '@/lib/tierConfig';
 
 interface TierContextValue {
@@ -25,10 +27,10 @@ interface TierProviderProps {
   overrideFeatures?: Partial<TierFeatures>; // For testing or A/B testing
 }
 
-export function TierProvider({ 
-  children, 
+export function TierProvider({
+  children,
   defaultTier = DEFAULT_TIER,
-  overrideFeatures 
+  overrideFeatures,
 }: TierProviderProps) {
   const searchParams = useSearchParams();
   const [tier, setTier] = useState<TierType>(defaultTier);
@@ -37,11 +39,10 @@ export function TierProvider({
   // Read tier from URL parameters
   useEffect(() => {
     const tierParam = searchParams.get('tier');
-    
     console.log('[TierContext] URL tier parameter:', tierParam);
     console.log('[TierContext] Current tier state:', tier);
     console.log('[TierContext] Search params string:', searchParams.toString());
-    
+
     if (tierParam && isValidTier(tierParam)) {
       console.log('[TierContext] Setting tier to:', tierParam);
       setTier(tierParam);
@@ -50,43 +51,38 @@ export function TierProvider({
       // Reset to default if no tier param
       setTier(defaultTier);
     }
+
     setIsLoading(false);
   }, [searchParams, searchParams.toString()]); // Add searchParams.toString() to force re-render
 
   // Memoize features to prevent unnecessary re-renders
   const features = useMemo(() => {
     const baseFeatures = getTierFeatures(tier);
-    
+
     // Apply any feature overrides (useful for testing or gradual rollouts)
     if (overrideFeatures) {
       return { ...baseFeatures, ...overrideFeatures };
     }
-    
+
     return baseFeatures;
   }, [tier, overrideFeatures]);
 
-  const contextValue = useMemo(() => ({
-    tier,
-    features,
-    setTier,
-    isLoading
-  }), [tier, features, isLoading]);
-
-  return (
-    <TierContext.Provider value={contextValue}>
-      {children}
-    </TierContext.Provider>
+  const contextValue = useMemo(
+    () => ({ tier, features, setTier, isLoading }),
+    [tier, features, isLoading]
   );
+
+  return <TierContext.Provider value={contextValue}>{children}</TierContext.Provider>;
 }
 
 // Custom hook to use the tier context
 export function useTierContext() {
   const context = useContext(TierContext);
-  
+
   if (!context) {
     throw new Error('useTierContext must be used within a TierProvider');
   }
-  
+
   return context;
 }
 

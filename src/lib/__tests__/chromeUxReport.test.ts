@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { fetchCrUXData, calculateCrUXScore, clearCache, WEB_VITALS_THRESHOLDS } from '../chromeUxReport';
+
+import {
+  WEB_VITALS_THRESHOLDS,
+  calculateCrUXScore,
+  clearCache,
+  fetchCrUXData,
+} from '../chromeUxReport';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -19,23 +25,23 @@ describe('Chrome UX Report API', () => {
             metrics: {
               largestContentfulPaint: {
                 percentiles: { p75: 2000 },
-                histogram: []
+                histogram: [],
               },
               firstInputDelay: {
                 percentiles: { p75: 50 },
-                histogram: []
+                histogram: [],
               },
               cumulativeLayoutShift: {
                 percentiles: { p75: 0.05 },
-                histogram: []
+                histogram: [],
               },
               timeToFirstByte: {
                 percentiles: { p75: 600 },
-                histogram: []
-              }
-            }
-          }
-        }
+                histogram: [],
+              },
+            },
+          },
+        },
       };
 
       mockedAxios.post.mockResolvedValueOnce(mockResponse);
@@ -54,8 +60,8 @@ describe('Chrome UX Report API', () => {
           lcpRating: 'good',
           fidRating: 'good',
           clsRating: 'good',
-          ttfbRating: 'good'
-        }
+          ttfbRating: 'good',
+        },
       });
 
       expect(mockedAxios.post).toHaveBeenCalledWith(
@@ -68,7 +74,7 @@ describe('Chrome UX Report API', () => {
     it('should handle 404 (no data available)', async () => {
       mockedAxios.post.mockRejectedValueOnce({
         isAxiosError: true,
-        response: { status: 404 }
+        response: { status: 404 },
       });
 
       const result = await fetchCrUXData('https://unknown-site.com');
@@ -76,7 +82,7 @@ describe('Chrome UX Report API', () => {
       expect(result).toEqual({
         url: 'https://unknown-site.com',
         hasData: false,
-        error: 'No Chrome UX Report data available for this URL'
+        error: 'No Chrome UX Report data available for this URL',
       });
     });
 
@@ -88,7 +94,7 @@ describe('Chrome UX Report API', () => {
       expect(result).toEqual({
         url: 'https://example.com',
         hasData: false,
-        error: 'Failed to fetch performance data'
+        error: 'Failed to fetch performance data',
       });
     });
 
@@ -100,18 +106,18 @@ describe('Chrome UX Report API', () => {
             metrics: {
               timeToFirstByte: {
                 percentiles: { p75: 600 },
-                histogram: []
-              }
-            }
-          }
-        }
+                histogram: [],
+              },
+            },
+          },
+        },
       };
 
       mockedAxios.post.mockResolvedValueOnce(mockResponse);
 
       // First call
       await fetchCrUXData('https://example.com');
-      
+
       // Second call should use cache
       const result = await fetchCrUXData('https://example.com');
 
@@ -127,7 +133,7 @@ describe('Chrome UX Report API', () => {
         ttfbRating: 'good' as const,
         lcpRating: 'good' as const,
         fidRating: 'needs-improvement' as const,
-        clsRating: 'poor' as const
+        clsRating: 'poor' as const,
       };
 
       const score = calculateCrUXScore(metrics, 10);
@@ -139,7 +145,7 @@ describe('Chrome UX Report API', () => {
     it('should handle partial metrics gracefully', () => {
       const metrics = {
         ttfbRating: 'good' as const,
-        lcpRating: 'needs-improvement' as const
+        lcpRating: 'needs-improvement' as const,
       };
 
       const score = calculateCrUXScore(metrics, 10);
@@ -164,7 +170,7 @@ describe('Chrome UX Report API', () => {
       const testCases = [
         { ttfb: 500, expected: 'good' },
         { ttfb: 1200, expected: 'needs-improvement' },
-        { ttfb: 2000, expected: 'poor' }
+        { ttfb: 2000, expected: 'poor' },
       ];
 
       for (const testCase of testCases) {
@@ -175,11 +181,11 @@ describe('Chrome UX Report API', () => {
               metrics: {
                 timeToFirstByte: {
                   percentiles: { p75: testCase.ttfb },
-                  histogram: []
-                }
-              }
-            }
-          }
+                  histogram: [],
+                },
+              },
+            },
+          },
         });
 
         clearCache(); // Clear cache for each test

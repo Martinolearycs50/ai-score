@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { z } from 'zod';
+
+import { config } from '@/config';
 import { AiSearchAnalyzer, type AnalysisResultNew } from '@/lib/analyzer-new';
-import { validateAndNormalizeUrl } from '@/utils/validators';
 import { simpleValidateUrl } from '@/utils/simple-validator';
+import { validateAndNormalizeUrl } from '@/utils/validators';
 
 // Force Node.js runtime for consistent behavior
 export const runtime = 'nodejs';
@@ -17,13 +20,12 @@ interface ApiResponseNew {
 
 // Request validation schema
 const analyzeRequestSchema = z.object({
-  url: z.string().min(1, 'URL is required')
+  url: z.string().min(1, 'URL is required'),
 });
 
 // Rate limiting (simple in-memory store for MVP)
+// TODO: Replace with Redis or similar for production
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 10; // requests per hour
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
 
 function checkRateLimit(clientId: string): boolean {
   const now = Date.now();
@@ -33,12 +35,12 @@ function checkRateLimit(clientId: string): boolean {
     // Reset or initialize
     requestCounts.set(clientId, {
       count: 1,
-      resetTime: now + RATE_LIMIT_WINDOW
+      resetTime: now + config.rateLimit.windowMs,
     });
     return true;
   }
 
-  if (clientData.count >= RATE_LIMIT) {
+  if (clientData.count >= config.rateLimit.perHour) {
     return false;
   }
 
@@ -56,10 +58,10 @@ function getClientId(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  const isDev = process.env.NODE_ENV === 'development';
-  
+  const isDev = config.isDevelopment;
+
   console.log('[API] Analyze endpoint called at', new Date().toISOString());
-  
+
   try {
     // Log request details for debugging
     if (isDev) {
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
         contentType: request.headers.get('content-type'),
         origin: request.headers.get('origin'),
         referer: request.headers.get('referer'),
-        userAgent: request.headers.get('user-agent')
+        userAgent: request.headers.get('user-agent'),
       });
     }
 
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,
-          error: 'Rate limit exceeded. Please try again later.'
+          error: 'Rate limit exceeded. Please try again later.',
         },
         { status: 429 }
       );
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,
-          error: 'Invalid JSON in request body'
+          error: 'Invalid JSON in request body',
         },
         { status: 400 }
       );
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,
-          error: 'Request body is empty or invalid'
+          error: 'Request body is empty or invalid',
         },
         { status: 400 }
       );
@@ -125,68 +127,74 @@ export async function POST(request: NextRequest) {
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,
-          error: 'Invalid request: ' + validationResult.error.issues[0].message
+          error: 'Invalid request: ' + validationResult.error.issues[0].message,
         },
         { status: 400 }
       );
     }
 
     const { url: rawUrl } = validationResult.data;
-    
+
     // Ensure URL is a string and properly formatted
     const url = String(rawUrl).trim();
 
     // Validate and normalize the URL
     console.log('[API] Processing URL:', url);
-    console.log('API Route - URL from request:', {
-      rawUrl,
-      url,
-      type: typeof url,
-      length: url?.length,
-      rawValue: JSON.stringify(url),
-      charCodes: url ? Array.from(url).map(c => c.charCodeAt(0)) : []
-    });
-    
+
+    if (isDev) {
+      console.log('API Route - URL from request:', {
+        rawUrl,
+        url,
+        type: typeof url,
+        length: url?.length,
+        rawValue: JSON.stringify(url),
+        charCodes: url ? Array.from(url).map((c) => c.charCodeAt(0)) : [],
+      });
+    }
+
     // Try advanced validation first
     let urlValidation = validateAndNormalizeUrl(url);
-    console.log('API Route - URL validation result:', {
-      isValid: urlValidation.isValid,
-      error: urlValidation.error,
-      normalizedUrl: urlValidation.normalizedUrl,
-      fullResult: JSON.stringify(urlValidation)
-    });
-    
+
+    if (isDev) {
+      console.log('API Route - URL validation result:', {
+        isValid: urlValidation.isValid,
+        error: urlValidation.error,
+        normalizedUrl: urlValidation.normalizedUrl,
+        fullResult: JSON.stringify(urlValidation),
+      });
+    }
+
     // If advanced validation fails, try simple validation as fallback
     if (!urlValidation.isValid) {
       console.log('API Route - Advanced validation failed, trying simple validation');
       const simpleResult = simpleValidateUrl(url);
       console.log('API Route - Simple validation result:', simpleResult);
-      
+
       if (simpleResult.isValid) {
         // Use simple validation result
         urlValidation = {
           isValid: true,
           normalizedUrl: simpleResult.normalizedUrl,
-          error: undefined
+          error: undefined,
         };
         console.log('API Route - Using simple validation result');
       }
     }
-    
+
     if (!urlValidation.isValid) {
       console.error('API Route - Both validations failed, returning error:', {
         error: urlValidation.error,
-        defaulting: !urlValidation.error
+        defaulting: !urlValidation.error,
       });
       return NextResponse.json<ApiResponseNew>(
         {
           success: false,
-          error: urlValidation.error || 'Invalid URL'
+          error: urlValidation.error || 'Invalid URL',
         },
         { status: 400 }
       );
     }
-    
+
     const normalizedUrl = urlValidation.normalizedUrl!;
     console.log('Using normalized URL:', normalizedUrl);
 
@@ -195,8 +203,8 @@ export async function POST(request: NextRequest) {
     console.log(`Starting analysis for URL: ${normalizedUrl}`);
     const analyzer = new AiSearchAnalyzer();
     const result = await analyzer.analyzeUrl(normalizedUrl);
-    console.log('[API] Analysis completed successfully');
 
+    console.log('[API] Analysis completed successfully');
     const analysisTime = Date.now() - startTime;
     console.log(`Analysis completed in ${analysisTime}ms for: ${normalizedUrl}`);
 
@@ -205,16 +213,15 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         data: result,
-        message: `Analysis completed in ${(analysisTime / 1000).toFixed(1)}s`
+        message: `Analysis completed in ${(analysisTime / 1000).toFixed(1)}s`,
       },
-      { 
+      {
         status: 200,
         headers: {
           'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
-        }
+        },
       }
     );
-
   } catch (error) {
     const analysisTime = Date.now() - startTime;
     console.error('[API] Analysis failed:', error);
@@ -226,7 +233,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      
+
       if (message.includes('timeout') || message.includes('took too long')) {
         errorMessage = 'Analysis timed out. The website may be slow to respond.';
         statusCode = 408;
@@ -244,7 +251,8 @@ export async function POST(request: NextRequest) {
         statusCode = 400;
       } else if (message.includes('server returned')) {
         // Parse server error responses more clearly
-        errorMessage = 'The website returned an error. It may be blocking automated access or experiencing issues.';
+        errorMessage =
+          'The website returned an error. It may be blocking automated access or experiencing issues.';
         statusCode = 502;
       } else {
         errorMessage = error.message;
@@ -254,7 +262,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ApiResponseNew>(
       {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       },
       { status: statusCode }
     );
@@ -280,7 +288,7 @@ export async function GET() {
       success: true,
       message: 'AI Search Readiness Analyzer API is running',
       timestamp: new Date().toISOString(),
-      version: '1.0.0'
+      version: '1.0.0',
     },
     { status: 200 }
   );

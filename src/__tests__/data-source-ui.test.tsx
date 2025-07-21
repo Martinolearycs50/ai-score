@@ -1,12 +1,12 @@
 /**
  * Data Source UI Indicator Tests
- * 
+ *
  * Tests for verifying that the UI properly displays indicators when
  * real-world data (Chrome UX Report) vs synthetic data is used
  */
-
-import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+
 import PillarScoreDisplayV2 from '@/components/PillarScoreDisplayV2';
 import { AnalysisResultNew } from '@/lib/analyzer-new';
 
@@ -44,26 +44,26 @@ describe('Data Source UI Indicators', () => {
         success: true,
         details: {
           ttfb: 450,
-          rating: 'good'
-        }
-      }
+          rating: 'good',
+        },
+      },
     ],
     enhancementData: {
       enhanced: true,
       dataSource: 'chrome-ux',
       cruxMetrics: {
         ttfb: 450,
-        rating: 'good'
+        rating: 'good',
       },
-      improvement: 2
+      improvement: 2,
     },
     breakdown: {
       RETRIEVAL: { ttfb: 5, paywall: 5, mainContent: 5, htmlSize: 5, llmsTxtFile: 2 },
       FACT_DENSITY: { uniqueStats: 5, dataMarkup: 5, citations: 5, deduplication: 5 },
       STRUCTURE: { headingFrequency: 5, headingDepth: 5, structuredData: 3, rssFeed: 2 },
       TRUST: { authorBio: 5, napConsistency: 3, license: 2 },
-      RECENCY: { lastModified: 5, stableCanonical: 3 }
-    }
+      RECENCY: { lastModified: 5, stableCanonical: 3 },
+    },
   };
 
   const mockResultWithSyntheticData: AnalysisResultNew = {
@@ -75,20 +75,15 @@ describe('Data Source UI Indicators', () => {
         timestamp: Date.now(),
         success: true,
         details: {
-          ttfb: 650
-        }
-      }
+          ttfb: 650,
+        },
+      },
     ],
-    enhancementData: undefined
+    enhancementData: undefined,
   };
 
   test('shows enhancement indicator when Chrome UX data is used', () => {
-    render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />);
 
     // Should show some indicator that real-world data was used
     // This could be a badge, icon, or text indicator
@@ -105,12 +100,7 @@ describe('Data Source UI Indicators', () => {
   });
 
   test('shows appropriate UI when synthetic data is used', () => {
-    render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithSyntheticData} 
-        enhancementStatus="idle"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={mockResultWithSyntheticData} enhancementStatus="idle" />);
 
     // Should not show enhancement indicator
     const enhancementIndicator = screen.queryByTestId('enhancement-indicator');
@@ -121,10 +111,7 @@ describe('Data Source UI Indicators', () => {
 
   test('shows loading state during enhancement', () => {
     render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithSyntheticData} 
-        enhancementStatus="loading"
-      />
+      <PillarScoreDisplayV2 result={mockResultWithSyntheticData} enhancementStatus="loading" />
     );
 
     // Could show a spinner or loading text
@@ -135,26 +122,22 @@ describe('Data Source UI Indicators', () => {
   });
 
   test('displays data source badges for each metric', () => {
-    render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />);
 
     // Look for data source badges
     const badges = screen.queryAllByTestId('data-source-badge');
-    
+
     if (badges.length > 0) {
       // Should have at least one badge for TTFB
       expect(badges.length).toBeGreaterThanOrEqual(1);
-      
+
       // Check badge content
-      const ttfbBadge = badges.find(badge => 
-        badge.textContent?.toLowerCase().includes('ttfb') ||
-        badge.textContent?.toLowerCase().includes('chrome')
+      const ttfbBadge = badges.find(
+        (badge) =>
+          badge.textContent?.toLowerCase().includes('ttfb') ||
+          badge.textContent?.toLowerCase().includes('chrome')
       );
-      
+
       if (ttfbBadge) {
         expect(ttfbBadge).toBeInTheDocument();
       }
@@ -162,17 +145,14 @@ describe('Data Source UI Indicators', () => {
   });
 
   test('shows improvement indicator when score is enhanced', () => {
-    render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />);
 
     // Look for improvement indicator (e.g., +2 points)
     const improvement = mockResultWithCruxData.enhancementData?.improvement;
     if (improvement && improvement > 0) {
-      const improvementText = screen.queryByText(new RegExp(`\\+${improvement}|improved by ${improvement}`, 'i'));
+      const improvementText = screen.queryByText(
+        new RegExp(`\\+${improvement}|improved by ${improvement}`, 'i')
+      );
       if (improvementText) {
         expect(improvementText).toBeInTheDocument();
       }
@@ -180,12 +160,7 @@ describe('Data Source UI Indicators', () => {
   });
 
   test('tooltip or hover shows data source details', async () => {
-    render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />);
 
     // Find RETRIEVAL pillar score
     const retrievalScore = screen.getByText(/retrieval/i);
@@ -201,10 +176,7 @@ describe('Data Source UI Indicators', () => {
 
   test('visual distinction between real-world and synthetic scores', () => {
     const { rerender } = render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
+      <PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />
     );
 
     // Get RETRIEVAL score element with real-world data
@@ -213,10 +185,7 @@ describe('Data Source UI Indicators', () => {
 
     // Re-render with synthetic data
     rerender(
-      <PillarScoreDisplayV2 
-        result={mockResultWithSyntheticData} 
-        enhancementStatus="idle"
-      />
+      <PillarScoreDisplayV2 result={mockResultWithSyntheticData} enhancementStatus="idle" />
     );
 
     // Get RETRIEVAL score element with synthetic data
@@ -241,28 +210,25 @@ describe('Pillar-specific data source indicators', () => {
           paywall: 5,
           mainContent: 5,
           htmlSize: 5,
-          llmsTxtFile: 0
+          llmsTxtFile: 0,
         },
         FACT_DENSITY: { uniqueStats: 5, dataMarkup: 5, citations: 5, deduplication: 5 },
         STRUCTURE: { headingFrequency: 5, headingDepth: 5, structuredData: 3, rssFeed: 2 },
         TRUST: { authorBio: 5, napConsistency: 3, license: 2 },
-        RECENCY: { lastModified: 5, stableCanonical: 3 }
-      }
+        RECENCY: { lastModified: 5, stableCanonical: 3 },
+      },
     };
 
-    render(
-      <PillarScoreDisplayV2 
-        result={result} 
-        enhancementStatus="enhanced"
-      />
-    );
+    render(<PillarScoreDisplayV2 result={result} enhancementStatus="enhanced" />);
 
     // RETRIEVAL section should indicate Chrome UX data usage
     const retrievalSection = screen.getByText(/retrieval/i).closest('div');
-    
+
     if (retrievalSection) {
       // Look for any indicator within the RETRIEVAL section
-      const indicator = retrievalSection.querySelector('[data-testid*="chrome-ux"], [data-testid*="real-world"]');
+      const indicator = retrievalSection.querySelector(
+        '[data-testid*="chrome-ux"], [data-testid*="real-world"]'
+      );
       if (indicator) {
         expect(indicator).toBeInTheDocument();
       }
@@ -274,22 +240,14 @@ describe('Pillar-specific data source indicators', () => {
 describe('Enhancement animations', () => {
   test('score animates when enhanced', async () => {
     const { rerender } = render(
-      <PillarScoreDisplayV2 
-        result={mockResultWithSyntheticData} 
-        enhancementStatus="idle"
-      />
+      <PillarScoreDisplayV2 result={mockResultWithSyntheticData} enhancementStatus="idle" />
     );
 
     // Get initial RETRIEVAL score
     const initialScore = screen.getByTestId('retrieval-score').textContent;
 
     // Simulate enhancement
-    rerender(
-      <PillarScoreDisplayV2 
-        result={mockResultWithCruxData} 
-        enhancementStatus="enhanced"
-      />
-    );
+    rerender(<PillarScoreDisplayV2 result={mockResultWithCruxData} enhancementStatus="enhanced" />);
 
     // Score should update
     await waitFor(() => {

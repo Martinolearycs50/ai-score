@@ -1,10 +1,12 @@
 # AI Search Score
 
-A web application that analyzes websites for AI/LLM visibility. Find out if ChatGPT, Claude, Perplexity, and other AI tools will mention your site.
+A web application that analyzes websites for AI/LLM visibility. Find out if
+ChatGPT, Claude, Perplexity, and other AI tools will mention your site.
 
 ## 🎯 What It Does
 
 AI Search Score evaluates any website URL and provides:
+
 - An overall AI Search Score (0-100)
 - Analysis across 5 key pillars optimized for AI discovery
 - Intelligent page type detection (Homepage, Blog, Product)
@@ -13,15 +15,18 @@ AI Search Score evaluates any website URL and provides:
 ## ✨ Key Features
 
 ### Free Tier (Current Focus)
+
 - **🎯 AI Search Score**: Comprehensive 0-100 score for your website
 - **📊 5-Pillar Analysis**: Detailed breakdown with visual progress bars
-- **🔍 Smart Page Detection**: Automatically identifies page type with manual override
+- **🔍 Smart Page Detection**: Automatically identifies page type with manual
+  override
 - **💡 Recommendations**: All issues identified with clear fixes
 - **⚡ Two-Phase Analysis**: Instant results enhanced with API data
 - **📱 Responsive Design**: Works perfectly on all devices
 - **🚀 No Signup Required**: Start analyzing immediately
 
 ### Coming Soon: Pro Tier ($29/month)
+
 - AI-powered content optimization
 - Side-by-side before/after comparisons
 - Export functionality
@@ -30,7 +35,8 @@ AI Search Score evaluates any website URL and provides:
 
 ## 🚀 Getting Started
 
-Visit [AI Search Score](https://yourdomain.com) to start analyzing your website immediately. No signup required.
+Visit [AI Search Score](https://yourdomain.com) to start analyzing your website
+immediately. No signup required.
 
 ## 🎯 How to Use
 
@@ -42,21 +48,24 @@ Visit [AI Search Score](https://yourdomain.com) to start analyzing your website 
 
 ## 📏 AI-First Scoring System
 
-Each website is scored across five AI-optimized pillars with dynamic weights based on page type:
+Each website is scored across five AI-optimized pillars with dynamic weights
+based on page type:
 
-| Pillar | What It Measures | Homepage | Blog/Article | Product |
-|--------|------------------|----------|--------------|---------|
-| **RETRIEVAL** | Speed & crawler access | 35% | 25% | 25% |
-| **FACT_DENSITY** | Statistics & data richness | 15% | 35% | 30% |
-| **STRUCTURE** | Content organization | 25% | 20% | 25% |
-| **TRUST** | Credibility signals | 20% | 10% | 15% |
-| **RECENCY** | Content freshness | 5% | 10% | 5% |
+| Pillar           | What It Measures           | Homepage | Blog/Article | Product |
+| ---------------- | -------------------------- | -------- | ------------ | ------- |
+| **RETRIEVAL**    | Speed & crawler access     | 35%      | 25%          | 25%     |
+| **FACT_DENSITY** | Statistics & data richness | 15%      | 35%          | 30%     |
+| **STRUCTURE**    | Content organization       | 25%      | 20%          | 25%     |
+| **TRUST**        | Credibility signals        | 20%      | 10%          | 15%     |
+| **RECENCY**      | Content freshness          | 5%       | 10%          | 5%      |
 
 ### What We Analyze
 
-**RETRIEVAL**: Page load speed, robots.txt permissions, sitemap presence, accessibility
+**RETRIEVAL**: Page load speed, robots.txt permissions, sitemap presence,
+accessibility
 
-**FACT_DENSITY**: Statistics, named entities, citations, examples, structured data
+**FACT_DENSITY**: Statistics, named entities, citations, examples, structured
+data
 
 **STRUCTURE**: Heading hierarchy, schema markup, semantic HTML, FAQ sections
 
@@ -99,42 +108,49 @@ Each website is scored across five AI-optimized pillars with dynamic weights bas
 ## 🛠️ Development Setup
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Chrome UX Report API key (free)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/ai-search-analyzer-v2.git
 cd ai-search-analyzer-v2
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. Add your Chrome UX Report API key to `.env.local`:
+
 ```
 CHROME_UX_API_KEY=your_api_key_here
 ```
 
 > **Getting a Chrome UX Report API Key (Free)**:
+>
 > 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 > 2. Create a new project or select existing
 > 3. Enable the Chrome UX Report API
 > 4. Create credentials (API Key)
 > 5. Copy the API key to your `.env.local`
-> 
+>
 > The free tier includes 1,000 requests per day.
 
 5. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -170,4 +186,6 @@ This project is licensed under the MIT License.
 
 ---
 
-**Note**: This tool analyzes publicly accessible website data only. It respects robots.txt and implements responsible crawling practices. Some sites may block analysis due to security policies.
+**Note**: This tool analyzes publicly accessible website data only. It respects
+robots.txt and implements responsible crawling practices. Some sites may block
+analysis due to security policies.

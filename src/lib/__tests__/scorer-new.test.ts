@@ -163,8 +163,8 @@ describe('AI Search Scorer', () => {
 
       // Check breakdown structure
       expect(result.breakdown).toHaveLength(5);
-      
-      const retrievalBreakdown = result.breakdown.find(b => b.pillar === 'RETRIEVAL');
+
+      const retrievalBreakdown = result.breakdown.find((b) => b.pillar === 'RETRIEVAL');
       expect(retrievalBreakdown).toEqual({
         pillar: 'RETRIEVAL',
         earned: 25,
@@ -172,7 +172,7 @@ describe('AI Search Scorer', () => {
         checks: results.RETRIEVAL,
       });
 
-      const factDensityBreakdown = result.breakdown.find(b => b.pillar === 'FACT_DENSITY');
+      const factDensityBreakdown = result.breakdown.find((b) => b.pillar === 'FACT_DENSITY');
       expect(factDensityBreakdown?.earned).toBe(20);
       expect(factDensityBreakdown?.max).toBe(25);
     });
@@ -213,9 +213,9 @@ describe('AI Search Scorer', () => {
       const result = score(results);
 
       expect(result.recommendations).toHaveLength(4);
-      
+
       // Check recommendation structure
-      const ttfbRec = result.recommendations.find(r => r.metric === 'ttfb');
+      const ttfbRec = result.recommendations.find((r) => r.metric === 'ttfb');
       expect(ttfbRec).toBeDefined();
       expect(ttfbRec?.why).toContain('AI engines skip slow pages');
       expect(ttfbRec?.fix).toContain('Use a CDN like Cloudflare');

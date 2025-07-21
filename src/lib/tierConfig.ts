@@ -16,15 +16,15 @@ export interface TierFeatures {
   showComparisonMode: boolean;
   showImplementationTime: boolean;
   showExamples: boolean;
-  
+
   // Limits
   maxAnalysesPerMonth: number;
-  
+
   // UI features
   showEmotionalReveal: boolean;
   showParticleEffects: boolean;
   showUpgradeCTA: boolean;
-  
+
   // Future features (easy to add)
   // showAPIAccess: boolean;
   // showBulkAnalysis: boolean;
@@ -43,15 +43,16 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showComparisonMode: true, // Enable comparison for free tier
     showImplementationTime: false,
     showExamples: false,
-    
+
     // Limits
     maxAnalysesPerMonth: Infinity,
-    
+
     // UI features
     showEmotionalReveal: true, // Keep the nice animation even for free
     showParticleEffects: false,
     showUpgradeCTA: true,
   },
+
   pro: {
     // Display features
     showDetailedScores: true,
@@ -61,15 +62,16 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showComparisonMode: true,
     showImplementationTime: true,
     showExamples: true,
-    
+
     // Limits
     maxAnalysesPerMonth: 30,
-    
+
     // UI features
     showEmotionalReveal: true,
     showParticleEffects: true,
     showUpgradeCTA: false,
   },
+
   consultation: {
     // Display features
     showDetailedScores: true,
@@ -79,15 +81,15 @@ export const TIER_CONFIG: Record<TierType, TierFeatures> = {
     showComparisonMode: true,
     showImplementationTime: true,
     showExamples: true,
-    
+
     // Limits
     maxAnalysesPerMonth: Infinity,
-    
+
     // UI features
     showEmotionalReveal: true,
     showParticleEffects: true,
     showUpgradeCTA: false,
-  }
+  },
 } as const;
 
 // Helper function to get features for a tier
@@ -109,23 +111,24 @@ export function getAvailableTiers(): TierType[] {
 export const DEFAULT_TIER: TierType = 'free';
 
 // Tier metadata for display purposes
-export const TIER_METADATA: Record<TierType, { name: string; price: string; description: string }> = {
-  free: {
-    name: 'Free',
-    price: '$0/month',
-    description: 'Basic AI search analysis'
-  },
-  pro: {
-    name: 'Pro',
-    price: '$39/month',
-    description: 'Full analysis with recommendations'
-  },
-  consultation: {
-    name: 'Consultation',
-    price: 'Custom',
-    description: '1-on-1 expert consultancy'
-  }
-};
+export const TIER_METADATA: Record<TierType, { name: string; price: string; description: string }> =
+  {
+    free: {
+      name: 'Free',
+      price: '$0/month',
+      description: 'Basic AI search analysis',
+    },
+    pro: {
+      name: 'Pro',
+      price: '$29/month',
+      description: 'Full analysis with recommendations',
+    },
+    consultation: {
+      name: 'Consultation',
+      price: 'Custom',
+      description: '1-on-1 expert consultancy',
+    },
+  };
 
 // Type guard to check if a string is a valid tier
 export function isValidTier(tier: string): tier is TierType {

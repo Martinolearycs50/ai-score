@@ -3,8 +3,8 @@
   "version": "2.9.3",
   "private": true,
   "scripts": {
-    "dev": "nodemon",
-    "dev:stable": "node scripts/dev-server.js",
+    "dev": "npm run format:check && nodemon",
+    "dev:stable": "npm run format:check && node scripts/dev-server.js",
     "dev:simple": "next dev",
     "dev:pm2": "pm2 start ecosystem.config.js",
     "dev:stop": "pm2 stop all && pkill -f 'next dev' || true",
@@ -12,7 +12,7 @@
     "dev:logs": "pm2 logs",
     "dev:status": "pm2 status",
     "next:dev": "next dev",
-    "build": "next build",
+    "build": "npm run format:check && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
@@ -23,7 +23,14 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
     "test:api": "jest src/__tests__/*.test.ts --testPathIgnorePatterns=e2e",
-    "test:all": "npm run test && npm run test:e2e"
+    "test:all": "npm run test && npm run test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "lint-staged",
+    "format:fix": "prettier --write . && npm run lint -- --fix",
+    "format:verify": "npm run format:check && echo '✅ All files are properly formatted'",
+    "format:test": "npm run format:check -- --debug-check",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -46,6 +53,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -55,13 +63,25 @@
     "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
+    "husky": "^9.1.7",
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
+    "lint-staged": "^16.1.2",
     "nodemon": "^3.1.10",
     "pm2": "^6.0.8",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.0",
     "typescript": "^5",
     "wait-on": "^8.0.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ],
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }

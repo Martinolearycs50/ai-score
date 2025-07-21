@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Completion Sound</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f4f6fa;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+      }
+      h1 {
+        color: #1f2937;
+        margin-bottom: 1rem;
+      }
+      button {
+        background-color: #3f8cff;
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      button:hover {
+        background-color: #2d7ae5;
+        transform: scale(1.05);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .info {
+        margin-top: 1.5rem;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .notes {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #4b5563;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Search Score Completion Sound</h1>
+      <p>Click the button to hear the completion sound that plays when analysis finishes.</p>
+
+      <button onclick="playCompletionSound()">Play Completion Sound</button>
+
+      <div class="info">
+        <p>This is the sound that plays when your AI Search Score analysis completes.</p>
+      </div>
+
+      <div class="notes">
+        <strong>Technical Details:</strong><br />
+        • Two-note chime (C5 → G5)<br />
+        • Duration: ~0.45 seconds<br />
+        • Volume: 30% (moderate)<br />
+        • Generated using Web Audio API
+      </div>
+    </div>
+
+    <script>
+      function playCompletionSound() {
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+          // Create oscillators for a pleasant chime sound
+          const playNote = (frequency, startTime, duration) => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            // Envelope for smooth sound
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+          };
+
+          const now = audioContext.currentTime;
+
+          // Play a pleasant two-note chime (C5 and G5)
+          playNote(523.25, now, 0.3); // C5
+          playNote(783.99, now + 0.15, 0.3); // G5
+
+          // Visual feedback
+          const button = document.querySelector('button');
+          button.style.backgroundColor = '#10b981';
+          button.textContent = 'Sound Played! ✓';
+
+          setTimeout(() => {
+            button.style.backgroundColor = '#3f8cff';
+            button.textContent = 'Play Completion Sound';
+          }, 1000);
+        } catch (error) {
+          alert('Audio playback not available. Error: ' + error.message);
+        }
+      }
+    </script>
+  </body>
+</html>

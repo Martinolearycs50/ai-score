@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 
 interface RecencyScores {
-  lastModified: number;    // Last-Modified header & on-page timestamp < 90 days (+5)
+  lastModified: number; // Last-Modified header & on-page timestamp < 90 days (+5)
   stableCanonical: number; // Stable canonical URL (no querystring variants) (+5)
 }
 
@@ -23,8 +23,7 @@ export async function run(html: string, headers: Headers): Promise<RecencyScores
 
   // Check Last-Modified header and on-page timestamps
   const now = new Date();
-  const ninetyDaysAgo = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
-  
+  const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
   let isFresh = false;
 
   // Check Last-Modified header
@@ -69,18 +68,16 @@ export async function run(html: string, headers: Headers): Promise<RecencyScores
       $('.date, .updated, .modified, .last-updated, .post-date, .article-date'),
       $('[class*="date"], [class*="updated"], [class*="modified"]'),
       $('time[datetime]'),
-      
       // Date in text (look for "Updated:", "Last modified:", etc.)
       $('p, span, div').filter((_, el) => {
         const text = $(el).text();
         return /(?:updated|modified|revised|published)[\s:]+/i.test(text);
-      })
+      }),
     ];
 
     // Check all found dates
     const allDates = [...dateMetaTags, ...structuredDataDates];
-    
-    datePatterns.forEach(elements => {
+    datePatterns.forEach((elements) => {
       elements.each((_, el) => {
         const datetime = $(el).attr('datetime');
         const text = $(el).text();
@@ -108,17 +105,19 @@ export async function run(html: string, headers: Headers): Promise<RecencyScores
   if (canonicalLink) {
     try {
       const canonicalUrl = new URL(canonicalLink);
-      
+
       // Check if URL has minimal or no query parameters
       const queryParams = Array.from(canonicalUrl.searchParams.keys());
-      const hasMinimalParams = queryParams.length === 0 || 
-        (queryParams.length === 1 && ['utm_source', 'utm_medium', 'utm_campaign'].includes(queryParams[0]));
-      
+      const hasMinimalParams =
+        queryParams.length === 0 ||
+        (queryParams.length === 1 &&
+          ['utm_source', 'utm_medium', 'utm_campaign'].includes(queryParams[0]));
+
       // Check if URL structure is clean (no session IDs, timestamps, etc.)
       const urlPath = canonicalUrl.pathname;
-      const hasCleanPath = !urlPath.match(/[?&](?:session|sid|token|timestamp|ts)=/i) &&
-                          !urlPath.match(/\d{10,}/); // No unix timestamps
-      
+      const hasCleanPath =
+        !urlPath.match(/[?&](?:session|sid|token|timestamp|ts)=/i) && !urlPath.match(/\d{10,}/); // No unix timestamps
+
       hasStableCanonical = hasMinimalParams && hasCleanPath;
     } catch (e) {
       // Invalid URL
@@ -136,13 +135,13 @@ export async function run(html: string, headers: Headers): Promise<RecencyScores
  */
 function parseFlexibleDate(dateStr: string): Date | null {
   if (!dateStr) return null;
-  
+
   // Try standard date parsing first
   const date = new Date(dateStr);
   if (!isNaN(date.getTime())) {
     return date;
   }
-  
+
   // Try to extract date patterns
   const patterns = [
     // ISO 8601
@@ -156,7 +155,7 @@ function parseFlexibleDate(dateStr: string): Date | null {
     // Reverse written format
     /(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})/i,
   ];
-  
+
   for (const pattern of patterns) {
     const match = dateStr.match(pattern);
     if (match) {
@@ -167,6 +166,6 @@ function parseFlexibleDate(dateStr: string): Date | null {
       }
     }
   }
-  
+
   return null;
 }

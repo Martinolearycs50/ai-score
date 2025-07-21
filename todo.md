@@ -3,6 +3,7 @@
 ## Current State (as of 2025-07-17)
 
 ### ✅ Working
+
 - Basic tier system (free vs pro)
 - Tier navigation from pricing page
 - Tier context properly reads URL parameters
@@ -12,6 +13,7 @@
 - Debug tools for tier troubleshooting
 
 ### ⚠️ Issues
+
 - Pro tier lacks "wow factor" - too similar to free tier visually
 - Comparison mode available in free tier (should be Pro-only)
 - No AI-powered insights or recommendations
@@ -21,6 +23,7 @@
 ## Tomorrow's Priority: Build Out Pro Tier with AI
 
 ### 1. AI Integration (HIGH PRIORITY)
+
 - [ ] Set up OpenAI API integration
   - [ ] Add API key management (environment variables)
   - [ ] Create AI service module
@@ -36,6 +39,7 @@
   - [ ] Industry-specific recommendations
 
 ### 2. Visual Differentiation (MEDIUM PRIORITY)
+
 - [ ] Free tier changes:
   - [ ] More minimal design
   - [ ] Add "locked" overlays on Pro features
@@ -49,6 +53,7 @@
   - [ ] Achievement badges/gamification
 
 ### 3. Pro-Exclusive Features (HIGH PRIORITY)
+
 - [ ] AI-Generated Insights Dashboard
   - [ ] Executive summary of findings
   - [ ] Competitive positioning analysis
@@ -65,6 +70,7 @@
   - [ ] Shareable links
 
 ### 4. Technical Implementation
+
 - [ ] Create AI service architecture
   - [ ] Abstract AI provider interface
   - [ ] Implement provider-specific adapters
@@ -75,6 +81,7 @@
 - [ ] Implement error boundaries for AI failures
 
 ### 5. Usage Tracking & Limits
+
 - [ ] Implement analysis counter
 - [ ] Store usage in localStorage/database
 - [ ] Block analysis after limit reached
@@ -103,6 +110,7 @@ src/
 ```
 
 ## Environment Variables Needed
+
 ```
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
@@ -112,7 +120,7 @@ AI_SERVICE_ENABLED=true
 ## Best Starting Prompt for Tomorrow
 
 ```
-I want to build out the Pro tier with AI integrations to create a "wow factor" experience. 
+I want to build out the Pro tier with AI integrations to create a "wow factor" experience.
 
 Current state:
 - Basic tier system is working (free shows simple score, pro shows detailed breakdown)
@@ -133,6 +141,7 @@ Please help me implement these AI integrations and premium features. Start by se
 ```
 
 ## Success Criteria
+
 - Pro tier feels significantly more valuable than free tier
 - AI insights are actually helpful and actionable
 - Visual design clearly differentiates tiers

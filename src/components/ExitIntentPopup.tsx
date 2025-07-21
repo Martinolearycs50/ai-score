@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
+import { cssVars } from '@/lib/design-system/colors';
 
 interface ExitIntentPopupProps {
   onClose: () => void;
@@ -50,11 +53,9 @@ export default function ExitIntentPopup({ onClose, onEmailSubmit }: ExitIntentPo
     if (!email || isSubmitting) return;
 
     setIsSubmitting(true);
-    
     try {
       await onEmailSubmit(email);
       setSubmitted(true);
-      
       // Close after success message
       setTimeout(() => {
         onClose();
@@ -79,7 +80,7 @@ export default function ExitIntentPopup({ onClose, onEmailSubmit }: ExitIntentPo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="bg-foreground/50 fixed inset-0 z-50"
             onClick={handleClose}
           />
 
@@ -88,17 +89,29 @@ export default function ExitIntentPopup({ onClose, onEmailSubmit }: ExitIntentPo
             initial={{ opacity: 0, scale: 0.9, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+            className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="bg-white rounded-lg shadow-xl p-8 relative">
+            <div className="bg-card relative rounded-lg p-8 shadow-xl">
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-muted hover:text-body absolute top-4 right-4 transition-colors"
                 aria-label="Close popup"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
 
@@ -106,16 +119,32 @@ export default function ExitIntentPopup({ onClose, onEmailSubmit }: ExitIntentPo
                 <>
                   {/* Icon */}
                   <div className="mb-4">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
-                      <path d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z" fill="#3B82F6" fillOpacity="0.2" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round"/>
+                    <svg
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="mx-auto"
+                    >
+                      <path
+                        d="M12 2L14.09 8.26L20.76 9.27L16.38 13.14L17.57 19.84L12 16.5L6.43 19.84L7.62 13.14L3.24 9.27L9.91 8.26L12 2Z"
+                        fill={cssVars.primary}
+                        fillOpacity="0.2"
+                        stroke={cssVars.primary}
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
 
-                  <h2 className="text-2xl font-medium text-center mb-2" style={{ color: 'var(--foreground)' }}>
+                  <h2
+                    className="mb-2 text-center text-2xl font-medium"
+                    style={{ color: 'var(--foreground)' }}
+                  >
                     Wait! Don't Miss Out
                   </h2>
-                  
-                  <p className="text-center text-muted mb-6">
+                  <p className="text-muted mb-6 text-center">
                     Get free AI optimization tips and be the first to know when Pro features launch!
                   </p>
 
@@ -126,43 +155,63 @@ export default function ExitIntentPopup({ onClose, onEmailSubmit }: ExitIntentPo
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      style={{ color: 'var(--foreground)' }}
+                      className="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:outline-none"
+                      style={
+                        {
+                          borderColor: 'var(--gray-300)',
+                          color: 'var(--foreground)',
+                          '--tw-ring-color': cssVars.primary,
+                        } as React.CSSProperties
+                      }
                     />
-                    
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      className="w-full rounded-lg px-6 py-3 transition-colors disabled:opacity-50"
+                      style={{
+                        color: 'white',
+                        backgroundColor: isSubmitting ? cssVars.muted : cssVars.primary,
+                      }}
+                      onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.opacity = '0.9')}
+                      onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.opacity = '1')}
                     >
                       {isSubmitting ? 'Sending...' : 'Get Free Tips'}
                     </button>
                   </form>
 
-                  <p className="text-xs text-center text-muted mt-4">
+                  <p className="text-muted mt-4 text-center text-xs">
                     No spam, unsubscribe anytime
                   </p>
                 </>
               ) : (
-                <div className="text-center py-8">
+                <div className="py-8 text-center">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 200 }}
+                    transition={{ type: 'spring', stiffness: 200 }}
                     className="mb-4"
                   >
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
-                      <path d="M20 6L9 17L4 12" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="64"
+                      height="64"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="mx-auto"
+                    >
+                      <path
+                        d="M20 6L9 17L4 12"
+                        stroke={cssVars.success}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </motion.div>
-                  
-                  <h3 className="text-xl font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                  <h3 className="mb-2 text-xl font-medium" style={{ color: 'var(--foreground)' }}>
                     You're all set!
                   </h3>
-                  
-                  <p className="text-muted">
-                    Check your email for AI optimization tips
-                  </p>
+                  <p className="text-muted">Check your email for AI optimization tips</p>
                 </div>
               )}
             </div>

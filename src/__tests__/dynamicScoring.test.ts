@@ -1,6 +1,6 @@
 import { score } from '@/lib/scorer-new';
+import type { ExtractedContent, PillarResults } from '@/lib/types';
 import { DYNAMIC_SCORING_WEIGHTS, PAGE_TYPE_WEIGHT_MAP, PILLARS } from '@/utils/constants';
-import type { PillarResults, ExtractedContent } from '@/lib/types';
 
 describe('Dynamic Scoring System', () => {
   // Mock pillar results with perfect scores
@@ -203,7 +203,7 @@ describe('Dynamic Scoring System', () => {
 
     it('should have all required pillars in each weight configuration', () => {
       const requiredPillars = Object.keys(PILLARS);
-      
+
       Object.entries(DYNAMIC_SCORING_WEIGHTS).forEach(([pageType, weights]) => {
         const configPillars = Object.keys(weights);
         expect(configPillars.sort()).toEqual(requiredPillars.sort());
@@ -211,9 +211,20 @@ describe('Dynamic Scoring System', () => {
     });
 
     it('should map all page types correctly', () => {
-      const pageTypes = ['homepage', 'article', 'blog', 'product', 'documentation', 'category', 'about', 'contact', 'search', 'general'];
-      
-      pageTypes.forEach(pageType => {
+      const pageTypes = [
+        'homepage',
+        'article',
+        'blog',
+        'product',
+        'documentation',
+        'category',
+        'about',
+        'contact',
+        'search',
+        'general',
+      ];
+
+      pageTypes.forEach((pageType) => {
         const weightKey = PAGE_TYPE_WEIGHT_MAP[pageType];
         expect(weightKey).toBeDefined();
         expect(DYNAMIC_SCORING_WEIGHTS[weightKey]).toBeDefined();

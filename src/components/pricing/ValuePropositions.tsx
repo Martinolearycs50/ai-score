@@ -1,12 +1,15 @@
 'use client';
 
 import React from 'react';
+
 import { motion } from 'framer-motion';
+
 import { valuePropositions } from '@/lib/pricingData';
 
 export default function ValuePropositions() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+      {' '}
       {valuePropositions.map((prop, index) => (
         <motion.div
           key={index}
@@ -16,14 +19,11 @@ export default function ValuePropositions() {
           whileHover={{ y: -5 }}
           className="text-center"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {prop.title}
-          </h3>
-          <p className="text-sm text-gray-600">
-            {prop.description}
-          </p>
+          {' '}
+          <h3 className="text-foreground mb-2 text-lg font-semibold"> {prop.title} </h3>{' '}
+          <p className="text-body text-sm"> {prop.description} </p>{' '}
         </motion.div>
-      ))}
+      ))}{' '}
     </div>
   );
 }

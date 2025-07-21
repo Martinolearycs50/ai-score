@@ -5,7 +5,7 @@ describe('Trust Audit Module', () => {
   describe('Well-optimized content', () => {
     it('should score well for trustworthy content', async () => {
       const scores = await run(WELL_OPTIMIZED_HTML);
-      
+
       expect(scores.authorBio).toBe(5); // Has author bio
       expect(scores.napConsistency).toBe(5); // Has company info
       expect(scores.license).toBe(5); // Has CC-BY license
@@ -29,7 +29,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
 
@@ -43,7 +43,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
 
@@ -57,7 +57,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
 
@@ -68,7 +68,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
 
@@ -81,7 +81,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
 
@@ -93,7 +93,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
     });
   });
@@ -113,7 +113,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(5);
     });
 
@@ -128,7 +128,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(5);
     });
 
@@ -140,7 +140,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(5);
     });
 
@@ -152,7 +152,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(5);
     });
 
@@ -166,7 +166,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(5);
     });
 
@@ -177,7 +177,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.napConsistency).toBe(0);
     });
   });
@@ -193,7 +193,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(5);
     });
 
@@ -206,7 +206,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(5);
     });
 
@@ -219,7 +219,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(5);
     });
 
@@ -233,7 +233,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(5);
     });
 
@@ -247,7 +247,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(5);
     });
 
@@ -261,7 +261,7 @@ describe('Trust Audit Module', () => {
         </html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.license).toBe(0);
     });
   });
@@ -270,7 +270,7 @@ describe('Trust Audit Module', () => {
     it('should handle empty content', async () => {
       const html = '<html><body></body></html>';
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(0);
       expect(scores.napConsistency).toBe(0);
       expect(scores.license).toBe(0);
@@ -284,7 +284,7 @@ describe('Trust Audit Module', () => {
         </body></html>
       `;
       const scores = await run(html);
-      
+
       expect(scores.authorBio).toBe(5);
       expect(scores.napConsistency).toBe(0);
       expect(scores.license).toBe(0);

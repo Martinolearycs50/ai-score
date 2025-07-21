@@ -2,7 +2,10 @@
 
 ## Executive Summary
 
-The AI Search Analyzer is a comprehensive web application that evaluates websites for their readiness to be discovered and referenced by AI search engines like ChatGPT, Claude, and Perplexity. It provides actionable insights through a sophisticated scoring system and personalized recommendations.
+The AI Search Analyzer is a comprehensive web application that evaluates
+websites for their readiness to be discovered and referenced by AI search
+engines like ChatGPT, Claude, and Perplexity. It provides actionable insights
+through a sophisticated scoring system and personalized recommendations.
 
 ## Table of Contents
 
@@ -18,7 +21,9 @@ The AI Search Analyzer is a comprehensive web application that evaluates website
 ## System Architecture
 
 ### Overview
+
 The application is built using modern web technologies:
+
 - **Frontend**: Next.js 15.3.5 with React 19
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **Animations**: Framer Motion
@@ -27,9 +32,10 @@ The application is built using modern web technologies:
 - **Testing**: Jest with Testing Library
 
 ### Application Flow
+
 ```
-User Input (URL) → API Route → URL Validation → Content Fetching 
-→ Content Extraction → Multi-Pillar Analysis → Score Calculation 
+User Input (URL) → API Route → URL Validation → Content Fetching
+→ Content Extraction → Multi-Pillar Analysis → Score Calculation
 → Recommendation Generation → Results Display
 ```
 
@@ -38,6 +44,7 @@ User Input (URL) → API Route → URL Validation → Content Fetching
 The application uses a feature flag architecture for managing free/pro tiers:
 
 #### Components
+
 1. **`tierConfig.ts`** - Centralized feature configuration
    - Single source of truth for all tier features
    - Type-safe feature definitions
@@ -65,6 +72,7 @@ The application uses a feature flag architecture for managing free/pro tiers:
 The analyzer evaluates websites across five key dimensions:
 
 #### RETRIEVAL (30% weight)
+
 - **Purpose**: Measures how easily AI can access and process the site
 - **Metrics Evaluated**:
   - Page load speed (TTFB)
@@ -75,6 +83,7 @@ The analyzer evaluates websites across five key dimensions:
   - Mobile responsiveness
 
 #### FACT_DENSITY (25% weight)
+
 - **Purpose**: Assesses the quality and richness of content
 - **Metrics Evaluated**:
   - Unique statistics and data points
@@ -85,6 +94,7 @@ The analyzer evaluates websites across five key dimensions:
   - Quotations and expert opinions
 
 #### STRUCTURE (20% weight)
+
 - **Purpose**: Evaluates content organization and semantic markup
 - **Metrics Evaluated**:
   - Heading hierarchy
@@ -95,6 +105,7 @@ The analyzer evaluates websites across five key dimensions:
   - Structured data (JSON-LD)
 
 #### TRUST (15% weight)
+
 - **Purpose**: Measures credibility signals
 - **Metrics Evaluated**:
   - Author information
@@ -105,6 +116,7 @@ The analyzer evaluates websites across five key dimensions:
   - Domain authority indicators
 
 #### RECENCY (10% weight)
+
 - **Purpose**: Checks content freshness
 - **Metrics Evaluated**:
   - Last modified dates
@@ -140,6 +152,7 @@ The system generates personalized recommendations based on:
 ### 3. Website Comparison Mode
 
 Allows side-by-side analysis of two websites:
+
 - Visual score comparison
 - Pillar-by-pillar breakdown
 - Strength/weakness identification
@@ -148,6 +161,7 @@ Allows side-by-side analysis of two websites:
 ### 4. Content Extraction Pipeline
 
 Sophisticated content processing that:
+
 - Extracts text with proper spacing
 - Filters out navigation and UI elements
 - Identifies key content areas
@@ -161,6 +175,7 @@ Sophisticated content processing that:
 The application now supports two distinct tiers:
 
 #### Free Tier (Default)
+
 - **Monthly Limit**: 5 analyses
 - **Features**:
   - Overall AI Search Score (0-100)
@@ -175,6 +190,7 @@ The application now supports two distinct tiers:
   - Comparison mode
 
 #### Pro Tier ($39/month)
+
 - **Monthly Limit**: 30 analyses
 - **Additional Features**:
   - Everything in Free tier
@@ -188,16 +204,26 @@ The application now supports two distinct tiers:
 ### Technical Architecture
 
 #### Tier Parameter
+
 - Query parameter: `?tier=free` or `?tier=pro`
 - Default: `free` (encourages upgrades)
 - Passed through component hierarchy
 
 #### Performance Rating System
+
 ```typescript
 // src/lib/performanceRatings.ts
-export type PerformanceRating = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Critical';
+export type PerformanceRating =
+  | 'Excellent'
+  | 'Good'
+  | 'Fair'
+  | 'Poor'
+  | 'Critical';
 
-export function getPerformanceRating(earned: number, max: number): PerformanceRating {
+export function getPerformanceRating(
+  earned: number,
+  max: number
+): PerformanceRating {
   const percentage = (earned / max) * 100;
   if (percentage >= 80) return 'Excellent';
   if (percentage >= 60) return 'Good';
@@ -208,12 +234,14 @@ export function getPerformanceRating(earned: number, max: number): PerformanceRa
 ```
 
 #### Component Updates
+
 - **PillarScoreDisplay**: Tier-aware rendering
 - **page.tsx**: Tier state management and propagation
 - **EmotionalResultsReveal**: Works for both tiers
 - **WebsiteProfileCard**: Pro-only visibility
 
 ### Design Philosophy
+
 - **Free Tier**: Minimal, focused on conversion
 - **Pro Tier**: Full featured, value-packed
 - **No Analysis Changes**: Same engine, different display
@@ -223,6 +251,7 @@ export function getPerformanceRating(earned: number, max: number): PerformanceRa
 ### API Routes
 
 **`/api/analyze`** - Main analysis endpoint
+
 ```typescript
 - Validates input URL
 - Fetches page content with proper headers
@@ -267,6 +296,7 @@ Where:
 ## UI/UX Features
 
 ### Emotional Results Reveal
+
 - **Suspense Phase**: Building anticipation
 - **Score Reveal**: Animated counter with visual effects
 - **Emotional Theming**: Color and messaging based on score:
@@ -276,12 +306,14 @@ Where:
   - 0-39: "Transform Your Visibility" (Purple)
 
 ### Interactive Components
+
 - **Animated Score Circles**: Visual representation of each pillar
 - **Expandable Recommendation Cards**: Detailed implementation guides
 - **Progress Indicators**: Real-time analysis feedback
 - **Smooth Transitions**: Framer Motion animations throughout
 
 ### Responsive Design
+
 - Mobile-first approach
 - Adaptive layouts for all screen sizes
 - Touch-friendly interactions
@@ -290,18 +322,21 @@ Where:
 ## Performance Metrics
 
 ### Analysis Speed
+
 - Average analysis time: 2-5 seconds
 - Concurrent request handling
 - Efficient caching strategies
 - Optimized content extraction
 
 ### Accuracy
+
 - Validated against 50+ test sites
 - Consistent scoring across runs
 - Handles edge cases gracefully
 - Regular algorithm refinements
 
 ### Resource Efficiency
+
 - Minimal memory footprint
 - Efficient HTML parsing
 - Streamlined API responses
@@ -310,18 +345,21 @@ Where:
 ## Testing & Quality
 
 ### Test Coverage
+
 - Unit tests for all core functions
 - Integration tests for API routes
 - Component testing with React Testing Library
 - End-to-end testing scenarios
 
 ### Quality Assurance
+
 - TypeScript for type safety
 - ESLint for code consistency
 - Automated testing in CI/CD
 - Regular manual testing
 
 ### Error Handling
+
 - Graceful degradation
 - User-friendly error messages
 - Comprehensive logging
@@ -337,6 +375,7 @@ Where:
 ## Technical Stack Details
 
 ### Dependencies
+
 - **next**: 15.3.5 - React framework
 - **react**: 19.0.0 - UI library
 - **axios**: 1.10.0 - HTTP client
@@ -346,6 +385,7 @@ Where:
 - **zod**: 4.0.5 - Schema validation
 
 ### Development Tools
+
 - **typescript**: Type checking
 - **jest**: Testing framework
 - **eslint**: Code linting
@@ -353,6 +393,11 @@ Where:
 
 ## Conclusion
 
-The AI Search Analyzer MVP represents a complete, production-ready solution for evaluating website AI-readiness. It combines sophisticated analysis algorithms with an intuitive user interface to deliver actionable insights that help websites improve their visibility to AI search engines.
+The AI Search Analyzer MVP represents a complete, production-ready solution for
+evaluating website AI-readiness. It combines sophisticated analysis algorithms
+with an intuitive user interface to deliver actionable insights that help
+websites improve their visibility to AI search engines.
 
-The modular architecture and comprehensive testing ensure reliability and maintainability, while the focus on user experience makes complex technical analysis accessible to all users.
+The modular architecture and comprehensive testing ensure reliability and
+maintainability, while the focus on user experience makes complex technical
+analysis accessible to all users.
