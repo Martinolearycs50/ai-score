@@ -11,12 +11,12 @@ code in this repository.
 
 1. Read CLAUDE_CONTEXT.md first - it has current project state and what needs
    building
-2. Review STYLE_GUIDE.md for all visual design and UI decisions
+2. Review docs/STYLE_GUIDE.md for all visual design and UI decisions
 3. Update CLAUDE_CONTEXT.md regularly as you work (see update instructions
    below)
 4. Never modify design constants without team approval 🎨 Design System Note:
    For complete visual design specifications, animations, and voice/tone
-   guidelines, see STYLE_GUIDE.md
+   guidelines, see docs/STYLE_GUIDE.md
 
 Quick Reference Colors (Updated 2025-01-20) css --primary: #2D2A7F /_ Deep
 Indigo - Brand color _/ --accent: #3F8CFF /_ Electric Blue - CTAs _/
@@ -29,7 +29,7 @@ Voice & Tone (Summary) ✅ Encouraging: "Room to grow! 🌱" ❌ Critical: "Poor
 performance" ✅ Simple: "Your site loads quickly" ❌ Technical: "TTFB metrics
 suboptimal"
 
-See STYLE_GUIDE.md for complete guidelines including:
+See docs/STYLE_GUIDE.md for complete guidelines including:
 
 - Full color system with CSS variables
 - Button patterns and CTA colors
@@ -339,7 +339,7 @@ open coverage/lcov-report/index.html   # View coverage report
 2. **No Authentication**: Free tier requires no login
 3. **Generic Error Messages**: Never expose technical details to users
 4. **Mobile First**: Test at 375px width minimum
-5. **Design System**: Follow STYLE_GUIDE.md strictly for all UI decisions
+5. **Design System**: Follow docs/STYLE_GUIDE.md strictly for all UI decisions
 6. **Rate Limiting**: 50 requests/hour per IP enforced via
    `apiUsageVerification.ts`
 7. **Progressive Enhancement**: Features should work without external services

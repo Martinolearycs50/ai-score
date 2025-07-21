@@ -139,7 +139,7 @@ Current Performance:
     multi-line strings)
   - Expanded all compressed files from single-line format
   - Created backup and recovery scripts for safety
-  - Added formatting protection (CONTRIBUTING.md, FORMATTING.md)
+  - Added formatting protection (CONTRIBUTING.md, docs/FORMATTING.md)
 - **Results**:
   - Dev server now starts successfully
   - 7/13 files completely fixed, 6/13 partially fixed (expanded but minor syntax

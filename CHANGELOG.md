@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed 13 files that were compressed into single lines with broken syntax
   - Resolved progressiveEnhancement.ts syntax errors (try/catch blocks, multi-line strings)
   - Created comprehensive fix scripts and backup/recovery tools
-  - Added formatting protection measures (CONTRIBUTING.md, FORMATTING.md)
+  - Added formatting protection measures (CONTRIBUTING.md, docs/FORMATTING.md)
   - Dev server now starts successfully
 - Complete rewrite of main content detection algorithm
   - Now works reliably with all modern websites including React/Next.js SPAs
