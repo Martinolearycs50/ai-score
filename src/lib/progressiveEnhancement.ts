@@ -38,7 +38,8 @@ interface ProgressiveAnalysisCallbacks {
 const WORKER_URL = process.env.NEXT_PUBLIC_WORKER_URL || 'https://ai-search-worker.your-subdomain.workers.dev';
 export async function performProgressiveAnalysis( url: string,
   callbacks: ProgressiveAnalysisCallbacks ): Promise<void> {
-  // Phase 1: Quick analysis via Cloudflare Worker try {
+  // Phase 1: Quick analysis via Cloudflare Worker
+  try {
   
 const quickResult = await fetchQuickAnalysis(url);
 callbacks.onQuickResult(quickResult);
@@ -51,7 +52,8 @@ callbacks.onError(error as Error,
   'quick');
 // Continue to full analysis even if quick fails 
 }
- // Phase 2: Full analysis via Next.js API try {
+ // Phase 2: Full analysis via Next.js API
+  try {
   
 const fullResult = await fetchFullAnalysis(url);
 callbacks.onFullResult(fullResult);
@@ -129,7 +131,8 @@ isQuickAnalysis: true,
 timestamp: quickResult.timestamp,
   scores: {
 raw: quickScores,
-  weighted: quickScores, // Simplified for quick analysis weights: {
+  weighted: quickScores, // Simplified for quick analysis
+  weights: {
   
 retrieval: 0.25,
   factDensity: 0.25,
@@ -148,15 +151,17 @@ title: basicMetrics.title,
   url: quickResult.url,
   hasHttps: basicMetrics.hasHttps
 
-}, // Simplified recommendations for quick analysis recommendations: generateQuickRecommendations(quickScores,
-pageType), // Indicate this is preliminary analysisType: 'quick',
+}, // Simplified recommendations for quick analysis
+recommendations: generateQuickRecommendations(quickScores, pageType), // Indicate this is preliminary
+analysisType: 'quick',
 message: 'Initial analysis complete. Full analysis in progress...'
 };
 };
  function generateQuickRecommendations(scores: any,
   pageType: string): any[] {
 const recommendations = [];
-  // Basic recommendations based on low scores if (scores.retrieval < 20) {
+  // Basic recommendations based on low scores
+  if (scores.retrieval < 20) {
   recommendations.push({
   
 category: 'RETRIEVAL',
@@ -165,19 +170,17 @@ category: 'RETRIEVAL',
   description: 'Your site may be loading slowly. Consider optimizing images and enabling caching.',
   impact: 'High' 
 });
-};
+}
 if (scores.factDensity < 10) {
   recommendations.push({
   
 category: 'FACT_DENSITY',
   priority: 'MEDIUM',
   title: 'Add More Valuable Content',
-  description: 'Consider adding more detailed information,
-  statistics,
-  or examples to your content.',
+  description: 'Consider adding more detailed information, statistics, or examples to your content.',
   impact: 'Medium' 
 });
-};
+}
 if (scores.structure < 10) {
   recommendations.push({
   
@@ -187,7 +190,7 @@ category: 'STRUCTURE',
   description: 'Add clear headings and meta descriptions to help AI understand your content.',
   impact: 'Medium' 
 });
-};
+}
 if (!scores.trust) {
   recommendations.push({
   
@@ -197,6 +200,6 @@ category: 'TRUST',
   description: 'Secure your site with HTTPS to build trust with users and AI systems.',
   impact: 'High' 
 });
-};
- return recommendations;
+}
+return recommendations;
 }
