@@ -15,32 +15,32 @@ const filesWithErrors = [
   'src/lib/progressiveEnhancement.ts',
   'src/lib/types.ts',
   'src/utils/contentVerification.ts',
-  'src/utils/validators.test.ts'
+  'src/utils/validators.test.ts',
 ];
 
 console.log('🔧 Fixing compressed files by rewriting them...\n');
 
-filesWithErrors.forEach(filePath => {
+filesWithErrors.forEach((filePath) => {
   const fullPath = path.join(process.cwd(), filePath);
-  
+
   try {
     console.log(`📝 Processing ${filePath}...`);
-    
+
     // Read the file
     const content = fs.readFileSync(fullPath, 'utf8');
-    
+
     // Create a temporary file with .tmp extension
     const tmpPath = fullPath + '.tmp';
-    
+
     // Write content to temp file
     fs.writeFileSync(tmpPath, content, 'utf8');
-    
+
     // Try to format with prettier, ignoring errors
     try {
-      execSync(`npx prettier --write "${tmpPath}" --no-error-on-unmatched-pattern`, { 
-        stdio: 'pipe' 
+      execSync(`npx prettier --write "${tmpPath}" --no-error-on-unmatched-pattern`, {
+        stdio: 'pipe',
       });
-      
+
       // If prettier succeeded, use the formatted content
       const formattedContent = fs.readFileSync(tmpPath, 'utf8');
       fs.writeFileSync(fullPath, formattedContent, 'utf8');
@@ -48,9 +48,9 @@ filesWithErrors.forEach(filePath => {
     } catch (prettierError) {
       // If prettier failed, try to fix common issues
       console.log(`⚠️  Prettier failed for ${filePath}, attempting manual fixes...`);
-      
+
       let fixed = content;
-      
+
       // Fix common syntax errors
       fixed = fixed
         // Fix missing semicolons after closing braces
@@ -65,26 +65,25 @@ filesWithErrors.forEach(filePath => {
         .replace(/return\s+{/g, 'return {\n')
         // Fix compressed exports
         .replace(/export\s+(const|let|var|function|class|interface|type|enum)/g, '\nexport $1');
-      
+
       // Write the manually fixed content
       fs.writeFileSync(fullPath, fixed, 'utf8');
-      
+
       // Try prettier again
       try {
-        execSync(`npx prettier --write "${fullPath}" --no-error-on-unmatched-pattern`, { 
-          stdio: 'pipe' 
+        execSync(`npx prettier --write "${fullPath}" --no-error-on-unmatched-pattern`, {
+          stdio: 'pipe',
         });
         console.log(`✅ Fixed ${filePath} with manual corrections`);
       } catch (secondError) {
         console.log(`❌ Could not fix ${filePath} - manual intervention needed`);
       }
     }
-    
+
     // Clean up temp file
     if (fs.existsSync(tmpPath)) {
       fs.unlinkSync(tmpPath);
     }
-    
   } catch (error) {
     console.error(`❌ Error processing ${filePath}: ${error.message}`);
   }

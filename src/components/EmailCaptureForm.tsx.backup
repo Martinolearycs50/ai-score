@@ -1,29 +1,22 @@
 'use client';
 import {
-  
- useState 
-} from 'react';
+ useState };
+ from 'react';
 import {
-  
- motion 
-} from 'framer-motion';
+ motion };
+ from 'framer-motion';
   import {
-  
 colors,
-  cssVars 
-} from '@/lib/design-system/colors';
+cssVars };
+ from '@/lib/design-system/colors';
   interface EmailCaptureFormProps {
-  
 
 variant?: 'inline' | 'hero' | 'cta';
 onSubmit?: (email: string) => void;
-
-}
+};
  export default function EmailCaptureForm({
-  
 variant = 'inline',
-  onSubmit 
-}
+onSubmit }
 : EmailCaptureFormProps) {
 const [email,
 setEmail] = useState('');
@@ -36,103 +29,80 @@ setError] = useState('');
   const handleSubmit = async (e: React.FormEvent) => {
 e.preventDefault();
 setError('');
-if (!email) {
-  
+  if (!email) {
 setError('Email is required');
 return;
-
 }
- //  Basic email validation 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-if (!emailRegex.test(email)) {
-  
+ // Basic email validation const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
 setError('Please enter a valid email');
 return;
-
 };
-setIsSubmitting(true);
+ setIsSubmitting(true);
   try {
   // Call parent handler or default implementation if (onSubmit) {
-  
 await onSubmit(email);
-
-} else {
-  
-// Default: simulate API call await new Promise(resolve => setTimeout(resolve,
-  1000));
-console.log('Email submitted:',
-  email);
-
 };
-setSubmitted(true);
+ else {
+// Default: simulate API call await new Promise(resolve => setTimeout(resolve, 1000));
+console.log('Email submitted:',
+email);
+};
+ setSubmitted(true);
 setEmail('');
   // Reset after 5 seconds setTimeout(() => {
-  
 setSubmitted(false);
-
 }, 5000);
-} catch (err) {
-  
+};
+ catch (err) {
 setError('Something went wrong. Please try again.');
-
-} finally {
-  
+};
+ finally {
 setIsSubmitting(false);
-
 }
 
 };
-if (submitted) {
+  if (submitted) {
 return ( <motion.div;
-initial={
+  initial={
   {
-  
 opacity:
 0,
-  y:
+y:
 10
-
 }
 };
-animate={
+  animate={
   {
-  
 opacity:
 1,
-  y:
+y:
 0
-
 }
 };
-className={
+  className={
 `
   ${
-  
 variant
 ===
 'hero'
 ?
 'p-8'
 :
-'p-6'
-};
+'p-6'};
 rounded-lg;
 border;
 text-center
 `};
-style={
+  style={
 {
 backgroundColor:
 `${
-  
-cssVars.success
-}
+cssVars.success}
 20`,
 borderColor:
 `${
-  
-cssVars.success
-}
+cssVars.success}
 40`
 }
 }
@@ -163,10 +133,8 @@ className="success-text;
 mt-1"
   style={
 {
-  
 opacity:
 0.9
-
 }
 }
 >Check your email for AI optimization tips</p> </motion.div> );
@@ -176,9 +144,7 @@ opacity:
 container: 'rounded-lg p-6',
 containerStyle: {
  backgroundColor: `${
-  
-cssVars.accent
-}
+cssVars.accent}
 10`
 },
 title: 'Get AI Optimization Tips',
@@ -191,13 +157,9 @@ buttonClass: 'px-6',
 container: 'rounded-2xl p-8 shadow-lg',
 containerStyle: {
  background: `linear-gradient(to bottom right, ${
-  
-cssVars.accent
-}
+cssVars.accent}
 10, ${
-  
-cssVars.primary
-}
+cssVars.primary}
 10)`
 },
 title: 'Boost Your AI Visibility',
@@ -209,10 +171,8 @@ buttonClass: 'w-full',
   cta: {
 container: 'rounded-lg border shadow-sm p-8 text-center',
   containerStyle: {
-  
 backgroundColor: cssVars.card,
-  borderColor: cssVars.border
-
+borderColor: cssVars.border
 },
 title: 'Ready to Improve Your Score?',
 subtitle: 'Get personalized recommendations delivered to your inbox',
@@ -223,36 +183,28 @@ buttonClass: 'w-full',
 };
 const styles = variants[variant];
 return ( <motion.div;
-initial={
+  initial={
   {
-  
 opacity:
 0,
-  y:
+y:
 20
-
 }
 };
-animate={
+  animate={
   {
-  
 opacity:
 1,
-  y:
+y:
 0
-
 }
 };
 className={
-  
-styles.container
-};
-style={
+styles.container};
+  style={
 styles.containerStyle
 ||
 {
-  
-
 }
 }
 
@@ -262,74 +214,48 @@ font-medium;
 mb-2"
   style={
 {
-  
 color:
 "var(--foreground)"
-
 }
 }
 > {
-  
-styles.title
-}
+styles.title}
  </h3> <p className="text-muted text-sm"> {
-  
-styles.subtitle
-}
+styles.subtitle}
  </p> <form;
 onSubmit={
-  
-handleSubmit
-};
+handleSubmit};
 className={
-  
-styles.formClass
-}
+styles.formClass}
 > <input;
 type="email"
 value={
-  
-email
-};
-onChange={
-  
+email};
+  onChange={
 (e)
-=> setEmail(e.target.value)
-};
-placeholder="Enter your email" disabled={
-  
-isSubmitting
-};
-className={
+=> setEmail(e.target.value)};
+ placeholder="Enter your email" disabled={
+isSubmitting};
+ className={
 ` ${
-  
-styles.inputClass
-};
+styles.inputClass};
  px-4 py-3 border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 `};
-style={
+ style={
 {
-  
- color: "var(--foreground)" 
-}
+ color: "var(--foreground)" }
 }
  /> <button;
 type="submit"
 disabled={
-  
-isSubmitting
-};
-className={
+isSubmitting};
+  className={
 `
 ${
-  
-styles.buttonClass
-};
-style={
+styles.buttonClass};
+  style={
 {
-  
 color:
 "white"
-
 }
 };
 px-6;
@@ -340,24 +266,18 @@ transition-opacity;
 disabled:opacity-50;
 disabled:cursor-not-allowed
 `};
-style={
+  style={
 {
-  
 backgroundColor:
 cssVars.accent
-
 }
 }
 
 > {
-  
-isSubmitting ? 'Sending...' : 'Get Tips'
-}
+isSubmitting ? 'Sending...' : 'Get Tips'}
  </button> </form> {
 error && ( <p className="error-text text-sm mt-2">{
-  
-error
-}
+error}
 </p> )}
  <p className="text-xs text-muted mt-3"> No spam,
 unsubscribe anytime. By subscribing,

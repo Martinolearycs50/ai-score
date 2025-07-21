@@ -1,7 +1,8 @@
 import {
 describe,
 expect,
-test } from '@jest/globals';
+test };
+ from '@jest/globals';
   import {
 validateAndNormalizeUrl,
 parseRobotsTxt,
@@ -9,7 +10,8 @@ detectFaqContent,
 validateSchemaMarkup,
 calculateReadingLevel,
 isSystemFile,
-urlSchema } from './validators';
+urlSchema };
+ from './validators';
   describe('URL Validation', () => {
   describe('urlSchema', () => {
   test('should validate correct URLs', () => {
