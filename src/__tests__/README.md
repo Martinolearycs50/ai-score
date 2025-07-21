@@ -69,7 +69,7 @@ The tests require the Chrome UX API key to be set:
 
 ```bash
 # In .env.local or environment
-CHROME_UX_API_KEY=AIzaSyDcKAHt4Cr8RIUDx1yIFM1Cz-2IQePM2lQ
+CHROME_UX_API_KEY=your_api_key_here
 ```
 
 ## What the Tests Verify

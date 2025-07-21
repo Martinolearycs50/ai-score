@@ -93,13 +93,14 @@ intelligent page type detection and actionable recommendations.
 ## 🛠️ Technical Status
 
 <!-- CLAUDE CODE: Update as you implement -->
+<!-- SECURITY: Never commit API keys. Always use environment variables -->
 
 ### APIs & Services
 
 ```
 Chrome UX Report API:
 ├── Status: [x] Complete - Fully implemented and tested
-├── API Key: [x] Configured (AIzaSyDcKAHt4Cr8RIUDx1yIFM1Cz-2IQePM2lQ)
+├── API Key: [x] Configured (see .env.local)
 ├── Features Implemented:
 │   ├── Real-world TTFB data from Chrome users
 │   ├── Progressive enhancement after initial load
