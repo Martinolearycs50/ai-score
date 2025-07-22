@@ -22,12 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Email capture form component with multiple variants
 - Pro upgrade CTAs throughout the user journey
 - Progressive enhancement flow (quick analysis → full analysis)
+- Modular content extraction architecture for better maintainability
+- shadcn/ui component library (Form, Input, Badge, Dialog)
+- Pro tier infrastructure with feature flags
+- ProFeatureWrapper component for gating premium features
+- Enhanced tier configuration with environment variable support
+- PRO badges with gradient styling
+- Support for API access, bulk analysis, custom reports (Pro tier)
+- Beta features flag system
 
 ### Changed
 - Enhanced conversion optimization with multiple touchpoints
 - Improved user experience with instant preliminary results
 - Updated homepage headline to "Is Your Website Visible to AI Search?" for clearer value proposition
 - Reduced Pro tier pricing from $39/month to $29/month for better accessibility
+- Refactored contentExtractor.ts into modular components
 - Increased rate limit from 10 to 50 requests per hour per IP for improved user experience
 - Complete design system overhaul with new professional color palette:
   - Deep Indigo (#2D2A7F) for brand identity

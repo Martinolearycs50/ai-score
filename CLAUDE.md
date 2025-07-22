@@ -44,18 +44,26 @@ See docs/STYLE_GUIDE.md for complete guidelines including:
 
 ```bash
 # Development
-npm run dev              # Primary dev server (uses nodemon)
+npm run dev              # Primary dev server (uses nodemon with format check)
 npm run dev:stable       # Alternative stable dev server
 npm run dev:simple       # Direct Next.js dev without nodemon
+npm run dev:pm2          # PM2-managed dev server
+
+# Testing
 npm test                 # Run all tests
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate coverage report
 npm test -- [pattern]    # Run specific test files (e.g., npm test -- scorer)
 npm run test:e2e         # Run Playwright E2E tests
+npm run test:e2e:ui      # Run E2E tests with UI
+npm run test:api         # Run API integration tests
 
 # Build & Quality
 npm run build           # Build for production (run before deployment)
 npm run lint            # Check code quality
+npm run format          # Format all files
+npm run format:check    # Check formatting
+npm run format:fix      # Auto-fix formatting and linting issues
 npm start               # Run production server
 ```
 
@@ -100,62 +108,111 @@ afplay /System/Library/Sounds/Glass.aiff
 
 This audio notification alerts the user that you're waiting for their response.
 
-While Coding
+### While Coding
 
 <!-- CLAUDE CODE: Follow these patterns -->
 
-Component Structure tsx // ✅ Good - Consistent card pattern export default
-function FeatureName() { return (
+#### Component Structure
 
-<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"> {/_
-Content _/} </div> ); }
+```tsx
+// ✅ Good - Consistent card pattern
+export default function FeatureName() {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      {/* Content */}
+    </div>
+  );
+}
 
 // ❌ Bad - Inconsistent styling
-
 <div className="bg-gray-50 rounded-xl shadow-lg p-4">
-Button Patterns
-tsx
+```
+
+#### Button Patterns
+
+```tsx
 // Primary CTA (Electric Blue)
 <button className="btn-primary">
 
-// Upgrade CTA (Deep Indigo) <button
-style={{ backgroundColor: 'var(--primary)' }} className="text-white px-6 py-3
-rounded-lg">
+// Upgrade CTA (Deep Indigo)
+<button
+  style={{ backgroundColor: 'var(--primary)' }}
+  className="text-white px-6 py-3 rounded-lg">
 
-// Secondary <button className="bg-white text-gray-700 px-6 py-3 rounded-lg
-border" style={{ borderColor: 'var(--border)', color: 'var(--text)' }}>
+// Secondary
+<button
+  className="bg-white text-gray-700 px-6 py-3 rounded-lg border"
+  style={{ borderColor: 'var(--border)', color: 'var(--text)' }}>
 
-// Text button <button style={{ color: 'var(--accent)' }}
-className="hover:opacity-80 underline"> API Patterns typescript // ✅ Always
-validate URLs if (!isValidUrl(url)) { return { error: "Invalid URL" }; }
+// Text button
+<button
+  style={{ color: 'var(--accent)' }}
+  className="hover:opacity-80 underline">
+```
 
-// ✅ Generic error messages catch (error) { console.error(error); // Log for
-debugging return { error: "Unable to analyze website" }; }
+#### API Patterns
 
-// ✅ Rate limiting if (rateLimiter.isLimited(ip)) { return { error: "Too many
-requests. Try again later." }; } Testing Checklist
+```typescript
+// ✅ Always validate URLs
+if (!isValidUrl(url)) {
+  return { error: "Invalid URL" };
+}
+
+// ✅ Generic error messages
+catch (error) {
+  console.error(error); // Log for debugging
+  return { error: "Unable to analyze website" };
+}
+
+// ✅ Rate limiting
+if (rateLimiter.isLimited(ip)) {
+  return { error: "Too many requests. Try again later." };
+}
+```
+
+### Testing Checklist
 
 <!-- CLAUDE CODE: Check these before marking feature complete -->
 
-Works at 375px width (mobile) No console errors No TypeScript errors (npm run
-build) Loading states show correctly Error states handled gracefully Free tier
-shows limited features (when applicable) 📝 Documentation Updates
+- [ ] Works at 375px width (mobile)
+- [ ] No console errors
+- [ ] No TypeScript errors (npm run build)
+- [ ] Loading states show correctly
+- [ ] Error states handled gracefully
+- [ ] Free tier shows limited features (when applicable)
+
+## 📝 Documentation Updates
 
 <!-- CLAUDE CODE: Update these files when making changes -->
 
-1. CLAUDE_CONTEXT.md - Update Throughout Session At Session Start: Update "Last
-   Updated" date Review "Current Sprint Focus" Check implementation progress
-   While Working: Check off completed features in Implementation Progress Add
-   issues to "Active Issues & Blockers" as found Update "Technical Status" with
-   API integration details After Completing Features: Add entry to "Recent
-   Changes Log" (newest at top) Update accuracy metrics if measured Move
-   resolved issues to resolved section Before Session End: Update "Current
-   Sprint Focus" with next priorities Note any blockers in "Blocked/Waiting"
-   Final check that all progress is recorded
-2. CHANGELOG.md Add changes under [Unreleased] while working Follow
-   Added/Changed/Fixed format Move to versioned section when releasing
-3. README.md - Only Update When: New user-facing features added Setup process
-   changes Dependencies change Public API changes
+1. **CLAUDE_CONTEXT.md** - Update Throughout Session
+   - **At Session Start:**
+     - Update "Last Updated" date
+     - Review "Current Sprint Focus"
+     - Check implementation progress
+   - **While Working:**
+     - Check off completed features in Implementation Progress
+     - Add issues to "Active Issues & Blockers" as found
+     - Update "Technical Status" with API integration details
+   - **After Completing Features:**
+     - Add entry to "Recent Changes Log" (newest at top)
+     - Update accuracy metrics if measured
+     - Move resolved issues to resolved section
+   - **Before Session End:**
+     - Update "Current Sprint Focus" with next priorities
+     - Note any blockers in "Blocked/Waiting"
+     - Final check that all progress is recorded
+
+2. **CHANGELOG.md**
+   - Add changes under [Unreleased] while working
+   - Follow Added/Changed/Fixed format
+   - Move to versioned section when releasing
+
+3. **README.md** - Only Update When:
+   - New user-facing features added
+   - Setup process changes
+   - Dependencies change
+   - Public API changes
 
 ## 🏗️ Code Patterns
 
@@ -179,24 +236,49 @@ shows limited features (when applicable) 📝 Documentation Updates
 - **lib/contentExtractor.ts** - HTML content extraction
 - **lib/chromeUxReport.ts** - Chrome UX Report API integration
 - **lib/types.ts** - Core TypeScript types and interfaces
-- **lib/tierConfig.ts** - Free/Pro tier configuration and constraints File
-  Structure typescript // 1. Imports (React first, then external, then local)
-  import { useState } from 'react'; import { ExternalLib } from 'external';
-  import { localFunction } from '@/lib/local';
+- **lib/tierConfig.ts** - Free/Pro tier configuration and constraints
 
-// 2. Types/Interfaces interface Props { value: string; onChange: (value:
-string) => void; }
+### File Structure
 
-// 3. Component export default function ComponentName({ value, onChange }:
-Props) { // 4. Hooks const [state, setState] = useState('');
+```typescript
+// 1. Imports (React first, then external, then local)
+import { useState } from 'react';
+import { ExternalLib } from 'external';
+import { localFunction } from '@/lib/local';
 
-// 5. Handlers const handleClick = () => { // logic };
+// 2. Types/Interfaces
+interface Props {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-// 6. Render return <div>{/_ JSX _/}</div>; } Type Safety typescript // ✅
-Always use strict types interface AnalysisResult { score: number; breakdown:
-Record<string, number>; }
+// 3. Component
+export default function ComponentName({ value, onChange }: Props) {
+  // 4. Hooks
+  const [state, setState] = useState('');
 
-// ❌ Avoid any const result: any = getData();
+  // 5. Handlers
+  const handleClick = () => {
+    // logic
+  };
+
+  // 6. Render
+  return <div>{/* JSX */}</div>;
+}
+```
+
+### Type Safety
+
+```typescript
+// ✅ Always use strict types
+interface AnalysisResult {
+  score: number;
+  breakdown: Record<string, number>;
+}
+
+// ❌ Avoid any
+const result: any = getData();
+```
 
 ### Key Dependencies Usage
 
@@ -233,26 +315,59 @@ import { motion } from 'framer-motion';
 >
 ```
 
-🚀 Deployment Pre-deployment Checklist npm run build succeeds No TypeScript
-errors All tests pass Documentation updated Changelog updated Deployment Process
-bash
+## 🚀 Deployment
 
+### Pre-deployment Checklist
+
+- [ ] `npm run build` succeeds
+- [ ] No TypeScript errors
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] Changelog updated
+
+### Deployment Process
+
+```bash
 # Automatic via GitHub
+git push origin main  # Deploys to Vercel
+```
 
-git push origin main # Deploys to Vercel 🐛 Common Issues & Solutions
+## 🐛 Common Issues & Solutions
 
 <!-- CLAUDE CODE: Add solutions as you encounter issues -->
 
-Dev Server Issues bash
+### Dev Server Issues
 
+```bash
 # If styles not loading
-
 rm -rf .next && npm run dev
 
 # If port in use
+lsof -ti:3000 | xargs kill -9
+```
 
-lsof -ti:3000 | xargs kill -9 TypeScript Errors typescript // Missing types? Add
-to types.ts export interface NewType { // definition }
+### TypeScript Errors
+
+```typescript
+// Missing types? Add to types.ts
+export interface NewType {
+  // definition
+}
+```
+
+### Code Formatting Protection
+
+<!-- CLAUDE CODE: The project has comprehensive formatting protection -->
+
+This project has multiple layers of protection against code compression:
+
+- **Prettier**: Configured with printWidth: 80 and anti-compression rules
+- **EditorConfig**: Cross-editor consistency
+- **Git Hooks**: Pre-commit formatting via Husky
+- **Lint-staged**: Automatic formatting on commit
+
+If you encounter compressed code, see `docs/FORMATTING.md` for recovery
+procedures.
 
 ## 📋 Quick Reference
 
@@ -314,6 +429,27 @@ NEXT_PUBLIC_ENABLE_DYNAMIC_SCORING=true
 cp .env.example .env.local
 ```
 
+#### Additional Configuration Options
+
+```bash
+# Rate Limiting
+RATE_LIMIT_PER_HOUR=50             # Requests per hour per IP
+RATE_LIMIT_WINDOW_MS=3600000       # Rate limit window (1 hour)
+
+# Timeouts
+TIMEOUT_PAGE_FETCH=10000           # Page fetch timeout (10s)
+TIMEOUT_ROBOTS_TXT=3000            # Robots.txt timeout (3s)
+TIMEOUT_TTFB_CHECK=5000            # TTFB check timeout (5s)
+
+# Cache Settings
+CACHE_CHROME_UX_TTL=3600000        # Chrome UX cache (1 hour)
+CACHE_ROBOTS_TXT_TTL=86400000      # Robots.txt cache (24 hours)
+
+# Content Limits
+MAX_CONTENT_LENGTH=2000000         # Max content size (2MB)
+MAX_WORD_COUNT=10000               # Max words to analyze
+```
+
 ### Testing Strategy
 
 ```bash
@@ -323,9 +459,11 @@ npm test -- --testNamePattern="dynamic" # Test by pattern
 
 # Integration Tests
 npm test src/app/api                   # Test API routes
+npm run test:api                       # Alternative API test command
 
 # E2E Tests
 npm run test:e2e                       # Full user flow tests
+npm run test:e2e:ui                    # E2E tests with UI mode
 
 # Coverage
 npm run test:coverage                  # Generate coverage report
@@ -344,6 +482,25 @@ open coverage/lcov-report/index.html   # View coverage report
    `apiUsageVerification.ts`
 7. **Progressive Enhancement**: Features should work without external services
    (Cloudflare Worker, Chrome UX API)
+
+## Recent Important Fixes
+
+<!-- CLAUDE CODE: Learn from these resolved issues -->
+
+1. **Compressed TypeScript Files** (2025-07-21)
+   - Issue: AI assistants were compressing code into single lines
+   - Solution: Comprehensive formatting protection system implemented
+   - Prevention: Always use `npm run dev` which includes format checking
+
+2. **Content Detection Rewrite** (2025-07-20)
+   - Issue: Modern websites using React/Vue weren't analyzed correctly
+   - Solution: Complete rewrite of content detection algorithm
+   - Key Learning: Check for both SSR and CSR content patterns
+
+3. **Wikipedia Timeouts** (2025-07-19)
+   - Issue: Large Wikipedia pages caused analysis timeouts
+   - Solution: Implemented content limits and optimized extraction
+   - Prevention: MAX_CONTENT_LENGTH and MAX_WORD_COUNT limits
 
 <!-- CLAUDE CODE: Add new patterns and learnings as you discover them -->
 
