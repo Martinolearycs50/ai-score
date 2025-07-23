@@ -341,9 +341,9 @@ export class NarrativeEngine {
    * Identify the key missing element for this site
    */
   private getKeyMissingElement(): string {
-    const pillars = this.analysisResult.scoringResult.pillars;
+    const breakdown = this.analysisResult.scoringResult.breakdown;
 
-    if (!pillars) {
+    if (!breakdown || breakdown.length === 0) {
       return 'key optimization elements';
     }
 
@@ -351,11 +351,11 @@ export class NarrativeEngine {
     let weakestPillar = '';
     let lowestPercentage = 100;
 
-    Object.entries(pillars).forEach(([pillar, pillarData]) => {
-      const percentage = pillarData.percentage;
+    breakdown.forEach((pillarData) => {
+      const percentage = (pillarData.earned / pillarData.max) * 100;
       if (percentage < lowestPercentage) {
         lowestPercentage = percentage;
-        weakestPillar = pillar;
+        weakestPillar = pillarData.pillar;
       }
     });
 
@@ -375,9 +375,9 @@ export class NarrativeEngine {
    */
   private getTopActionSteps(): string[] {
     const recommendations = this.analysisResult.scoringResult.recommendations
-      .filter((rec) => rec.impact === 'high' || rec.estimatedScoreImpact >= 5)
+      .filter((rec) => rec.gain >= 5)
       .slice(0, 3)
-      .map((rec) => rec.title);
+      .map((rec) => rec.fix);
 
     if (recommendations.length < 3) {
       // Add some from business persona if needed

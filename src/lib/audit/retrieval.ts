@@ -235,7 +235,7 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
             name.includes('content'));
 
         if (shouldAggregate) {
-          let aggregatedParts: string[] = [];
+          const aggregatedParts: string[] = [];
           elements.each((_, elem) => {
             const $elem = $clean(elem);
             // Extract paragraphs and headings separately

@@ -18,10 +18,12 @@ export default function PricingPage() {
 
   const handleSelectPlan = (tierId: string) => {
     if (tierId === 'free') {
-      router.push('/');
+      // Temporarily redirect to Pro dashboard for testing
+      // TODO: Change back to '/' when auth/payments are implemented
+      router.push('/pro');
     } else if (tierId === 'pro') {
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Redirect to Pro dashboard
+      router.push('/pro');
     }
   };
 

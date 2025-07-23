@@ -368,7 +368,7 @@ export class DynamicRecommendationGenerator {
     const pageContext = this.getPageTypeContext();
 
     // Add page type prefix if available
-    let contextualWhy = pageContext.prefix ? `${pageContext.prefix} ${defaultWhy}` : defaultWhy;
+    const contextualWhy = pageContext.prefix ? `${pageContext.prefix} ${defaultWhy}` : defaultWhy;
 
     // Add context based on detected content
     const personalizations: Record<string, string> = {

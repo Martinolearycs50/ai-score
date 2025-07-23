@@ -9,6 +9,9 @@ code in this repository.
 
 ### 🚨 CRITICAL: Start Here
 
+**IMPORTANT: PROJECT_VISION.md describes features that are NOT YET IMPLEMENTED.
+See "Unimplemented Features" section below.**
+
 1. Read PROJECT_VISION.md first - it has current project state and what needs
    building
 2. Review docs/GLOBAL_STYLE_SYSTEM.md for all visual design and UI decisions
@@ -441,6 +444,9 @@ CHROME_UX_API_KEY=your_api_key_here
 # Optional Cloudflare Worker URL for progressive enhancement
 NEXT_PUBLIC_WORKER_URL=your_worker_url_here
 
+# Required for AI Done-for-You rewrite feature (Pro tier)
+OPENAI_API_KEY=your_openai_api_key_here
+
 # Feature flags
 NEXT_PUBLIC_ENABLE_DYNAMIC_SCORING=true
 NEXT_PUBLIC_ENABLE_PRO_FEATURES=false
@@ -509,6 +515,50 @@ open coverage/lcov-report/index.html   # View coverage report
    `apiUsageVerification.ts`
 7. **Progressive Enhancement**: Features should work without external services
    (Cloudflare Worker, Chrome UX API)
+
+## Unimplemented Features from PROJECT_VISION.md
+
+<!-- CLAUDE CODE: These features are described in PROJECT_VISION.md but NOT YET BUILT -->
+
+### 1. Compare Scan (Free Tier)
+
+- **Vision**: Enter two URLs, get twin badge scores, pillar winners, trophy icon
+- **Current**: No two-URL comparison feature exists
+- **To Build**: New API endpoint, UI toggle, comparison logic
+
+### 2. Pro Dashboard with Deep Analysis
+
+- **Vision**: `/pro?url={encoded}` route, decimal scores, impact-sorted fixes
+- **Current**: No `/pro` route, no Deep Analysis tab
+- **To Build**: Pro dashboard page, enhanced scoring display
+
+### 3. AI Done-for-You Rewrite
+
+- **Vision**: OpenAI integration for content rewriting with better headings
+- **Current**: No OpenAI integration, no rewrite functionality
+- **To Build**: OpenAI API setup, rewrite endpoint, dual-panel UI
+
+### 4. Dynamic Weights Configuration
+
+- **Vision**: `/config/weights.json` for hot-reload weight changes
+- **Current**: Weights hardcoded in `src/lib/constants.ts`
+- **To Build**: JSON config loader, hot-reload mechanism
+
+### 5. Temporary isPro Flag
+
+- **Vision**: Simple flag to unlock Pro features before payments
+- **Current**: Standard tier system with TierContext
+- **To Build**: Override mechanism in tier configuration
+
+### Implementation Priority
+
+When implementing these features, follow this order:
+
+1. Compare Scan (extends existing free tier)
+2. Dynamic weights.json (foundation for Pro features)
+3. Pro dashboard route and Deep Analysis
+4. OpenAI integration for rewrites
+5. Temporary isPro flag (last, as it's temporary)
 
 ## Recent Important Fixes
 

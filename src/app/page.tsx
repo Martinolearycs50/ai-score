@@ -15,6 +15,7 @@ import EmotionalResultsReveal from '@/components/EmotionalResultsReveal';
 import ExitIntentPopup from '@/components/ExitIntentPopup';
 import FriendlyRecommendationCard from '@/components/FriendlyRecommendationCard';
 import PillarScoreDisplayV2 from '@/components/PillarScoreDisplayV2';
+import ProDeepAnalysisCTA from '@/components/ProDeepAnalysisCTA';
 import ProUpgradeCTA from '@/components/ProUpgradeCTA';
 import UrlForm from '@/components/UrlForm';
 import WebsiteProfileCard from '@/components/WebsiteProfileCard';
@@ -488,6 +489,22 @@ function HomeContent() {
                       result={analysisState.result}
                       enhancementStatus={enhancementStatus}
                     />
+
+                    {/* Pro Deep Analysis CTA for Free Tier */}
+                    {tier === 'free' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="mt-8"
+                      >
+                        <ProDeepAnalysisCTA
+                          url={analysisState.result.url}
+                          score={analysisState.result.aiSearchScore}
+                          variant="banner"
+                        />
+                      </motion.div>
+                    )}
 
                     {/* Enhanced Recommendations Section - Feature flag based */}
                     {features.showRecommendations ? (

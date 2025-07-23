@@ -190,6 +190,22 @@ export function isProFeaturesEnabled(): boolean {
   return process.env.NEXT_PUBLIC_ENABLE_PRO_FEATURES === 'true';
 }
 
+// Temporary isPro override for development
+// This allows testing Pro features without authentication
+export function hasProAccess(userTier: TierType = 'free'): boolean {
+  // Check for temporary isPro override
+  if (typeof window !== 'undefined') {
+    const isProOverride = localStorage.getItem('isPro') === 'true';
+    if (isProOverride) return true;
+  }
+
+  // Check if Pro features are enabled globally
+  if (!isProFeaturesEnabled()) return false;
+
+  // Check user's actual tier
+  return userTier === 'pro' || userTier === 'consultation';
+}
+
 // Helper function to check if a specific pro feature is enabled
 export function isProFeatureEnabled(feature: string, userTier: TierType = 'free'): boolean {
   // First check if pro features are enabled globally
