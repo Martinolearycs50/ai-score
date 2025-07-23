@@ -16,29 +16,29 @@ const envSchema = z.object({
   // Feature flags
   NEXT_PUBLIC_ENABLE_DYNAMIC_SCORING: z
     .string()
-    .transform((val) => val === 'true')
-    .default('true'),
+    .default('true')
+    .transform((val) => val === 'true'),
   NEXT_PUBLIC_ENABLE_PROGRESSIVE_ENHANCEMENT: z
     .string()
-    .transform((val) => val === 'true')
-    .default('true'),
+    .default('true')
+    .transform((val) => val === 'true'),
 
   // Rate limiting
-  RATE_LIMIT_PER_HOUR: z.string().transform(Number).default('50'),
-  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default('3600000'), // 1 hour
+  RATE_LIMIT_PER_HOUR: z.string().default('50').transform(Number),
+  RATE_LIMIT_WINDOW_MS: z.string().default('3600000').transform(Number), // 1 hour
 
   // Timeouts (in milliseconds)
-  TIMEOUT_PAGE_FETCH: z.string().transform(Number).default('30000'),
-  TIMEOUT_ROBOTS_TXT: z.string().transform(Number).default('5000'),
-  TIMEOUT_TTFB_CHECK: z.string().transform(Number).default('5000'),
+  TIMEOUT_PAGE_FETCH: z.string().default('30000').transform(Number),
+  TIMEOUT_ROBOTS_TXT: z.string().default('5000').transform(Number),
+  TIMEOUT_TTFB_CHECK: z.string().default('5000').transform(Number),
 
   // Cache settings
-  CACHE_CHROME_UX_TTL: z.string().transform(Number).default('3600000'), // 1 hour
-  CACHE_ROBOTS_TXT_TTL: z.string().transform(Number).default('86400000'), // 24 hours
+  CACHE_CHROME_UX_TTL: z.string().default('3600000').transform(Number), // 1 hour
+  CACHE_ROBOTS_TXT_TTL: z.string().default('86400000').transform(Number), // 24 hours
 
   // Content limits
-  MAX_CONTENT_LENGTH: z.string().transform(Number).default('100000'), // 100KB
-  MAX_WORD_COUNT: z.string().transform(Number).default('50000'),
+  MAX_CONTENT_LENGTH: z.string().default('100000').transform(Number), // 100KB
+  MAX_WORD_COUNT: z.string().default('50000').transform(Number),
 });
 
 // Parse and validate environment variables
@@ -47,7 +47,7 @@ const parseEnv = () => {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid environment configuration:', error.errors);
+      console.error('Invalid environment configuration:', error.issues);
       // In production, we should fail fast
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Invalid environment configuration');

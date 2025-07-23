@@ -5,11 +5,11 @@ import React, { useState } from 'react';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 import { SparklesIcon } from '@heroicons/react/24/solid';
 
-import { useTier } from '@/contexts/TierContext';
+import { useTier } from '@/hooks/useTier';
 import { hasFeature, isProFeaturesEnabled } from '@/lib/tierConfig';
 
 import { Badge, ProBadge } from './ui/Badge';
-import { Button } from './ui/Button';
+import Button from './ui/Button';
 import {
   Dialog,
   DialogClose,

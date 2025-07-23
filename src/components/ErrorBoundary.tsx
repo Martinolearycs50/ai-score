@@ -43,8 +43,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
                 window.location.href = '/';
               }}
               className="rounded-lg px-6 py-2 transition-opacity hover:opacity-90"
-              style={{ color: 'white' }}
-              style={{ backgroundColor: cssVars.accent }}
+              style={{ color: 'white', backgroundColor: cssVars.accent }}
             >
               {' '}
               Go back home{' '}

@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 
-import type { ExtractedContent, PageType } from '../types';
+import type { ExtractedContent } from '../contentExtractor';
+import type { PageType } from '../types';
 
 /**
  * Feature detection methods for ContentExtractor

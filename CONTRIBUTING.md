@@ -2,11 +2,14 @@
 
 ## 🚨 CRITICAL: Preventing Code Compression
 
-This project has strict formatting requirements to prevent code compression issues that can break the application.
+This project has strict formatting requirements to prevent code compression
+issues that can break the application.
 
 ### What is Code Compression?
 
-Code compression occurs when code formatters or editors incorrectly format TypeScript/TSX files, resulting in:
+Code compression occurs when code formatters or editors incorrectly format
+TypeScript/TSX files, resulting in:
+
 - Multiple statements on a single line
 - Broken syntax (e.g., `else; if` instead of `else if`)
 - Malformed type definitions
@@ -15,6 +18,7 @@ Code compression occurs when code formatters or editors incorrectly format TypeS
 ### Prevention Guidelines
 
 1. **Always Use Project Formatter**
+
    ```bash
    npm run format      # Format all files
    npm run format:check # Check formatting
@@ -44,13 +48,14 @@ Code compression occurs when code formatters or editors incorrectly format TypeS
    - Your editor and version
 
 3. **Recovery process**:
+
    ```bash
    # Check git status
    git status
-   
+
    # Revert if needed
    git checkout -- path/to/file
-   
+
    # Or restore from backup
    cp path/to/file.backup path/to/file
    ```

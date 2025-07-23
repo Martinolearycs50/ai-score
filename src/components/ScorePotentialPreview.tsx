@@ -116,8 +116,7 @@ export default function ScorePotentialPreview({
             {' '}
             <motion.div
               className="rounded-full px-3 py-2 text-sm font-bold"
-              style={{ color: 'white' }}
-              style={{ background: color }}
+              style={{ color: 'white', background: color }}
               animate={{ y: [0, -5, 0], rotate: [-5, 5, -5] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >

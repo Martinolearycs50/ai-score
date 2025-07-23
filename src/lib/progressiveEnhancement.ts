@@ -29,9 +29,11 @@ interface ProgressiveAnalysisCallbacks {
   onFullResult: (result: any) => void;
   onError: (error: Error, phase: 'quick' | 'full') => void;
 }
-//  Worker URL - will be replaced with actual deployed URL
+
+// Worker URL - will be replaced with actual deployed URL
 const WORKER_URL =
   process.env.NEXT_PUBLIC_WORKER_URL || 'https://ai-search-worker.your-subdomain.workers.dev';
+
 export async function performProgressiveAnalysis(
   url: string,
   callbacks: ProgressiveAnalysisCallbacks
@@ -45,6 +47,7 @@ export async function performProgressiveAnalysis(
     callbacks.onError(error as Error, 'quick');
     // Continue to full analysis even if quick fails
   }
+
   // Phase 2: Full analysis via Next.js API
   try {
     const fullResult = await fetchFullAnalysis(url);
@@ -54,44 +57,48 @@ export async function performProgressiveAnalysis(
     callbacks.onError(error as Error, 'full');
   }
 }
+
 async function fetchQuickAnalysis(url: string): Promise<QuickAnalysisResult> {
   const response = await fetch(WORKER_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      url,
-    }),
+    body: JSON.stringify({ url }),
   });
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Quick analysis failed');
   }
+
   return response.json();
 }
+
 async function fetchFullAnalysis(url: string): Promise<any> {
   const response = await fetch('/api/analyze', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      url,
-    }),
+    body: JSON.stringify({ url }),
   });
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Analysis failed');
   }
+
   return response.json();
 }
-// Convert quick scores to match full analysis format;
 
+// Convert quick scores to match full analysis format
 export function convertQuickToFullFormat(quickResult: QuickAnalysisResult): any {
   const { quickScores, pageType, basicMetrics } = quickResult;
-  //  Calculate total score
+
+  // Calculate total score
   const totalScore = Object.values(quickScores).reduce((sum, score) => sum + score, 0);
+
   return {
     success: true,
     url: quickResult.url,
@@ -125,8 +132,10 @@ export function convertQuickToFullFormat(quickResult: QuickAnalysisResult): any 
     message: 'Initial analysis complete. Full analysis in progress...',
   };
 }
+
 function generateQuickRecommendations(scores: any, pageType: string): any[] {
   const recommendations = [];
+
   // Basic recommendations based on low scores
   if (scores.retrieval < 20) {
     recommendations.push({
@@ -138,6 +147,7 @@ function generateQuickRecommendations(scores: any, pageType: string): any[] {
       impact: 'High',
     });
   }
+
   if (scores.factDensity < 10) {
     recommendations.push({
       category: 'FACT_DENSITY',
@@ -148,6 +158,7 @@ function generateQuickRecommendations(scores: any, pageType: string): any[] {
       impact: 'Medium',
     });
   }
+
   if (scores.structure < 10) {
     recommendations.push({
       category: 'STRUCTURE',
@@ -157,6 +168,7 @@ function generateQuickRecommendations(scores: any, pageType: string): any[] {
       impact: 'Medium',
     });
   }
+
   if (!scores.trust) {
     recommendations.push({
       category: 'TRUST',
@@ -166,5 +178,6 @@ function generateQuickRecommendations(scores: any, pageType: string): any[] {
       impact: 'High',
     });
   }
+
   return recommendations;
 }

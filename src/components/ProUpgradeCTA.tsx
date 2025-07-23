@@ -45,7 +45,7 @@ export default function ProUpgradeCTA({ variant = 'inline', feature }: ProUpgrad
         className={style.container}
         style={{
           background: style.gradient,
-          borderColor: style.borderColor,
+          borderColor: 'borderColor' in style ? style.borderColor : undefined,
         }}
       >
         <div>

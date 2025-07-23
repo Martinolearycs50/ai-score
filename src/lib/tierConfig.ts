@@ -224,7 +224,7 @@ export function getFeatureComparison(): Record<
   const allFeatures = Object.keys(getTierFeatures('pro')) as (keyof TierFeatures)[];
 
   allFeatures.forEach((feature) => {
-    features[feature] = {};
+    features[feature] = {} as Record<TierType, boolean | number>;
     tiers.forEach((tier) => {
       features[feature][tier] = getTierFeatures(tier)[feature];
     });
