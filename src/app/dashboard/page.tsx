@@ -14,7 +14,7 @@ import {
 import { motion } from 'framer-motion';
 
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { cssVars } from '@/lib/design-system/colors';
 
 import CompetitorQuickView from './components/CompetitorQuickView';

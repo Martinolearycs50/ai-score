@@ -72,6 +72,21 @@
 
     /* Transitions */
     --transition: 200ms ease-out;
+
+    /* shadcn/ui compatibility variables */
+    --radius: 0.5rem;
+    --destructive: #ef4444; /* Same as --error */
+    --destructive-foreground: #ffffff;
+    --muted-foreground: #6b7280; /* Same as --muted */
+    --card-foreground: #1f2937; /* Same as --foreground */
+    --popover: #ffffff;
+    --popover-foreground: #1f2937;
+    --primary-foreground: #ffffff;
+    --secondary: #f3f4f6;
+    --secondary-foreground: #1f2937;
+    --accent-foreground: #ffffff;
+    --ring: #3f8cff; /* Same as --accent for focus rings */
+    --input: #e5e7eb; /* Same as --border */
   }
 
   * {

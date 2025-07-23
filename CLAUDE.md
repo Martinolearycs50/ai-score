@@ -5,14 +5,14 @@ code in this repository.
 
 ## Technical Implementation Guide
 
-<!-- CLAUDE CODE: This file contains HOW to build. For WHAT to build, see CLAUDE_CONTEXT.md -->
+<!-- CLAUDE CODE: This file contains HOW to build. For WHAT to build, see PROJECT_VISION.md -->
 
 ### 🚨 CRITICAL: Start Here
 
-1. Read CLAUDE_CONTEXT.md first - it has current project state and what needs
+1. Read PROJECT_VISION.md first - it has current project state and what needs
    building
-2. Review docs/STYLE_GUIDE.md for all visual design and UI decisions
-3. Update CLAUDE_CONTEXT.md regularly as you work (see update instructions
+2. Review docs/GLOBAL_STYLE_SYSTEM.md for all visual design and UI decisions
+3. Update PROJECT_VISION.md regularly as you work (see update instructions
    below)
 4. Never modify design constants without team approval 🎨 Design System Note:
    For complete visual design specifications, animations, and voice/tone
@@ -56,6 +56,8 @@ npm run test:coverage    # Generate coverage report
 npm test -- [pattern]    # Run specific test files (e.g., npm test -- scorer)
 npm run test:e2e         # Run Playwright E2E tests
 npm run test:e2e:ui      # Run E2E tests with UI
+npm run test:e2e:headed  # Run E2E tests with visible browser
+npm run test:e2e:report  # Show Playwright test report
 npm run test:api         # Run API integration tests
 
 # Build & Quality
@@ -64,14 +66,19 @@ npm run lint            # Check code quality
 npm run format          # Format all files
 npm run format:check    # Check formatting
 npm run format:fix      # Auto-fix formatting and linting issues
+npm run format:verify   # Verify formatting without fixing
 npm start               # Run production server
+
+# PM2 Process Management (for dev:pm2)
+npm run dev:logs        # View PM2 logs
+npm run dev:status      # Check PM2 process status
 ```
 
 ### Starting Work
 
 ```bash
 # 1. Read current state
-cat CLAUDE_CONTEXT.md  # Understand what needs building
+cat PROJECT_VISION.md  # Understand what needs building
 
 # 2. Create checkpoint
 git add . && git commit -m "chore: checkpoint before [feature]"
@@ -83,7 +90,7 @@ npm run dev
 http://localhost:3000       # Free tier
 http://localhost:3000?tier=pro  # Pro tier (future)
 
-# 5. Update CLAUDE_CONTEXT.md
+# 5. Update PROJECT_VISION.md
 # - Set "Last Updated" to today
 # - Update "Now Working On" section
 ```
@@ -185,7 +192,7 @@ if (rateLimiter.isLimited(ip)) {
 
 <!-- CLAUDE CODE: Update these files when making changes -->
 
-1. **CLAUDE_CONTEXT.md** - Update Throughout Session
+1. **PROJECT_VISION.md** - Update Throughout Session
    - **At Session Start:**
      - Update "Last Updated" date
      - Review "Current Sprint Focus"
@@ -332,6 +339,18 @@ import { motion } from 'framer-motion';
 git push origin main  # Deploys to Vercel
 ```
 
+### CI/CD Pipeline
+
+GitHub Actions runs on every push:
+
+- Matrix testing on Node.js 18.x and 20.x
+- Linting and formatting checks
+- Test suite execution
+- Build verification
+- Code coverage reporting to Codecov
+
+The pipeline must pass before deployment.
+
 ## 🐛 Common Issues & Solutions
 
 <!-- CLAUDE CODE: Add solutions as you encounter issues -->
@@ -405,7 +424,7 @@ workers/            # Cloudflare Worker (separate deployment)
 - Located in `/workers/ai-search-worker/`
 - Handles cross-origin requests for content extraction
 - Progressive enhancement - app works without it
-- Deployment pending (see CLAUDE_CONTEXT.md)
+- Deployment pending (see PROJECT_VISION.md)
 
 #### Chrome UX Report API
 
@@ -424,6 +443,8 @@ NEXT_PUBLIC_WORKER_URL=your_worker_url_here
 
 # Feature flags
 NEXT_PUBLIC_ENABLE_DYNAMIC_SCORING=true
+NEXT_PUBLIC_ENABLE_PRO_FEATURES=false
+NEXT_PUBLIC_ENABLE_PROGRESSIVE_ENHANCEMENT=true
 
 # Create .env.local from template
 cp .env.example .env.local
@@ -464,11 +485,17 @@ npm run test:api                       # Alternative API test command
 # E2E Tests
 npm run test:e2e                       # Full user flow tests
 npm run test:e2e:ui                    # E2E tests with UI mode
+npm run test:e2e:headed                # E2E tests with visible browser
 
 # Coverage
 npm run test:coverage                  # Generate coverage report
 open coverage/lcov-report/index.html   # View coverage report
 ```
+
+#### Test Configuration Files
+
+- **jest.config.js**: Custom module mocks for axios/cheerio, coverage collection
+- **playwright.config.ts**: Multi-browser E2E testing (Chrome, Firefox, Safari)
 
 ## Important Constraints
 
@@ -514,5 +541,5 @@ open coverage/lcov-report/index.html   # View coverage report
 
 <!-- CLAUDE CODE: Add new patterns and learnings as you discover them -->
 
-Remember: This guide is for HOW to build. Check CLAUDE_CONTEXT.md for WHAT to
+Remember: This guide is for HOW to build. Check PROJECT_VISION.md for WHAT to
 build.

@@ -1,48 +1,53 @@
-'use client';
-
 import * as React from 'react';
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'error' | 'pro';
-  size?: 'sm' | 'md' | 'lg';
-}
+import { Slot } from '@radix-ui/react-slot';
+import { type VariantProps, cva } from 'class-variance-authority';
 
-const badgeVariants = {
-  default: 'bg-gray-100 text-gray-800 border-gray-200',
-  secondary: 'bg-blue-100 text-blue-800 border-blue-200',
-  success: 'bg-green-100 text-green-800 border-green-200',
-  warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  error: 'bg-red-100 text-red-800 border-red-200',
-  pro: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0',
-};
+import { cn } from '@/lib/utils';
 
-const badgeSizes = {
-  sm: 'text-xs px-2 py-0.5',
-  md: 'text-sm px-2.5 py-0.5',
-  lg: 'text-base px-3 py-1',
-};
+const badgeVariants = cva(
+  'inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
+  {
+    variants: {
+      variant: {
+        default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+        secondary:
+          'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
+        destructive:
+          'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+        outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-export function Badge({
-  className = '',
-  variant = 'default',
-  size = 'md',
-  children,
+function Badge({
+  className,
+  variant,
+  asChild = false,
   ...props
-}: BadgeProps) {
+}: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : 'span';
+
   return (
-    <span
-      className={`inline-flex items-center rounded-full border font-medium ${badgeVariants[variant]} ${badgeSizes[size]} ${className} `}
-      {...props}
-    >
-      {children}
-    </span>
+    <Comp data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />
   );
 }
 
-export function ProBadge({ className = '', ...props }: Omit<BadgeProps, 'variant'>) {
+// ProBadge component - a simple wrapper for Pro tier indicator
+function ProBadge({
+  size = 'default',
+  ...props
+}: { size?: 'sm' | 'default' } & React.ComponentProps<typeof Badge>) {
+  const sizeClass = size === 'sm' ? 'text-[10px] px-1.5 py-0' : '';
   return (
-    <Badge variant="pro" className={`animate-shimmer ${className}`} {...props}>
+    <Badge variant="default" className={cn('bg-brand-primary text-white', sizeClass)} {...props}>
       PRO
     </Badge>
   );
 }
+
+export { Badge, badgeVariants, ProBadge };

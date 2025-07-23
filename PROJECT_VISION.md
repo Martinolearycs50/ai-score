@@ -1,6 +1,6 @@
-# CLAUDE_CONTEXT.md
+# PROJECT_VISION.md
 
-<!-- CLAUDE CODE: This file tracks project state. Update sections marked with comments -->
+<!-- This file tracks project vision, roadmap, and current state. Claude Code should update sections marked with comments -->
 
 ## 🎯 Project Overview
 

@@ -4,7 +4,7 @@ import React from 'react';
 
 import { ProFeature, ProFeatureWrapper } from '../ProFeatureWrapper';
 import { ProBadge } from '../ui/Badge';
-import Card from '../ui/Card';
+import { Card } from '../ui/Card';
 
 /**
  * Example usage of Pro feature components

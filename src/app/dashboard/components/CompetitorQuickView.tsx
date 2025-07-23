@@ -4,7 +4,7 @@ import { ChartBarIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { cssVars } from '@/lib/design-system/colors';
 
 interface Competitor {

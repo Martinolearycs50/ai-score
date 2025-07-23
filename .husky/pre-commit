@@ -10,6 +10,15 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Run style compliance checks
+./scripts/check-styles.sh
+
+if [ $? -ne 0 ]; then
+  echo "❌ Style compliance check failed!"
+  echo "Please fix style violations before committing."
+  exit 1
+fi
+
 echo "🧪 Running quick tests..."
 npm test -- --passWithNoTests --silent
 

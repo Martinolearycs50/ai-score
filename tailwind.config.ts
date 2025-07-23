@@ -9,7 +9,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Map CSS variables to Tailwind utilities
+        // Brand colors
+        brand: {
+          primary: '#2D2A7F', // Deep Indigo - Logo, premium CTAs
+          accent: '#3F8CFF', // Electric Blue - Primary CTAs, links
+        },
+        // Surface colors
+        surface: {
+          background: '#F4F6FA', // Cool Gray - Page background
+          card: '#FFFFFF', // White - Cards, modals
+        },
+        // Content colors
+        content: {
+          heading: '#1F2937', // Slate - Headings
+          body: '#4B5563', // Gray - Body text
+          border: '#E5E7EB', // Light Gray - Borders
+        },
+        // Status colors
+        status: {
+          success: '#3DDC97', // Mint Green - Success states
+          warning: '#F59E0B', // Amber - Warnings
+          error: '#EF4444', // Red - Errors
+        },
+        // Legacy mappings (for gradual migration)
         primary: 'var(--primary)',
         accent: 'var(--accent)',
         background: 'var(--background)',
@@ -22,29 +44,7 @@ const config: Config = {
         warning: 'var(--warning)',
         error: 'var(--error)',
       },
-      backgroundColor: {
-        'design-primary': 'var(--primary)',
-        'design-accent': 'var(--accent)',
-        'design-background': 'var(--background)',
-        'design-card': 'var(--card)',
-        'design-success': 'var(--success)',
-        'design-warning': 'var(--warning)',
-        'design-error': 'var(--error)',
-      },
-      textColor: {
-        'design-foreground': 'var(--foreground)',
-        'design-text': 'var(--text)',
-        'design-muted': 'var(--muted)',
-        'design-success': 'var(--success)',
-        'design-warning': 'var(--warning)',
-        'design-error': 'var(--error)',
-      },
-      borderColor: {
-        'design-border': 'var(--border)',
-        'design-success': 'var(--success)',
-        'design-warning': 'var(--warning)',
-        'design-error': 'var(--error)',
-      },
+      // Remove redundant color mappings
     },
   },
   plugins: [],

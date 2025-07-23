@@ -276,7 +276,7 @@ export class NarrativeEngine {
    */
   private calculateImprovementPotential(currentScore: number): number {
     // Base potential on how far from 100
-    let basePotential = 100 - currentScore;
+    const basePotential = 100 - currentScore;
 
     // Realistic achievement factor (can't usually get to 100)
     const achievableFactor = 0.7;
@@ -341,23 +341,18 @@ export class NarrativeEngine {
    * Identify the key missing element for this site
    */
   private getKeyMissingElement(): string {
-    const scoreBreakdown = this.analysisResult.scoringResult.pillarScores;
+    const pillars = this.analysisResult.scoringResult.pillars;
+
+    if (!pillars) {
+      return 'key optimization elements';
+    }
 
     // Find the weakest pillar
     let weakestPillar = '';
     let lowestPercentage = 100;
 
-    Object.entries(scoreBreakdown).forEach(([pillar, score]) => {
-      // Get the max score for this pillar
-      const maxScores: Record<string, number> = {
-        RETRIEVAL: 30,
-        FACT_DENSITY: 25,
-        STRUCTURE: 20,
-        TRUST: 15,
-        RECENCY: 10,
-      };
-
-      const percentage = (score / maxScores[pillar]) * 100;
+    Object.entries(pillars).forEach(([pillar, pillarData]) => {
+      const percentage = pillarData.percentage;
       if (percentage < lowestPercentage) {
         lowestPercentage = percentage;
         weakestPillar = pillar;
@@ -380,9 +375,9 @@ export class NarrativeEngine {
    */
   private getTopActionSteps(): string[] {
     const recommendations = this.analysisResult.scoringResult.recommendations
-      .filter((rec) => rec.gain >= 5) // High impact = gain >= 5
+      .filter((rec) => rec.impact === 'high' || rec.estimatedScoreImpact >= 5)
       .slice(0, 3)
-      .map((rec) => rec.fix);
+      .map((rec) => rec.title);
 
     if (recommendations.length < 3) {
       // Add some from business persona if needed

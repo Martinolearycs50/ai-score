@@ -3,7 +3,7 @@
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { cssVars } from '@/lib/design-system/colors';
 
 interface MetricCardProps {
