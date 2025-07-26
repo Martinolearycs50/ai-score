@@ -46,11 +46,8 @@ export function TierProvider({
     if (tierParam && isValidTier(tierParam)) {
       console.log('[TierContext] Setting tier to:', tierParam);
       setTier(tierParam);
-    } else {
-      console.log('[TierContext] Using default tier:', defaultTier);
-      // Reset to default if no tier param
-      setTier(defaultTier);
     }
+    // Don't reset to default if no tier param - preserve current tier
 
     setIsLoading(false);
   }, [searchParams, searchParams.toString()]); // Add searchParams.toString() to force re-render

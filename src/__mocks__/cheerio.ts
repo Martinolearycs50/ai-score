@@ -1,6 +1,6 @@
 // Simplified mock for cheerio that properly handles all test cases
 const cheerio = {
-  load: jest.fn((html: string) => {
+  load: jest.fn(() => {
     // Create a mock jQuery-like function
     const $ = jest.fn((selector: any) => {
       // Handle when selector is an element (from filter callback, etc.)

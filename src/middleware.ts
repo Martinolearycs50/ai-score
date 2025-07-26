@@ -14,6 +14,8 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.next();
 
     // Add CORS headers for API routes
+    // TODO: Restrict Access-Control-Allow-Origin to specific domain(s) before production launch
+    // TODO: Consider implementing CORS configuration based on environment variables
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');

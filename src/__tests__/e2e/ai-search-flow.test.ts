@@ -2,8 +2,9 @@
  * E2E test for AI Search analysis flow
  * Tests the complete user journey from URL input to results display
  */
+import axios from 'axios';
+
 import { AiSearchAnalyzer } from '@/lib/analyzer-new';
-import type { AnalysisResultNew } from '@/lib/analyzer-new';
 
 // Mock fetch for E2E test
 global.fetch = jest.fn();
@@ -81,8 +82,7 @@ describe('AI Search Analysis E2E Flow', () => {
       `;
 
       // Mock the axios response
-      const axios = require('axios');
-      axios.create = jest.fn(() => ({
+      (axios.create as jest.Mock) = jest.fn(() => ({
         get: jest.fn().mockResolvedValue({
           data: wellOptimizedHTML,
           headers: {
@@ -127,8 +127,7 @@ describe('AI Search Analysis E2E Flow', () => {
         </html>
       `;
 
-      const axios = require('axios');
-      axios.create = jest.fn(() => ({
+      (axios.create as jest.Mock) = jest.fn(() => ({
         get: jest.fn().mockResolvedValue({
           data: poorlyOptimizedHTML,
           headers: {},
@@ -153,8 +152,7 @@ describe('AI Search Analysis E2E Flow', () => {
       // Test with minimal valid HTML
       const minimalHTML = '<html><body><p>Content</p></body></html>';
 
-      const axios = require('axios');
-      axios.create = jest.fn(() => ({
+      (axios.create as jest.Mock) = jest.fn(() => ({
         get: jest.fn().mockResolvedValue({
           data: minimalHTML,
           headers: {},
@@ -172,8 +170,7 @@ describe('AI Search Analysis E2E Flow', () => {
 
   describe('Error handling', () => {
     it('should handle network errors gracefully', async () => {
-      const axios = require('axios');
-      axios.create = jest.fn(() => ({
+      (axios.create as jest.Mock) = jest.fn(() => ({
         get: jest.fn().mockRejectedValue(new Error('Network error')),
       }));
 
@@ -198,8 +195,7 @@ describe('AI Search Analysis E2E Flow', () => {
         </html>
       `;
 
-      const axios = require('axios');
-      axios.create = jest.fn(() => ({
+      (axios.create as jest.Mock) = jest.fn(() => ({
         get: jest.fn().mockResolvedValue({
           data: htmlWithIssues,
           headers: {},

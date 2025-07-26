@@ -25,6 +25,7 @@ const analyzeRequestSchema = z.object({
 
 // Rate limiting (simple in-memory store for MVP)
 // TODO: Replace with Redis or similar for production
+// TODO: Consider implementing distributed rate limiting for multiple server instances
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
 function checkRateLimit(clientId: string): boolean {
@@ -51,6 +52,7 @@ function checkRateLimit(clientId: string): boolean {
 
 function getClientId(request: NextRequest): string {
   // Use IP address as client identifier (in production, consider more sophisticated methods)
+  // TODO: Add authentication tokens for Pro users to track usage per account
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
   return ip;

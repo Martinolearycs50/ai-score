@@ -50,6 +50,11 @@ export interface AiRewriteResult {
     source: string;
   }>;
   generatedAt: Date;
+  metadata?: {
+    tokensUsed?: number;
+    estimatedCost?: number;
+    generatedAt?: string;
+  };
 }
 
 export interface UserUsage {

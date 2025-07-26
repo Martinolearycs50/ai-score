@@ -177,6 +177,35 @@ CHROME_UX_API_KEY=your_key npm test -- chromeUxReport.integration
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## 🔐 Security & API Keys
+
+### OpenAI API Setup (Pro Tier Feature)
+
+The AI Done-for-You rewrite feature requires an OpenAI API key:
+
+1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. **Add to `.env.local`**:
+   ```bash
+   OPENAI_API_KEY=your_api_key_here
+   ```
+3. **Never commit API keys** - `.env.local` is in `.gitignore`
+4. **Regenerate keys** if accidentally exposed
+
+### Security Best Practices
+
+- **Server-side only**: API keys are only used in server-side code
+- **Rate limiting**: 50 requests/hour per IP address
+- **Token limits**: Max 4000 tokens per request
+- **Cost tracking**: Usage logged for monitoring
+- **Generic errors**: No sensitive info in error messages
+
+### Cost Management
+
+- GPT-4 Turbo: ~$0.01-0.03 per rewrite
+- Monitor usage in OpenAI dashboard
+- Set billing alerts
+- Usage stats available in server logs
+
 ## 📄 License
 
 This project is licensed under the MIT License.

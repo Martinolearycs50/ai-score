@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { motion } from 'framer-motion';
 
+import AiRewriteView from '@/components/AiRewriteView';
 import DeepAnalysisView from '@/components/DeepAnalysisView';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -242,6 +243,8 @@ export default function ProDashboard() {
                 </div>
               </Card>
             )
+          ) : currentAnalysis ? (
+            <AiRewriteView analysis={currentAnalysis} />
           ) : (
             <Card>
               <div className="p-6">
@@ -250,10 +253,9 @@ export default function ProDashboard() {
                 </h2>
                 <p className="text-gray-600">
                   {url
-                    ? 'AI-optimized content rewrite will appear here after analysis.'
+                    ? 'Run analysis first to generate an AI-optimized rewrite.'
                     : 'Enter a URL above to generate an AI-optimized rewrite.'}
                 </p>
-                {/* TODO: Add AI Rewrite component */}
               </div>
             </Card>
           )}

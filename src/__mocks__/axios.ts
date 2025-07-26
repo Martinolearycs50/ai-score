@@ -1,4 +1,4 @@
-export default {
+const axiosMock = {
   create: jest.fn(() => ({
     get: jest
       .fn()
@@ -12,3 +12,5 @@ export default {
   delete: jest.fn(),
   patch: jest.fn(),
 };
+
+export default axiosMock;
