@@ -12,6 +12,27 @@ export class ContentParsing {
     this.contentText = contentText;
   }
 
+  extractMetaDescription(): string {
+    try {
+      const metaDescription =
+        this.$('meta[name="description"]').attr('content') ||
+        this.$('meta[property="og:description"]').attr('content') ||
+        this.$('meta[name="twitter:description"]').attr('content') ||
+        '';
+
+      console.log(
+        '[ContentParsing] Extracted meta description:',
+        metaDescription.substring(0, 100) + (metaDescription.length > 100 ? '...' : '')
+      );
+      console.log('[ContentParsing] Meta description length:', metaDescription.length);
+
+      return metaDescription.trim();
+    } catch (error) {
+      console.error('[ContentParsing] Error extracting meta description:', error);
+      return '';
+    }
+  }
+
   extractTitle(): string {
     try {
       let title =
@@ -50,18 +71,12 @@ export class ContentParsing {
         title = title.substring(0, cutoffIndex).trim();
       }
 
-      // Also handle common title separators
-      const separators = ['|', '-', '–', '—', '::'];
-      for (const sep of separators) {
-        const parts = title.split(sep);
-        if (parts.length > 1 && parts[0].trim().length > 5) {
-          // Keep only the first meaningful part
-          title = parts[0].trim();
-          break;
-        }
-      }
+      // Don't truncate at separators - we need the full title including brand names
+      // for accurate SEO analysis
 
-      return title;
+      console.log('[ContentParsing] Extracted title:', title);
+
+      return title.trim();
     } catch (error) {
       console.warn('[ContentParsing] extractTitle failed:', error);
       return '';

@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
   try {
     // TODO: Add authentication check for Pro users
     // TODO: Verify user has active Pro subscription before allowing access
-    
+
     // Rate limiting check
     const ip =
       request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';

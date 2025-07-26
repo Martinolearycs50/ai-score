@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 
 import {
   ArrowRightIcon,
+  BoltIcon,
   CheckCircleIcon,
   ClockIcon,
   DocumentDuplicateIcon,
-  LightningBoltIcon,
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
@@ -66,8 +66,13 @@ export default function QuickWinsView({ analysisResult, isLoading }: QuickWinsVi
     .filter((win) => !completedWins.has(win.id))
     .sort((a, b) => {
       // Sort by impact and time to implement
-      const impactScore = { high: 3, medium: 2, low: 1 };
-      const timeScore = { '5 minutes': 3, '15 minutes': 2, '30 minutes': 1, '1 hour': 0 };
+      const impactScore: Record<string, number> = { high: 3, medium: 2, low: 1 };
+      const timeScore: Record<string, number> = {
+        '5 minutes': 3,
+        '15 minutes': 2,
+        '30 minutes': 1,
+        '1 hour': 0,
+      };
 
       const aScore = impactScore[a.impact] + (timeScore[a.timeToImplement] || 0);
       const bScore = impactScore[b.impact] + (timeScore[b.timeToImplement] || 0);
@@ -139,7 +144,7 @@ export default function QuickWinsView({ analysisResult, isLoading }: QuickWinsVi
                         win.isDualBenefit ? 'bg-purple-100' : 'bg-blue-100'
                       }`}
                     >
-                      <LightningBoltIcon
+                      <BoltIcon
                         className={`h-5 w-5 ${
                           win.isDualBenefit ? 'text-purple-600' : 'text-blue-600'
                         }`}
@@ -155,10 +160,10 @@ export default function QuickWinsView({ analysisResult, isLoading }: QuickWinsVi
                         <Badge
                           variant={
                             win.impact === 'high'
-                              ? 'primary'
+                              ? 'default'
                               : win.impact === 'medium'
                                 ? 'secondary'
-                                : 'tertiary'
+                                : 'outline'
                           }
                         >
                           {win.impact} impact
@@ -253,12 +258,22 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
   // Get the checks data from breakdown
   const structureChecks = breakdown.find((b) => b.pillar === 'STRUCTURE')?.checks || {};
   const factDensityChecks = breakdown.find((b) => b.pillar === 'FACT_DENSITY')?.checks || {};
+  const recencyChecks = breakdown.find((b) => b.pillar === 'RECENCY')?.checks || {};
+  const trustChecks = breakdown.find((b) => b.pillar === 'TRUST')?.checks || {};
 
   // Title optimization
-  if (
-    !analysis.analysis.extractedContent?.title?.includes('|') &&
-    !analysis.analysis.extractedContent?.title?.includes('-')
-  ) {
+  const title =
+    analysis.analysis.extractedContent?.contentSamples?.title || analysis.analysis.pageTitle || '';
+
+  console.log('[QuickWinsView] Title data:', {
+    extractedTitle: analysis.analysis.extractedContent?.contentSamples?.title,
+    pageTitle: analysis.analysis.pageTitle,
+    finalTitle: title,
+    includesBar: title.includes('|'),
+    includesDash: title.includes('-'),
+  });
+
+  if (title && !title.includes('|') && !title.includes('-')) {
     wins.push({
       id: 'title-separator',
       title: 'Add Brand Separator to Title',
@@ -267,8 +282,10 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
       impact: 'high',
       aiGain: 3,
       seoGain: 5,
-      currentState: analysis.analysis.extractedContent?.title || 'Current title',
-      desiredState: `${analysis.analysis.extractedContent?.title} | Your Brand Name`,
+      currentState: title || 'Current title',
+      desiredState: title
+        ? `${title} | Your Brand Name`
+        : 'Add a descriptive title | Your Brand Name',
       steps: [
         'Open your CMS or HTML editor',
         'Locate the <title> tag or page title field',
@@ -279,11 +296,22 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
     });
   }
 
-  // Meta description
-  if (
-    !analysis.analysis.extractedContent?.metaDescription ||
-    analysis.analysis.extractedContent.metaDescription.length < 120
-  ) {
+  // Meta description - try new path first, then fallback to old path
+  const metaDescription =
+    analysis.analysis.extractedContent?.contentSamples?.metaDescription ||
+    analysis.analysis.extractedContent?.metaDescription ||
+    analysis.analysis.pageDescription ||
+    '';
+
+  console.log('[QuickWinsView] Meta description data:', {
+    contentSamplesMetaDesc: analysis.analysis.extractedContent?.contentSamples?.metaDescription,
+    extractedMetaDesc: analysis.analysis.extractedContent?.metaDescription,
+    pageDescription: analysis.analysis.pageDescription,
+    finalMetaDesc: metaDescription,
+    length: metaDescription.length,
+  });
+
+  if (!metaDescription || metaDescription.length < 120) {
     wins.push({
       id: 'meta-description',
       title: 'Write Compelling Meta Description',
@@ -329,7 +357,7 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
   }
 
   // Add current date
-  if (results.RECENCY?.currentYear < 5) {
+  if ((recencyChecks as any)?.currentYear < 5) {
     wins.push({
       id: 'add-dates',
       title: 'Add Current Year and "Last Updated" Date',
@@ -396,7 +424,7 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
   }
 
   // Author bio
-  if (results.TRUST?.authorBio < 5) {
+  if ((trustChecks as any)?.authorBio < 5) {
     wins.push({
       id: 'add-author',
       title: 'Add Author Bio with Credentials',
@@ -419,10 +447,10 @@ function generateQuickWins(analysis: ProAnalysisResult): QuickWin[] {
   }
 
   // Quick FAQ section
+  const contentText =
+    analysis.analysis.extractedContent?.contentSamples?.paragraphs?.join(' ') || '';
   const hasQA =
-    analysis.analysis.extractedContent?.content?.includes('?') &&
-    (analysis.analysis.extractedContent?.content?.includes('A:') ||
-      analysis.analysis.extractedContent?.content?.includes('Answer:'));
+    contentText.includes('?') && (contentText.includes('A:') || contentText.includes('Answer:'));
 
   if (!hasQA) {
     wins.push({

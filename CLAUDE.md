@@ -565,6 +565,7 @@ When implementing these features, follow this order:
 <!-- CLAUDE CODE: Latest testing and security findings -->
 
 ### API Testing Results:
+
 1. **Core Functionality**: ✅ All working correctly
    - Homepage loads properly with all UI elements
    - URL form validation works as expected
@@ -586,6 +587,7 @@ When implementing these features, follow this order:
    - App functions correctly without it (progressive enhancement)
 
 ### Security Assessment:
+
 1. **Good Practices Found**:
    - Strong input validation with Zod
    - Environment variables for sensitive keys
@@ -600,6 +602,7 @@ When implementing these features, follow this order:
    - Add user-based rate limiting for authenticated users
 
 ### Performance Notes:
+
 - Dev server starts in ~1.5 seconds
 - API responses typically 200-3000ms (depending on target site)
 - Chrome UX API adds minimal overhead
@@ -633,6 +636,14 @@ When implementing these features, follow this order:
    - Issue: Large Wikipedia pages caused analysis timeouts
    - Solution: Implemented content limits and optimized extraction
    - Prevention: MAX_CONTENT_LENGTH and MAX_WORD_COUNT limits
+
+5. **Metadata Extraction Accuracy** (2025-07-27)
+   - Issue: Title extraction was truncating at separators (|, -, etc.), removing brand names
+   - Impact: Incorrect "Add Brand Separator" suggestions when separators already existed
+   - Solution: Removed separator truncation logic in contentParsing.ts
+   - Files Fixed: contentParsing.ts, QuickWinsView.tsx, contentExtractor.ts
+   - Result: Accurate title and meta description extraction verified with real URLs
+   - Key Learning: Don't make assumptions about title structure - preserve full titles
 
 <!-- CLAUDE CODE: Add new patterns and learnings as you discover them -->
 

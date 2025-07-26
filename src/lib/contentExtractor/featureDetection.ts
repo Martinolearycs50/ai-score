@@ -428,7 +428,9 @@ export class FeatureDetection {
 
     // Check for extremely short content (likely blocked)
     if (this.contentText.length < 200) {
-      console.log(`[FeatureDetection] Detected error/blocked page: content too short (${this.contentText.length} chars)`);
+      console.log(
+        `[FeatureDetection] Detected error/blocked page: content too short (${this.contentText.length} chars)`
+      );
       return true;
     }
 
@@ -462,7 +464,7 @@ export class FeatureDetection {
 
     // Check for pages with only repetitive navigation text
     const words = this.contentText.split(/\s+/);
-    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+    const uniqueWords = new Set(words.map((w) => w.toLowerCase()));
     const repetitionRatio = words.length / uniqueWords.size;
     if (repetitionRatio > 5 && this.contentText.length < 1000) {
       console.log('[FeatureDetection] Detected error/blocked page: high text repetition');

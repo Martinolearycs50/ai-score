@@ -43,6 +43,7 @@ export interface ExtractedContent {
   // Extracted content samples
   contentSamples: {
     title: string;
+    metaDescription: string;
     headings: Array<{
       level: number;
       text: string;
@@ -75,6 +76,7 @@ export interface ExtractedContent {
   technicalTerms: string[];
 
   // Metadata
+  metaDescription?: string;
   wordCount: number;
   language: string;
 }
@@ -256,6 +258,7 @@ export class ContentExtractor {
           competitorMentions: [],
           contentSamples: {
             title: this.contentParsing.extractTitle() || 'Error',
+            metaDescription: this.contentParsing.extractMetaDescription() || '',
             headings: [],
             paragraphs: ['This page appears to be blocked or returning an error.'],
             lists: [],
@@ -275,6 +278,7 @@ export class ContentExtractor {
           keyTerms: [],
           productNames: [],
           technicalTerms: [],
+          metaDescription: '',
           wordCount: 0,
           language: 'en',
         };
@@ -302,6 +306,7 @@ export class ContentExtractor {
         competitorMentions: this.businessDetection.extractCompetitorMentions(),
         contentSamples: {
           title,
+          metaDescription: this.contentParsing.extractMetaDescription(),
           headings,
           paragraphs: this.contentParsing.extractParagraphs(),
           lists: this.contentParsing.extractLists(),
@@ -312,6 +317,7 @@ export class ContentExtractor {
         keyTerms: this.contentParsing.extractKeyTerms(),
         productNames,
         technicalTerms: this.contentParsing.extractTechnicalTerms(),
+        metaDescription: this.contentParsing.extractMetaDescription(),
         wordCount: this.contentText.split(/\s+/).filter((w) => w.length > 0).length,
         language: this.$('html').attr('lang')?.split('-')[0] || 'en',
       };
@@ -341,6 +347,7 @@ export class ContentExtractor {
       competitorMentions: [],
       contentSamples: {
         title: '',
+        metaDescription: '',
         headings: [],
         paragraphs: [],
         lists: [],
@@ -360,6 +367,7 @@ export class ContentExtractor {
       keyTerms: [],
       productNames: [],
       technicalTerms: [],
+      metaDescription: '',
       wordCount: 0,
       language: 'en',
     };

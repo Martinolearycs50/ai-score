@@ -295,12 +295,9 @@ Remember: The goal is to make this content excel in both AI search results AND t
       elements.push(`• Key phrases to maintain: ${topPhrases.join(', ')}`);
     }
 
-    // Note if content has schema markup
-    if (analysis.extractedContent?.structuredData) {
-      const schemas = Object.keys(analysis.extractedContent.structuredData);
-      if (schemas.length > 0) {
-        elements.push(`• Schema types present: ${schemas.join(', ')}`);
-      }
+    // Note business type
+    if (analysis.extractedContent?.businessType) {
+      elements.push(`• Business type: ${analysis.extractedContent.businessType}`);
     }
 
     // Meta description hint

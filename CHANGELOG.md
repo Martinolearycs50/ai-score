@@ -58,6 +58,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pricing page routing to redirect both Free and Pro trials to `/pro` for testing
 
 ### Fixed
+- Critical metadata extraction accuracy issues (2025-07-27)
+  - Fixed title extraction incorrectly truncating at separators (removing brand names)
+  - Fixed QuickWinsView showing "undefined | Your Brand Name" for titles  
+  - Fixed blank meta description display in Pro tier
+  - Added metaDescription to ExtractedContent interface for consistency
+  - Corrected data access paths throughout application
+  - Resolved multiple TypeScript errors in components and utility files
+  - Verified accurate extraction with real URLs (e.g., "Engineered for ambition - Adyen")
 - Comprehensive syntax error resolution across entire codebase (2025-07-23)
   - Fixed 18 files with compressed/malformed syntax preventing builds and tests
   - Corrected TypeScript/React syntax errors in components
