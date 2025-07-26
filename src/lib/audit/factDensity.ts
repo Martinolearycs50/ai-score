@@ -15,7 +15,20 @@ export interface CapturedHeadings {
   hasDirectAnswer: boolean;
 }
 
+export interface SEOIndicators {
+  hasAuthorityLinks: boolean; // Links to .edu/.gov sites
+  citationDensity: number; // Citations per 1000 words
+  contentFreshness: boolean; // Has recent dates/statistics
+  eeatScore: number; // Experience, Expertise, Authority, Trust (0-100)
+}
+
 export let capturedHeadings: CapturedHeadings[] = [];
+export let seoIndicators: SEOIndicators = {
+  hasAuthorityLinks: false,
+  citationDensity: 0,
+  contentFreshness: false,
+  eeatScore: 0,
+};
 
 /**
  * Audit module for the Fact Density pillar (20 points max) - UPDATED for 2025
@@ -24,6 +37,12 @@ export let capturedHeadings: CapturedHeadings[] = [];
 export async function run(html: string): Promise<FactDensityScores> {
   // Reset captured content for this analysis
   capturedHeadings = [];
+  seoIndicators = {
+    hasAuthorityLinks: false,
+    citationDensity: 0,
+    contentFreshness: false,
+    eeatScore: 0,
+  };
 
   const scores: FactDensityScores = {
     uniqueStats: 0,
@@ -57,10 +76,18 @@ export async function run(html: string): Promise<FactDensityScores> {
 
   // Check for outbound citations to primary sources
   const outboundLinks = $('a[href^="http"]');
+  let authorityLinkCount = 0;
+
   const citations = outboundLinks.filter((_, el) => {
     const href = $(el).attr('href') || '';
     const text = $(el).text().toLowerCase();
     const context = $(el).parent().text().toLowerCase();
+
+    // Track authority links for SEO E-E-A-T
+    if (href.includes('.gov') || href.includes('.edu')) {
+      authorityLinkCount++;
+      seoIndicators.hasAuthorityLinks = true;
+    }
 
     // Check if link appears to be a citation
     return (
@@ -80,6 +107,9 @@ export async function run(html: string): Promise<FactDensityScores> {
   });
 
   scores.citations = citations.length >= 2 ? 5 : Math.floor((citations.length / 2) * 5);
+
+  // Calculate citation density for SEO (citations per 1000 words)
+  seoIndicators.citationDensity = wordCount > 0 ? (citations.length / wordCount) * 1000 : 0;
 
   // Check for internal deduplication
   const paragraphs = $('p')
@@ -167,6 +197,32 @@ export async function run(html: string): Promise<FactDensityScores> {
   } else {
     scores.directAnswers = 0;
   }
+
+  // Calculate E-E-A-T score for SEO
+  let eeatScore = 0;
+
+  // Experience: Content shows first-hand experience (dates, specific examples)
+  if (dates.size >= 3) eeatScore += 15;
+
+  // Expertise: Technical accuracy and depth (stats, data)
+  if (stats.size >= 5) eeatScore += 25;
+
+  // Authority: Quality citations and links
+  if (seoIndicators.hasAuthorityLinks) eeatScore += 30;
+  if (citations.length >= 3) eeatScore += 10;
+
+  // Trust: Transparency and accuracy (no duplication, clear structure)
+  if (scores.deduplication === 5) eeatScore += 10;
+  if (scores.directAnswers >= 4) eeatScore += 10;
+
+  seoIndicators.eeatScore = Math.min(100, eeatScore);
+
+  // Check content freshness
+  const currentYear = new Date().getFullYear();
+  const recentYears = [currentYear, currentYear - 1, currentYear - 2];
+  seoIndicators.contentFreshness = Array.from(dates).some((date) =>
+    recentYears.some((year) => date.includes(year.toString()))
+  );
 
   return scores;
 }

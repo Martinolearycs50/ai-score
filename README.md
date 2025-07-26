@@ -183,7 +183,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 The AI Done-for-You rewrite feature requires an OpenAI API key:
 
-1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
+1. **Get your API key** from
+   [OpenAI Platform](https://platform.openai.com/api-keys)
 2. **Add to `.env.local`**:
    ```bash
    OPENAI_API_KEY=your_api_key_here

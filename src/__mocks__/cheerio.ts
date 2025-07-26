@@ -141,3 +141,4 @@ const cheerio = {
 };
 
 export default cheerio;
+export const load = cheerio.load;

@@ -415,10 +415,29 @@ export class FeatureDetection {
       'javascript is required',
       'enable javascript',
       'browser not supported',
+      // Additional bot-blocking indicators
+      'please wait while we check',
+      'checking your browser',
+      'ddos protection',
+      'one more step',
+      'please complete the security check',
     ];
 
     const lowerContent = this.contentText.toLowerCase();
     const lowerTitle = this.$('title').text().toLowerCase();
+
+    // Check for extremely short content (likely blocked)
+    if (this.contentText.length < 200) {
+      console.log(`[FeatureDetection] Detected error/blocked page: content too short (${this.contentText.length} chars)`);
+      return true;
+    }
+
+    // Check if page has no meaningful content (only navigation)
+    const mainContent = this.$('main, article, .content, #content').text().trim();
+    if (mainContent.length === 0 && this.contentText.length < 1000) {
+      console.log('[FeatureDetection] Detected error/blocked page: no main content found');
+      return true;
+    }
 
     // Check for error indicators in content
     for (const indicator of errorIndicators) {
@@ -438,6 +457,15 @@ export class FeatureDetection {
       this.$('body').text().length < 1000
     ) {
       console.log('[FeatureDetection] Detected Stripe API error page');
+      return true;
+    }
+
+    // Check for pages with only repetitive navigation text
+    const words = this.contentText.split(/\s+/);
+    const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+    const repetitionRatio = words.length / uniqueWords.size;
+    if (repetitionRatio > 5 && this.contentText.length < 1000) {
+      console.log('[FeatureDetection] Detected error/blocked page: high text repetition');
       return true;
     }
 

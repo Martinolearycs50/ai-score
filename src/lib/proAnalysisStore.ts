@@ -1,7 +1,10 @@
 /**
- * In-memory store for Pro tier analysis results
+ * In-memory store for Pro tier analysis results with file-based persistence
  * This will be replaced with Redis or a database in production
  */
+import * as fs from 'fs';
+import * as path from 'path';
+
 import type { AnalysisResultNew } from './analyzer-new';
 
 export interface ProAnalysisResult {
@@ -44,10 +47,14 @@ export interface AiRewriteResult {
   improvements: Array<{
     type: string;
     description: string;
+    benefitType?: 'ai' | 'seo' | 'dual';
   }>;
   addedDataPoints: Array<{
     value: string;
     source: string;
+  }>;
+  seoEnhancements?: Array<{
+    description: string;
   }>;
   generatedAt: Date;
   metadata?: {
@@ -68,16 +75,121 @@ class ProAnalysisStore {
   private analysisStore: Map<string, ProAnalysisResult>;
   private userUsage: Map<string, UserUsage>;
   private cleanupInterval: NodeJS.Timeout | null = null;
+  private persistInterval: NodeJS.Timeout | null = null;
+  private persistencePath: string;
 
   // Configuration
   private readonly RESULT_TTL_DAYS = parseInt(process.env.PRO_RESULT_TTL_DAYS || '7');
   private readonly SCAN_LIMIT = parseInt(process.env.PRO_SCAN_LIMIT || '30');
   private readonly CLEANUP_INTERVAL_MS = 3600000; // 1 hour
+  private readonly PERSIST_INTERVAL_MS = 30000; // 30 seconds
 
   constructor() {
     this.analysisStore = new Map();
     this.userUsage = new Map();
+
+    // Set up persistence directory
+    this.persistencePath = path.join(process.cwd(), '.next', 'cache', 'pro-analysis');
+    this.ensurePersistenceDir();
+
+    // Load persisted data
+    this.loadPersistedData();
+
+    // Start background jobs
     this.startCleanupJob();
+    this.startPersistenceJob();
+  }
+
+  /**
+   * Ensure persistence directory exists
+   */
+  private ensurePersistenceDir() {
+    try {
+      if (!fs.existsSync(this.persistencePath)) {
+        fs.mkdirSync(this.persistencePath, { recursive: true });
+      }
+    } catch (error) {
+      console.error('[ProAnalysisStore] Failed to create persistence directory:', error);
+    }
+  }
+
+  /**
+   * Load persisted data on startup
+   */
+  private loadPersistedData() {
+    try {
+      // Load analysis store
+      const analysisPath = path.join(this.persistencePath, 'analysis.json');
+      if (fs.existsSync(analysisPath)) {
+        const data = JSON.parse(fs.readFileSync(analysisPath, 'utf-8'));
+        // Convert dates back to Date objects
+        for (const [id, result] of Object.entries(data) as [string, any][]) {
+          result.createdAt = new Date(result.createdAt);
+          result.expiresAt = new Date(result.expiresAt);
+          if (result.aiRewrite?.generatedAt) {
+            result.aiRewrite.generatedAt = new Date(result.aiRewrite.generatedAt);
+          }
+          this.analysisStore.set(id, result);
+        }
+        console.log(
+          `[ProAnalysisStore] Loaded ${this.analysisStore.size} analysis results from disk`
+        );
+      }
+
+      // Load user usage
+      const usagePath = path.join(this.persistencePath, 'usage.json');
+      if (fs.existsSync(usagePath)) {
+        const data = JSON.parse(fs.readFileSync(usagePath, 'utf-8'));
+        for (const [id, usage] of Object.entries(data) as [string, any][]) {
+          usage.resetDate = new Date(usage.resetDate);
+          usage.lastScan = new Date(usage.lastScan);
+          this.userUsage.set(id, usage);
+        }
+        console.log(
+          `[ProAnalysisStore] Loaded ${this.userUsage.size} user usage records from disk`
+        );
+      }
+    } catch (error) {
+      console.error('[ProAnalysisStore] Failed to load persisted data:', error);
+    }
+  }
+
+  /**
+   * Persist data to disk
+   */
+  private persistData() {
+    try {
+      // Persist analysis store
+      const analysisData: Record<string, ProAnalysisResult> = {};
+      for (const [id, result] of this.analysisStore) {
+        analysisData[id] = result;
+      }
+      fs.writeFileSync(
+        path.join(this.persistencePath, 'analysis.json'),
+        JSON.stringify(analysisData, null, 2)
+      );
+
+      // Persist user usage
+      const usageData: Record<string, UserUsage> = {};
+      for (const [id, usage] of this.userUsage) {
+        usageData[id] = usage;
+      }
+      fs.writeFileSync(
+        path.join(this.persistencePath, 'usage.json'),
+        JSON.stringify(usageData, null, 2)
+      );
+    } catch (error) {
+      console.error('[ProAnalysisStore] Failed to persist data:', error);
+    }
+  }
+
+  /**
+   * Start the persistence job
+   */
+  private startPersistenceJob() {
+    this.persistInterval = setInterval(() => {
+      this.persistData();
+    }, this.PERSIST_INTERVAL_MS);
   }
 
   /**
@@ -105,6 +217,7 @@ class ProAnalysisStore {
 
     if (cleaned > 0) {
       console.log(`[ProAnalysisStore] Cleaned up ${cleaned} expired results`);
+      this.persistData(); // Persist after cleanup
     }
   }
 
@@ -129,6 +242,9 @@ class ProAnalysisStore {
       createdAt: now,
       expiresAt,
     });
+
+    // Persist immediately for important operations
+    this.persistData();
   }
 
   /**
@@ -140,6 +256,7 @@ class ProAnalysisStore {
 
     result.deepAnalysis = deepAnalysis;
     this.analysisStore.set(sessionId, result);
+    this.persistData();
     return true;
   }
 
@@ -152,6 +269,7 @@ class ProAnalysisStore {
 
     result.aiRewrite = aiRewrite;
     this.analysisStore.set(sessionId, result);
+    this.persistData();
     return true;
   }
 
@@ -199,6 +317,7 @@ class ProAnalysisStore {
     currentUsage.count++;
     currentUsage.lastScan = now;
     this.userUsage.set(userId, currentUsage);
+    this.persistData();
 
     return { allowed: true, count: currentUsage.count, limit: this.SCAN_LIMIT };
   }
@@ -255,6 +374,12 @@ class ProAnalysisStore {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
+    if (this.persistInterval) {
+      clearInterval(this.persistInterval);
+      this.persistInterval = null;
+    }
+    // Final persist before shutdown
+    this.persistData();
   }
 }
 

@@ -21,10 +21,14 @@ export interface RewriteResult {
   improvements?: Array<{
     type: string;
     description: string;
+    benefitType?: 'ai' | 'seo' | 'dual';
   }>;
   addedDataPoints?: Array<{
     value: string;
     source: string;
+  }>;
+  seoEnhancements?: Array<{
+    description: string;
   }>;
   tokensUsed?: number;
   estimatedCost?: number;
@@ -131,8 +135,9 @@ export class ContentRewriter {
         };
       }
 
-      // Parse improvements and data points from the response
-      const { improvements, addedDataPoints } = this.parseRewriteResponse(rewrittenContent);
+      // Parse improvements, data points, and SEO enhancements from the response
+      const { improvements, addedDataPoints, seoEnhancements } =
+        this.parseRewriteResponse(rewrittenContent);
 
       // Calculate cost
       const tokensUsed = completion.usage?.total_tokens || 0;
@@ -152,11 +157,16 @@ export class ContentRewriter {
         totalCost: this.totalCost.toFixed(3),
       });
 
+      // Extract just the rewritten content (after [REWRITTEN CONTENT] marker)
+      const contentMatch = rewrittenContent.match(/\[REWRITTEN CONTENT\]([\s\S]*?)$/);
+      const finalContent = contentMatch ? contentMatch[1].trim() : rewrittenContent;
+
       return {
         success: true,
-        rewrittenContent,
+        rewrittenContent: finalContent,
         improvements,
         addedDataPoints,
+        seoEnhancements,
         tokensUsed,
         estimatedCost,
       };
@@ -205,12 +215,15 @@ export class ContentRewriter {
     const focusAreasText =
       focusAreas.length > 0 ? `\nSpecial focus areas: ${focusAreas.join(', ')}` : '';
 
-    return `Rewrite this ${pageType} content to rank better in AI search results. The content currently scores ${analysis.aiSearchScore}/100.
+    // Extract SEO elements to preserve
+    const seoElements = this.extractSEOElements(originalContent, analysis);
+
+    return `Rewrite this ${pageType} content to rank better in AI search results while maintaining SEO best practices. The content currently scores ${analysis.aiSearchScore}/100.
 
 CURRENT ISSUES TO ADDRESS:
 ${issueSummary || '- Low fact density\n- Missing data points\n- Poor structure'}
 
-REQUIREMENTS:
+REQUIREMENTS FOR AI OPTIMIZATION:
 1. Add at least 3 specific data points, statistics, or citations (with sources)
 2. Improve heading structure for better scannability
 3. Include current date references (today is ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })})
@@ -220,31 +233,101 @@ REQUIREMENTS:
 7. Use clear, authoritative language
 8. Add specific examples where relevant${focusAreasText}
 
+SEO ELEMENTS TO PRESERVE:
+${seoElements}
+
+DUAL-BENEFIT OPTIMIZATIONS (Help both AI and SEO):
+• Use FAQ format for common questions (triggers rich results)
+• Include structured lists and tables (featured snippets)
+• Add author credentials and expertise indicators (E-E-A-T)
+• Preserve important keywords naturally throughout
+• Maintain clear heading hierarchy (H1 → H2 → H3)
+• Keep meta description-worthy summary in first paragraph
+
 FORMAT YOUR RESPONSE AS:
 [IMPROVEMENTS]
 • List each improvement made
-• Be specific about what was added/changed
+• Note which improvements help AI, SEO, or both
 
 [ADDED DATA POINTS]
 • Data point 1: [value] (Source: [source])
 • Data point 2: [value] (Source: [source])
 • Data point 3: [value] (Source: [source])
 
+[SEO ENHANCEMENTS]
+• List any SEO-specific improvements made
+
 [REWRITTEN CONTENT]
 ${originalContent}
 
-Remember: The goal is to make this content more likely to be cited by AI assistants when users ask questions related to this topic.`;
+Remember: The goal is to make this content excel in both AI search results AND traditional SEO, creating a win-win optimization.`;
   }
 
   /**
-   * Parse the rewrite response to extract improvements and data points
+   * Extract SEO elements to preserve during rewriting
+   */
+  private extractSEOElements(content: string, analysis: AnalysisResultNew): string {
+    const elements: string[] = [];
+
+    // Extract title/main heading
+    const titleMatch = content.match(/<h1[^>]*>(.*?)<\/h1>/i) || content.match(/^#\s+(.+)$/m);
+    if (titleMatch) {
+      elements.push(`• Main title/H1: "${titleMatch[1].replace(/<[^>]+>/g, '')}"`);
+    }
+
+    // Extract target keywords (simplified - looks for repeated phrases)
+    const words = content.toLowerCase().split(/\s+/);
+    const phrases: Record<string, number> = {};
+    for (let i = 0; i < words.length - 2; i++) {
+      const phrase = `${words[i]} ${words[i + 1]}`;
+      if (phrase.length > 10 && !phrase.includes('<') && !phrase.includes('>')) {
+        phrases[phrase] = (phrases[phrase] || 0) + 1;
+      }
+    }
+
+    const topPhrases = Object.entries(phrases)
+      .filter(([_, count]) => count >= 3)
+      .sort(([_, a], [__, b]) => b - a)
+      .slice(0, 3)
+      .map(([phrase]) => phrase);
+
+    if (topPhrases.length > 0) {
+      elements.push(`• Key phrases to maintain: ${topPhrases.join(', ')}`);
+    }
+
+    // Note if content has schema markup
+    if (analysis.extractedContent?.structuredData) {
+      const schemas = Object.keys(analysis.extractedContent.structuredData);
+      if (schemas.length > 0) {
+        elements.push(`• Schema types present: ${schemas.join(', ')}`);
+      }
+    }
+
+    // Meta description hint
+    const firstParagraph = content.match(/<p[^>]*>(.*?)<\/p>/i) || content.match(/^(?!#)(.+)$/m);
+    if (firstParagraph) {
+      const cleaned = firstParagraph[1].replace(/<[^>]+>/g, '').slice(0, 100);
+      elements.push(`• First paragraph (potential meta desc): "${cleaned}..."`);
+    }
+
+    return elements.length > 0 ? elements.join('\n') : '• No specific SEO elements identified';
+  }
+
+  /**
+   * Parse the rewrite response to extract improvements, data points, and SEO enhancements
    */
   private parseRewriteResponse(response: string): {
-    improvements: Array<{ type: string; description: string }>;
+    improvements: Array<{ type: string; description: string; benefitType?: 'ai' | 'seo' | 'dual' }>;
     addedDataPoints: Array<{ value: string; source: string }>;
+    seoEnhancements?: Array<{ description: string }>;
   } {
-    const improvements: Array<{ type: string; description: string }> = [];
+    const improvements: Array<{
+      type: string;
+      description: string;
+      benefitType?: 'ai' | 'seo' | 'dual';
+    }> = [];
     const addedDataPoints: Array<{ value: string; source: string }> = [];
+    const seoEnhancements: Array<{ description: string }> = [];
 
     // Extract improvements section
     const improvementsMatch = response.match(/\[IMPROVEMENTS\]([\s\S]*?)\[ADDED DATA POINTS\]/);
@@ -253,27 +336,49 @@ Remember: The goal is to make this content more likely to be cited by AI assista
       improvementLines.forEach((line) => {
         const cleaned = line.replace(/^[•\-\*]\s*/, '').trim();
         if (cleaned) {
+          // Determine benefit type based on indicators in the text
+          let benefitType: 'ai' | 'seo' | 'dual' = 'ai';
+          const lowerCleaned = cleaned.toLowerCase();
+
+          if (lowerCleaned.includes('both ai and seo') || lowerCleaned.includes('dual benefit')) {
+            benefitType = 'dual';
+          } else if (lowerCleaned.includes('seo') || lowerCleaned.includes('search engine')) {
+            benefitType = 'seo';
+          }
+
           // Categorize improvements
           let type = 'general';
-          if (cleaned.toLowerCase().includes('heading')) type = 'structure';
-          else if (
-            cleaned.toLowerCase().includes('data') ||
-            cleaned.toLowerCase().includes('statistic')
-          )
+          if (
+            lowerCleaned.includes('heading') ||
+            lowerCleaned.includes('h1') ||
+            lowerCleaned.includes('h2')
+          ) {
+            type = 'structure';
+          } else if (
+            lowerCleaned.includes('data') ||
+            lowerCleaned.includes('statistic') ||
+            lowerCleaned.includes('fact')
+          ) {
             type = 'data';
-          else if (
-            cleaned.toLowerCase().includes('keyword') ||
-            cleaned.toLowerCase().includes('seo')
-          )
+          } else if (
+            lowerCleaned.includes('keyword') ||
+            lowerCleaned.includes('seo') ||
+            lowerCleaned.includes('meta')
+          ) {
             type = 'optimization';
+          } else if (lowerCleaned.includes('schema') || lowerCleaned.includes('markup')) {
+            type = 'structured-data';
+          }
 
-          improvements.push({ type, description: cleaned });
+          improvements.push({ type, description: cleaned, benefitType });
         }
       });
     }
 
     // Extract data points section
-    const dataPointsMatch = response.match(/\[ADDED DATA POINTS\]([\s\S]*?)\[REWRITTEN CONTENT\]/);
+    const dataPointsMatch = response.match(
+      /\[ADDED DATA POINTS\]([\s\S]*?)(?:\[SEO ENHANCEMENTS\]|\[REWRITTEN CONTENT\])/
+    );
     if (dataPointsMatch) {
       const dataLines = dataPointsMatch[1].trim().split('\n');
       dataLines.forEach((line) => {
@@ -288,7 +393,19 @@ Remember: The goal is to make this content more likely to be cited by AI assista
       });
     }
 
-    return { improvements, addedDataPoints };
+    // Extract SEO enhancements section
+    const seoMatch = response.match(/\[SEO ENHANCEMENTS\]([\s\S]*?)\[REWRITTEN CONTENT\]/);
+    if (seoMatch) {
+      const seoLines = seoMatch[1].trim().split('\n');
+      seoLines.forEach((line) => {
+        const cleaned = line.replace(/^[•\-\*]\s*/, '').trim();
+        if (cleaned) {
+          seoEnhancements.push({ description: cleaned });
+        }
+      });
+    }
+
+    return { improvements, addedDataPoints, seoEnhancements };
   }
 
   /**
@@ -299,8 +416,10 @@ Remember: The goal is to make this content more likely to be cited by AI assista
       requestCount: this.requestCount,
       totalTokensUsed: this.totalTokensUsed,
       totalCost: this.totalCost.toFixed(3),
-      averageTokensPerRequest: this.requestCount > 0 ? Math.round(this.totalTokensUsed / this.requestCount) : 0,
-      averageCostPerRequest: this.requestCount > 0 ? (this.totalCost / this.requestCount).toFixed(3) : '0',
+      averageTokensPerRequest:
+        this.requestCount > 0 ? Math.round(this.totalTokensUsed / this.requestCount) : 0,
+      averageCostPerRequest:
+        this.requestCount > 0 ? (this.totalCost / this.requestCount).toFixed(3) : '0',
     };
   }
 

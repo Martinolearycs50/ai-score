@@ -7,7 +7,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 import AiRewriteView from '@/components/AiRewriteView';
+import CompetitiveAnalysisView from '@/components/CompetitiveAnalysisView';
 import DeepAnalysisView from '@/components/DeepAnalysisView';
+import EnhancedDeepAnalysisView from '@/components/EnhancedDeepAnalysisView';
+import QuickWinsView from '@/components/QuickWinsView';
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useTier } from '@/hooks/useTier';
@@ -22,9 +25,19 @@ interface TabConfig {
 
 const tabs: TabConfig[] = [
   {
+    id: 'quick-wins',
+    label: 'Quick Wins',
+    description: 'Easy optimizations you can implement in minutes',
+  },
+  {
     id: 'deep-analysis',
     label: 'Deep Analysis',
     description: 'Detailed breakdown with technical and content fixes',
+  },
+  {
+    id: 'competitive',
+    label: 'Competitive Analysis',
+    description: 'Compare your page against competitors',
   },
   {
     id: 'ai-rewrite',
@@ -37,7 +50,7 @@ export default function ProDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { tier } = useTier();
-  const [activeTab, setActiveTab] = useState('deep-analysis');
+  const [activeTab, setActiveTab] = useState('quick-wins');
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [scansUsed, setScansUsed] = useState(0);
@@ -220,9 +233,11 @@ export default function ProDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {activeTab === 'deep-analysis' ? (
+          {activeTab === 'quick-wins' ? (
+            <QuickWinsView analysisResult={currentAnalysis} isLoading={isAnalyzing} />
+          ) : activeTab === 'deep-analysis' ? (
             currentAnalysis ? (
-              <DeepAnalysisView analysis={currentAnalysis} />
+              <EnhancedDeepAnalysisView analysisResult={currentAnalysis} isLoading={isAnalyzing} />
             ) : (
               <Card>
                 <div className="p-6">
@@ -243,6 +258,8 @@ export default function ProDashboard() {
                 </div>
               </Card>
             )
+          ) : activeTab === 'competitive' ? (
+            <CompetitiveAnalysisView analysisResult={currentAnalysis} isLoading={isAnalyzing} />
           ) : currentAnalysis ? (
             <AiRewriteView analysis={currentAnalysis} />
           ) : (

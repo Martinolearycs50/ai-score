@@ -3,7 +3,16 @@
 import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ChevronRight, Copy, Download, RefreshCw, Sparkles } from 'lucide-react';
+import {
+  AlertCircle,
+  ChevronRight,
+  Copy,
+  Download,
+  RefreshCw,
+  Search,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
 
 import Button from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -90,36 +99,68 @@ export default function AiRewriteView({ analysis }: AiRewriteViewProps) {
   const renderImprovements = () => {
     if (!rewriteData?.improvements?.length) return null;
 
-    const improvementsByType = rewriteData.improvements.reduce(
-      (acc, imp) => {
-        if (!acc[imp.type]) acc[imp.type] = [];
-        acc[imp.type].push(imp.description);
-        return acc;
-      },
-      {} as Record<string, string[]>
+    // Group improvements by benefit type
+    const dualBenefits = rewriteData.improvements.filter((imp) => imp.benefitType === 'dual');
+    const aiBenefits = rewriteData.improvements.filter(
+      (imp) => imp.benefitType === 'ai' || !imp.benefitType
     );
+    const seoBenefits = rewriteData.improvements.filter((imp) => imp.benefitType === 'seo');
 
     return (
-      <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
-        <h3 className="mb-3 flex items-center text-lg font-semibold text-green-900">
-          <Sparkles className="mr-2 h-5 w-5" />
-          Improvements Made
-        </h3>
-        <div className="space-y-2">
-          {Object.entries(improvementsByType).map(([type, descriptions]) => (
-            <div key={type}>
-              <h4 className="mb-1 text-sm font-medium text-green-800 capitalize">{type}:</h4>
-              <ul className="ml-4 space-y-1">
-                {descriptions.map((desc, i) => (
-                  <li key={i} className="flex items-start text-sm text-green-700">
-                    <ChevronRight className="mt-0.5 mr-1 h-3 w-3 flex-shrink-0" />
-                    <span>{desc}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <div className="mb-6 space-y-4">
+        {/* Dual Benefits */}
+        {dualBenefits.length > 0 && (
+          <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+            <h3 className="mb-3 flex items-center text-lg font-semibold text-purple-900">
+              <Zap className="mr-2 h-5 w-5" />
+              Dual-Benefit Improvements (AI + SEO)
+            </h3>
+            <ul className="space-y-2">
+              {dualBenefits.map((imp, i) => (
+                <li key={i} className="flex items-start text-sm text-purple-700">
+                  <span className="mr-2">🎯</span>
+                  <span>{imp.description}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* AI Benefits */}
+        {aiBenefits.length > 0 && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <h3 className="mb-3 flex items-center text-lg font-semibold text-blue-900">
+              <Sparkles className="mr-2 h-5 w-5" />
+              AI Search Improvements
+            </h3>
+            <ul className="space-y-2">
+              {aiBenefits.map((imp, i) => (
+                <li key={i} className="flex items-start text-sm text-blue-700">
+                  <span className="mr-2">🤖</span>
+                  <span>{imp.description}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* SEO Benefits */}
+        {seoBenefits.length > 0 && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+            <h3 className="mb-3 flex items-center text-lg font-semibold text-green-900">
+              <Search className="mr-2 h-5 w-5" />
+              SEO Improvements
+            </h3>
+            <ul className="space-y-2">
+              {seoBenefits.map((imp, i) => (
+                <li key={i} className="flex items-start text-sm text-green-700">
+                  <span className="mr-2">🔍</span>
+                  <span>{imp.description}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     );
   };
@@ -185,6 +226,23 @@ export default function AiRewriteView({ analysis }: AiRewriteViewProps) {
           >
             {renderImprovements()}
             {renderDataPoints()}
+            {/* SEO Enhancements */}
+            {rewriteData?.seoEnhancements && rewriteData.seoEnhancements.length > 0 && (
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <h3 className="mb-3 flex items-center text-lg font-semibold text-amber-900">
+                  <Search className="mr-2 h-5 w-5" />
+                  SEO-Specific Enhancements
+                </h3>
+                <ul className="space-y-2">
+                  {rewriteData.seoEnhancements.map((enhancement, i) => (
+                    <li key={i} className="flex items-start text-sm text-amber-700">
+                      <ChevronRight className="mt-0.5 mr-1 h-3 w-3 flex-shrink-0" />
+                      <span>{enhancement.description}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -220,8 +278,8 @@ export default function AiRewriteView({ analysis }: AiRewriteViewProps) {
           <div className="border-b border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <h3 className="flex items-center text-lg font-semibold text-gray-900">
-                <Sparkles className="mr-2 h-5 w-5 text-blue-500" />
-                AI-Optimized Rewrite
+                <Sparkles className="mr-2 h-5 w-5 text-purple-500" />
+                AI + SEO Optimized Rewrite
               </h3>
               <div className="flex gap-2">
                 <Button

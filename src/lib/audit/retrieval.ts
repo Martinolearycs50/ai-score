@@ -9,7 +9,7 @@ import { calculateCrUXScore, fetchCrUXData } from '../chromeUxReport';
 interface RetrievalScores {
   ttfb: number; // Time to first byte < 200ms (+5) - REDUCED
   paywall: number; // No paywall/auth wall (+5)
-  mainContent: number; // <main> content ratio ≥ 70% (+5)
+  mainContent: number; // Main content quality and accessibility (+5)
   htmlSize: number; // HTML ≤ 2MB (+5) - REDUCED
   llmsTxtFile: number; // /llms.txt file present (+5) - NEW for 2025
 }
@@ -30,6 +30,13 @@ export interface CapturedDomain {
     ttfb?: number;
     lcp?: number;
     ttfbRating?: string;
+  };
+  // SEO compatibility indicators
+  seoCompatibility?: {
+    contentRatioGood: boolean; // >60% is good for SEO
+    ttfbGood: boolean; // <600ms is acceptable for SEO
+    htmlSizeGood: boolean; // <5MB is acceptable for SEO
+    overallScore: number; // 0-100 SEO compatibility
   };
 }
 
@@ -413,20 +420,28 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
       - Content ratio: ${(contentRatio * 100).toFixed(1)}%
       - Score: ${contentRatio >= 0.3 ? 5 : contentRatio >= 0.15 ? 4 : contentRatio >= 0.05 ? 3 : contentRatio >= 0.02 ? 2 : contentRatio >= 0.01 ? 1 : 0}/5`);
 
-    // Partial scoring based on content ratio
-    // Adjusted for modern sites that have lots of JS/CSS in the DOM
-    if (contentRatio >= 0.3) {
-      scores.mainContent = 5; // Excellent - 30%+ is main content
-    } else if (contentRatio >= 0.15) {
-      scores.mainContent = 4; // Good - 15-30% is main content
-    } else if (contentRatio >= 0.05) {
-      scores.mainContent = 3; // Fair - 5-15% is main content
-    } else if (contentRatio >= 0.02) {
-      scores.mainContent = 2; // Poor - 2-5% is main content
-    } else if (contentRatio >= 0.01) {
-      scores.mainContent = 1; // Very poor - 1-2% is main content
+    // Score based on content quality and accessibility, not just ratio
+    // Modern sites have varied layouts - focus on whether AI can find content
+    const mainWordCount = mainContentText.split(/\s+/).filter((w) => w.length > 0).length;
+
+    // Check content quality factors
+    const hasSemanticMarkup = $clean('article, main, section[role="main"]').length > 0;
+    const hasStructuredContent = $clean('h1, h2, h3').length >= 2 && $clean('p').length >= 3;
+    const hasSubstantialContent = mainWordCount >= 300; // At least 300 words of main content
+
+    // Score based on multiple factors, not just ratio
+    if (hasSubstantialContent && hasSemanticMarkup && contentRatio >= 0.15) {
+      scores.mainContent = 5; // Excellent - Substantial, well-structured content
+    } else if (hasSubstantialContent && (hasSemanticMarkup || contentRatio >= 0.2)) {
+      scores.mainContent = 4; // Good - Substantial content, decent structure
+    } else if (mainWordCount >= 200 && contentRatio >= 0.1) {
+      scores.mainContent = 3; // Fair - Adequate content, could be better structured
+    } else if (mainWordCount >= 100) {
+      scores.mainContent = 2; // Poor - Minimal content
+    } else if (mainWordCount >= 50) {
+      scores.mainContent = 1; // Very poor - Barely any content
     } else {
-      scores.mainContent = 0; // Terrible - less than 1% is main content
+      scores.mainContent = 0; // No meaningful content found
     }
 
     capturedDomain.mainContentRatio = Math.round(contentRatio * 100);
@@ -612,6 +627,24 @@ export async function run(html: string, url: string): Promise<RetrievalScores> {
     scores.llmsTxtFile = 0;
     capturedDomain.hasLlmsTxt = false;
   }
+
+  // Calculate SEO compatibility indicators
+  const seoCompatibility = {
+    contentRatioGood: (capturedDomain.mainContentRatio || 0) >= 60,
+    ttfbGood: (capturedDomain.actualTtfb || Infinity) < 600,
+    htmlSizeGood: (capturedDomain.htmlSizeMB || Infinity) < 5,
+    overallScore: 0,
+  };
+
+  // Calculate overall SEO compatibility score (0-100)
+  let seoScore = 0;
+  if (seoCompatibility.contentRatioGood) seoScore += 30; // Content ratio is important for SEO
+  if (seoCompatibility.ttfbGood) seoScore += 40; // Core Web Vitals are crucial
+  if (seoCompatibility.htmlSizeGood) seoScore += 20; // Page size affects crawlability
+  if (!capturedDomain.hasPaywall) seoScore += 10; // Accessible content
+
+  seoCompatibility.overallScore = seoScore;
+  capturedDomain.seoCompatibility = seoCompatibility;
 
   return scores;
 }

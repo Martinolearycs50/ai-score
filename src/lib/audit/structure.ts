@@ -16,6 +16,11 @@ export interface CapturedContent {
   firstParagraph?: string;
   url?: string;
   headingsForComparison?: string[];
+  // SEO-specific captures
+  structuredDataTypes?: string[]; // Types of schema found
+  hasFAQSchema?: boolean; // FAQ schema can trigger rich results
+  hasHowToSchema?: boolean; // HowTo schema for featured snippets
+  featuredSnippetPotential?: number; // 0-100 score
 }
 
 export let capturedContent: CapturedContent = {};
@@ -74,6 +79,7 @@ export async function run(html: string, url?: string): Promise<StructureScores> 
   // Check for structured data (FAQPage, HowTo, Dataset)
   const structuredDataScripts = $('script[type="application/ld+json"]');
   let hasValuableStructuredData = false;
+  const foundSchemaTypes: string[] = [];
 
   structuredDataScripts.each((_, script) => {
     try {
@@ -81,16 +87,35 @@ export async function run(html: string, url?: string): Promise<StructureScores> 
       if (content) {
         const jsonData = JSON.parse(content);
 
-        // Check for valuable schema types
+        // Check for valuable schema types and track for SEO
         const checkType = (obj: any): boolean => {
           if (!obj) return false;
           const type = obj['@type'];
+
+          // Track all schema types found
+          if (type) {
+            if (Array.isArray(type)) {
+              foundSchemaTypes.push(...type);
+            } else {
+              foundSchemaTypes.push(type);
+            }
+          }
+
+          // Check for AI-valuable schemas
           if (type === 'FAQPage' || type === 'HowTo' || type === 'Dataset') {
+            // Track SEO-specific benefits
+            if (type === 'FAQPage') capturedContent.hasFAQSchema = true;
+            if (type === 'HowTo') capturedContent.hasHowToSchema = true;
             return true;
           }
           // Check if it's an array of types
           if (Array.isArray(type)) {
-            return type.some((t) => t === 'FAQPage' || t === 'HowTo' || t === 'Dataset');
+            const hasValuable = type.some((t) => {
+              if (t === 'FAQPage') capturedContent.hasFAQSchema = true;
+              if (t === 'HowTo') capturedContent.hasHowToSchema = true;
+              return t === 'FAQPage' || t === 'HowTo' || t === 'Dataset';
+            });
+            return hasValuable;
           }
           // Check nested @graph
           if (obj['@graph'] && Array.isArray(obj['@graph'])) {
@@ -109,6 +134,7 @@ export async function run(html: string, url?: string): Promise<StructureScores> 
   });
 
   scores.structuredData = hasValuableStructuredData ? 5 : 0;
+  capturedContent.structuredDataTypes = [...new Set(foundSchemaTypes)]; // Remove duplicates
 
   // Check for RSS/Atom feed
   const rssFeedLinks = $('link[type="application/rss+xml"], link[type="application/atom+xml"]');
@@ -131,22 +157,37 @@ export async function run(html: string, url?: string): Promise<StructureScores> 
   const unorderedLists = contentElement.find('ul').length;
   const totalLists = orderedLists + unorderedLists;
 
-  // Count list items for better scoring
+  // Count list items and check quality
   const listItems = contentElement.find('li').length;
+
+  // Check for numbered headings (another listicle pattern)
+  const numberedHeadings = headings.filter((_, h) => /^\d+\.?\s+/.test($(h).text())).length;
+
+  // Check content density in list items (quality indicator)
+  let substantialListItems = 0;
+  contentElement.find('li').each((_, li) => {
+    const text = $(li).text().trim();
+    if (text.length > 50) {
+      // At least 50 chars per item for substance
+      substantialListItems++;
+    }
+  });
 
   // Capture first paragraph for recommendations
   const firstParagraph = contentElement.find('p').first().text();
   capturedContent.firstParagraph = firstParagraph;
 
-  // Score listicle format
-  if (hasNumberInTitle && totalLists >= 1 && listItems >= 3) {
-    scores.listicleFormat = 10; // Full points for numbered title + lists
-  } else if (totalLists >= 2 && listItems >= 5) {
-    scores.listicleFormat = 7; // Good lists but no number in title
-  } else if (hasNumberInTitle && listItems >= 2) {
-    scores.listicleFormat = 3; // Number in title but weak list structure
+  // Score based on actual listicle quality, not just format
+  if (hasNumberInTitle && totalLists >= 1 && substantialListItems >= 5) {
+    scores.listicleFormat = 10; // High-quality listicle with substantial items
+  } else if ((totalLists >= 1 && substantialListItems >= 7) || numberedHeadings >= 5) {
+    scores.listicleFormat = 7; // Good list structure with quality content
+  } else if (hasNumberInTitle && (totalLists >= 1 || numberedHeadings >= 3)) {
+    scores.listicleFormat = 4; // Basic listicle structure
+  } else if (totalLists >= 1 && listItems >= 5) {
+    scores.listicleFormat = 2; // Has lists but not really a listicle
   } else {
-    scores.listicleFormat = 0;
+    scores.listicleFormat = 0; // Not a listicle
   }
 
   // NEW for 2025: Check for comparison tables (5 points)
@@ -216,6 +257,26 @@ export async function run(html: string, url?: string): Promise<StructureScores> 
       scores.semanticUrl = 0;
     }
   }
+
+  // Calculate featured snippet potential for SEO
+  let featuredSnippetScore = 0;
+
+  // FAQ schema is highly correlated with FAQ rich results
+  if (capturedContent.hasFAQSchema) featuredSnippetScore += 30;
+
+  // HowTo schema often triggers how-to rich results
+  if (capturedContent.hasHowToSchema) featuredSnippetScore += 30;
+
+  // Listicles often get featured snippets
+  if (scores.listicleFormat >= 7) featuredSnippetScore += 20;
+
+  // Tables are great for featured snippets
+  if (tables > 0) featuredSnippetScore += 10;
+
+  // Good heading structure helps
+  if (scores.headingFrequency >= 4 && scores.headingDepth === 5) featuredSnippetScore += 10;
+
+  capturedContent.featuredSnippetPotential = Math.min(100, featuredSnippetScore);
 
   return scores;
 }

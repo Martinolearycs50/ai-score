@@ -3,6 +3,7 @@ import { capturedDomain as retrievalDomain } from './audit/retrieval';
 // Import captured content from audit modules
 import { capturedContent as structureContent } from './audit/structure';
 import type { ExtractedContent } from './contentExtractor';
+import { enhanceWithDualBenefits } from './dualBenefitRecommendations';
 import { DynamicRecommendationGenerator } from './dynamicRecommendations';
 import {
   getPageTypeCustomMessage,
